@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, ne, sql } from 'drizzle-orm';
 import type { Db } from '@/lib/db/client';
 import { cartItems, carts, discountCodes, productVariants } from '@/lib/db/schema';
 import { computeTotals, evaluateDiscountCode } from '@/lib/pricing';
@@ -43,23 +43,32 @@ export async function addLine(db: Db, cartId: string, input: AddLineInput) {
 
   const grind = variant.product.category === 'coffee' ? (input.grind ?? 'whole_bean') : null;
 
-  const [existing] = await db
-    .select({ id: cartItems.id, quantity: cartItems.quantity })
+  // Stock is enforced against ALL lines of this variant in the cart (every grind and
+  // purchase-type combination shares the same underlying stockQuantity), not just the line
+  // this add would merge into.
+  const variantLines = await db
+    .select({
+      id: cartItems.id,
+      quantity: cartItems.quantity,
+      grind: cartItems.grind,
+      purchaseType: cartItems.purchaseType,
+      subscriptionIntervalWeeks: cartItems.subscriptionIntervalWeeks,
+    })
     .from(cartItems)
-    .where(
-      and(
-        eq(cartItems.cartId, cartId),
-        eq(cartItems.variantId, input.variantId),
-        grind ? eq(cartItems.grind, grind) : sql`${cartItems.grind} is null`,
-        eq(cartItems.purchaseType, input.purchaseType),
-        input.subscriptionIntervalWeeks
-          ? eq(cartItems.subscriptionIntervalWeeks, input.subscriptionIntervalWeeks)
-          : sql`${cartItems.subscriptionIntervalWeeks} is null`,
-      ),
-    );
+    .where(and(eq(cartItems.cartId, cartId), eq(cartItems.variantId, input.variantId)));
 
-  const nextQuantity = (existing?.quantity ?? 0) + input.quantity;
-  if (nextQuantity > variant.stockQuantity) {
+  const existing = variantLines.find(
+    (line) =>
+      (grind ? line.grind === grind : line.grind === null) &&
+      line.purchaseType === input.purchaseType &&
+      (input.subscriptionIntervalWeeks
+        ? line.subscriptionIntervalWeeks === input.subscriptionIntervalWeeks
+        : line.subscriptionIntervalWeeks === null),
+  );
+
+  const currentVariantTotal = variantLines.reduce((n, l) => n + l.quantity, 0);
+  const nextVariantTotal = currentVariantTotal + input.quantity;
+  if (nextVariantTotal > variant.stockQuantity) {
     throw new CartMutationError(
       'out_of_stock',
       variant.stockQuantity === 0
@@ -69,7 +78,10 @@ export async function addLine(db: Db, cartId: string, input: AddLineInput) {
   }
 
   if (existing) {
-    await db.update(cartItems).set({ quantity: nextQuantity }).where(eq(cartItems.id, existing.id));
+    await db
+      .update(cartItems)
+      .set({ quantity: existing.quantity + input.quantity })
+      .where(eq(cartItems.id, existing.id));
   } else {
     await db.insert(cartItems).values({
       cartId,
@@ -90,7 +102,22 @@ export async function setLineQuantity(db: Db, cartId: string, lineId: string, qu
     with: { variant: { columns: { stockQuantity: true } } },
   });
   if (!line) throw new CartMutationError('line_not_found', 'That item is no longer in your cart.');
-  if (quantity > line.variant.stockQuantity) {
+
+  // Sum every OTHER line of this variant in the cart (other grinds / purchase types) so the
+  // new target quantity is checked against the variant's total allocation, not just this line.
+  const [{ total: otherLinesTotal }] = await db
+    .select({ total: sql<number>`coalesce(sum(${cartItems.quantity}), 0)::int` })
+    .from(cartItems)
+    .where(
+      and(
+        eq(cartItems.cartId, cartId),
+        eq(cartItems.variantId, line.variantId),
+        ne(cartItems.id, lineId),
+      ),
+    );
+
+  const nextVariantTotal = otherLinesTotal + quantity;
+  if (nextVariantTotal > line.variant.stockQuantity) {
     throw new CartMutationError(
       'out_of_stock',
       `Only ${line.variant.stockQuantity} left in stock.`,

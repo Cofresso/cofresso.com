@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import {
   boolean,
+  check,
   index,
   integer,
   pgTable,
@@ -56,7 +57,10 @@ export const productVariants = pgTable(
     stockQuantity: integer('stock_quantity').notNull().default(0),
     position: integer('position').notNull().default(0),
   },
-  (t) => [index('product_variants_product_idx').on(t.productId)],
+  (t) => [
+    index('product_variants_product_idx').on(t.productId),
+    check('product_variants_stock_nonneg', sql`${t.stockQuantity} >= 0`),
+  ],
 );
 
 export const collections = pgTable('collections', {

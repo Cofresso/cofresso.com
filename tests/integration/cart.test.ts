@@ -98,6 +98,34 @@ describe('cart', () => {
     ).rejects.toMatchObject({ code: 'out_of_stock' });
   });
 
+  it('rejects a second distinct line of the same variant that would exceed stock in total', async () => {
+    const v = await variantBySku('KETTLE-2'); // stock 18
+    await addLine(db, cartId, {
+      variantId: v.id,
+      quantity: 10,
+      grind: null,
+      purchaseType: 'one_time',
+      subscriptionIntervalWeeks: null,
+    });
+    // A distinct line (subscription, not merged with the one_time line above) for the SAME
+    // variant: 10 alone is under the 18 in stock, but combined with the existing one_time
+    // line's 10 it would total 20 > 18. addLine must check the variant's total allocation
+    // across every line, not just the line this call would merge into.
+    await expect(
+      addLine(db, cartId, {
+        variantId: v.id,
+        quantity: 10,
+        grind: null,
+        purchaseType: 'subscription',
+        subscriptionIntervalWeeks: 4,
+      }),
+    ).rejects.toMatchObject({ code: 'out_of_stock' });
+
+    const view = await getCartView(cartId, db);
+    expect(view!.lines).toHaveLength(1);
+    expect(view!.lines[0].quantity).toBe(10);
+  });
+
   it('updates and removes lines', async () => {
     const v = await variantBySku('MUG-1');
     await addLine(db, cartId, {

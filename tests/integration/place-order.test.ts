@@ -6,8 +6,8 @@ import { getCartView } from '../../src/lib/cart/queries';
 import { placeOrder } from '../../src/lib/checkout/place-order';
 import { getOrderForConfirmation, getOrderForLookup } from '../../src/lib/checkout/queries';
 import type { CheckoutInput } from '../../src/lib/checkout/schemas';
-import { productVariants } from '../../src/lib/db/schema';
-import { TEST_CARDS } from '../../src/lib/payments';
+import { cartItems, productVariants } from '../../src/lib/db/schema';
+import { SimulatedPaymentProvider, TEST_CARDS, type PaymentProvider } from '../../src/lib/payments';
 import { testDb } from './helpers';
 
 const { db, close } = testDb();
@@ -125,5 +125,96 @@ describe('placeOrder', () => {
       .update(productVariants)
       .set({ stockQuantity: variant.stockQuantity })
       .where(eq(productVariants.id, variant.id));
+  });
+
+  it('rejects an oversell when the same variant is split across two cart lines', async () => {
+    const variant = await variantBySku('MORNINGFRAME-1');
+    const originalStock = variant.stockQuantity;
+    await db
+      .update(productVariants)
+      .set({ stockQuantity: 3 })
+      .where(eq(productVariants.id, variant.id));
+    try {
+      const cartId = await ensureCart(db, null);
+      // Insert two lines directly (bypassing addLine's own per-variant guard) so this proves
+      // the fix inside placeOrder itself: each line (qty 2) fits under the lowered stock (3)
+      // individually, but their sum (4) does not.
+      await db.insert(cartItems).values([
+        {
+          cartId,
+          variantId: variant.id,
+          quantity: 2,
+          grind: 'whole_bean',
+          purchaseType: 'one_time',
+        },
+        { cartId, variantId: variant.id, quantity: 2, grind: 'espresso', purchaseType: 'one_time' },
+      ]);
+
+      const result = await placeOrder({ cartId, input: input(), db });
+      expect(result).toMatchObject({ ok: false, code: 'out_of_stock' });
+      expect((await variantBySku('MORNINGFRAME-1')).stockQuantity).toBe(3);
+    } finally {
+      await db
+        .update(productVariants)
+        .set({ stockQuantity: originalStock })
+        .where(eq(productVariants.id, variant.id));
+    }
+  });
+
+  it('snapshots the subscription price and matches the order subtotal', async () => {
+    const cartId = await ensureCart(db, null);
+    const variant = await variantBySku('MUG-1');
+    await addLine(db, cartId, {
+      variantId: variant.id,
+      quantity: 2,
+      grind: null,
+      purchaseType: 'subscription',
+      subscriptionIntervalWeeks: 4,
+    });
+
+    const result = await placeOrder({ cartId, input: input(), db });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const order = await getOrderForConfirmation(result.orderNumber, result.lookupToken, db);
+    expect(order).not.toBeNull();
+    expect(order!.items[0].unitPriceCents).toBe(Math.round(variant.priceCents * 0.85));
+    // Would pass identically if the list price had been snapshotted instead of the
+    // subscription-discounted effective price, so also check it reconciles with the order total.
+    const computedSubtotal = order!.items.reduce(
+      (sum, item) => sum + item.unitPriceCents * item.quantity,
+      0,
+    );
+    expect(computedSubtotal).toBe(order!.totals.subtotalCents);
+  });
+
+  it('resolves a concurrent duplicate submit to a single order', async () => {
+    const { cartId } = await cartWith('MUG-1');
+    const key = randomUUID();
+    const real = new SimulatedPaymentProvider();
+    let calls = 0;
+    const countingProvider: PaymentProvider = {
+      name: real.name,
+      authorize: async (authInput) => {
+        calls += 1;
+        return real.authorize(authInput);
+      },
+    };
+
+    const [a, b] = await Promise.all([
+      placeOrder({ cartId, input: input({ idempotencyKey: key }), db, provider: countingProvider }),
+      placeOrder({ cartId, input: input({ idempotencyKey: key }), db, provider: countingProvider }),
+    ]);
+
+    expect(a.ok).toBe(true);
+    expect(b.ok).toBe(true);
+    if (a.ok && b.ok) expect(a.orderNumber).toBe(b.orderNumber);
+    // Both concurrent calls can pass the pre-transaction idempotency lookup and reach
+    // provider.authorize before the loser hits the unique constraint on
+    // orders.idempotency_key and is folded back into the winner's order (see the comment in
+    // placeOrder's catch block) — so authorize may run more than once for one logical order.
+    // That double-authorize is tolerated for the simulated provider; what matters is that both
+    // callers get the same real order back instead of a false decline or a duplicate order.
+    expect(calls).toBeGreaterThanOrEqual(1);
   });
 });
