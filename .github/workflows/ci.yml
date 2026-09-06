@@ -123,3 +123,112 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 7
+
+  deploy-preview:
+    name: deploy-preview
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: [lint, typecheck, unit, integration, build, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    environment:
+      name: preview
+      url: ${{ steps.url.outputs.preview_url }}
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      REPO: ${{ vars.GCP_ARTIFACT_REPO }}
+      TAG: pr-${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: meta
+        run: |
+          SHORT=$(git rev-parse --short "${{ github.event.pull_request.head.sha }}")
+          echo "short_sha=$SHORT" >> "$GITHUB_OUTPUT"
+          echo "image=$REPO/web:${TAG}-${SHORT}" >> "$GITHUB_OUTPUT"
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+          token_format: access_token
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.GCP_REGION }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.image }}
+          build-args: GIT_SHA=${{ steps.meta.outputs.short_sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: Migrate and seed preview database
+        run: |
+          gcloud run jobs update cofresso-migrate-preview --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
+          gcloud run jobs execute cofresso-migrate-preview --region "$REGION" --project "$PROJECT_ID" --wait
+          gcloud run jobs execute cofresso-migrate-preview --region "$REGION" --project "$PROJECT_ID" --wait --args="dist/db.mjs,seed"
+
+      - name: Deploy tagged revision (no traffic)
+        run: |
+          gcloud run deploy cofresso-web-preview \
+            --image "${{ steps.meta.outputs.image }}" \
+            --region "$REGION" --project "$PROJECT_ID" \
+            --no-traffic --tag "$TAG" --quiet
+
+      - id: url
+        run: |
+          URL=$(gcloud run services describe cofresso-web-preview --region "$REGION" --project "$PROJECT_ID" --format json \
+            | jq -r --arg tag "$TAG" '.status.traffic[] | select(.tag == $tag) | .url')
+          echo "preview_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Preview: $URL"
+
+      - name: Smoke test
+        run: |
+          for i in $(seq 1 12); do
+            if curl -fsS "${{ steps.url.outputs.preview_url }}/api/health" | tee /tmp/health.json | grep -q '"db":"up"'; then exit 0; fi
+            sleep 5
+          done
+          echo "Health check failed"; cat /tmp/health.json || true; exit 1
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview
+          message: |
+            ### 🚀 Preview deployed
+
+            | | |
+            | --- | --- |
+            | URL | ${{ steps.url.outputs.preview_url }} |
+            | Image | `${{ steps.meta.outputs.image }}` |
+            | Commit | `${{ steps.meta.outputs.short_sha }}` |
+
+            Zero-traffic revision on `cofresso-web-preview`, tagged `${{ env.TAG }}`. Uses the shared preview database. Lighthouse results are attached as a workflow artifact.
+
+      - name: Lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        continue-on-error: true
+        with:
+          urls: |
+            ${{ steps.url.outputs.preview_url }}/
+            ${{ steps.url.outputs.preview_url }}/products/morning-frame
+            ${{ steps.url.outputs.preview_url }}/cart
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: false
