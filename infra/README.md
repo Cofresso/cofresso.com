@@ -11,6 +11,16 @@ terraform plan
 terraform apply
 ```
 
+## Authentication
+
+Locally, Terraform uses your gcloud identity. Either export a token before running Terraform:
+
+```bash
+export GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token)
+```
+
+or set up Application Default Credentials once with `gcloud auth application-default login`. CI authenticates with Workload Identity Federation and needs neither.
+
 ## Day to day
 
 Changes under `infra/` get a plan comment on the PR and apply automatically on merge to `main` (see `.github/workflows/infra.yml`). Local `terraform plan` is fine; prefer letting CI apply.
