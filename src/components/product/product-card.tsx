@@ -15,9 +15,16 @@ export function ProductCard({
 }) {
   const { product, variants, rating } = data;
   const soldOut = variants.every((v) => v.stockQuantity <= 0);
+  const cheapest = [...variants].sort(
+    (a, b) => a.priceCents - b.priceCents || a.position - b.position,
+  )[0];
+  const onSale = variants.some(
+    (v) => v.compareAtPriceCents != null && v.compareAtPriceCents > v.priceCents,
+  );
   const compareAt =
-    variants.find((v) => v.compareAtPriceCents && v.compareAtPriceCents > v.priceCents)
-      ?.compareAtPriceCents ?? null;
+    cheapest?.compareAtPriceCents && cheapest.compareAtPriceCents > cheapest.priceCents
+      ? cheapest.compareAtPriceCents
+      : null;
   return (
     <article className="group flex flex-col" data-testid="product-card" data-slug={product.slug}>
       <Link
@@ -35,7 +42,7 @@ export function ProductCard({
         />
         <div className="absolute top-3 left-3 flex gap-2">
           {product.roastLevel ? <Badge>{roastLabel(product.roastLevel)} roast</Badge> : null}
-          {compareAt ? <Badge tone="copper">Sale</Badge> : null}
+          {onSale ? <Badge tone="copper">Sale</Badge> : null}
           {soldOut ? <Badge tone="espresso">Sold out</Badge> : null}
         </div>
       </Link>

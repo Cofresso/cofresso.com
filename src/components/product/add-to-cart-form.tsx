@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useMemo, useState } from 'react';
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
 import { useCartDrawer } from '@/components/layout/cart-drawer-context';
 import { Button } from '@/components/ui/button';
 import { QuantityStepper } from '@/components/ui/quantity-stepper';
@@ -28,6 +28,13 @@ export function AddToCartForm({ product, variants }: AddToCartFormProps) {
   const [quantity, setQuantity] = useState(1);
   const [state, formAction, pending] = useActionState(addToCartAction, null);
   const { openDrawer } = useCartDrawer();
+  const submittedRef = useRef<{
+    variantId: string;
+    quantity: number;
+    purchaseType: PurchaseType;
+    interval: SubscriptionInterval;
+    unitCents: number;
+  } | null>(null);
 
   const variant = useMemo(
     () => variants.find((v) => v.id === variantId) ?? initial,
@@ -65,28 +72,48 @@ export function AddToCartForm({ product, variants }: AddToCartFormProps) {
   }, [variantId, purchaseType]);
 
   useEffect(() => {
-    if (state?.ok && variant) {
-      track({
-        name: 'add_to_cart',
-        cartItemCount: state.data.itemCount,
-        item: {
-          productId: product.id,
-          slug: product.slug,
-          name: product.name,
-          variantId: variant.id,
-          variantName: variant.name,
-          priceCents: unitCents,
-          quantity,
-          purchaseType,
-        },
-      });
-      openDrawer();
+    if (state?.ok) {
+      const snapshot = submittedRef.current;
+      const submittedVariant = variants.find((v) => v.id === snapshot?.variantId) ?? variant;
+      if (submittedVariant) {
+        track({
+          name: 'add_to_cart',
+          cartItemCount: state.data.itemCount,
+          item: {
+            productId: product.id,
+            slug: product.slug,
+            name: product.name,
+            variantId: submittedVariant.id,
+            variantName: submittedVariant.name,
+            priceCents: snapshot?.unitCents ?? unitCents,
+            quantity: snapshot?.quantity ?? quantity,
+            purchaseType: snapshot?.purchaseType ?? purchaseType,
+          },
+        });
+        openDrawer();
+      }
+      submittedRef.current = null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
   return (
-    <form action={formAction} className="flex flex-col gap-6" data-testid="add-to-cart-form">
+    <form
+      action={formAction}
+      onSubmit={() => {
+        if (variant) {
+          submittedRef.current = {
+            variantId: variant.id,
+            quantity,
+            purchaseType,
+            interval,
+            unitCents,
+          };
+        }
+      }}
+      className="flex flex-col gap-6"
+      data-testid="add-to-cart-form"
+    >
       <input type="hidden" name="variantId" value={variantId} />
       <input type="hidden" name="quantity" value={quantity} />
       <input type="hidden" name="purchaseType" value={purchaseType} />
