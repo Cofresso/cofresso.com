@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750" width="600" height="750" role="img" aria-label="Cofresso Stoneware Mug">
+  <rect width="600" height="750" fill="#F6F1EB"/>
+  <ellipse cx="300" cy="590" rx="190" ry="26" fill="#4A2C24" opacity="0.12"/>
+  <rect x="190" y="280" width="200" height="260" rx="26" fill="#4A2C24"/><path d="M390 330 h30 a45 45 0 0 1 0 110 h-30" fill="none" stroke="#4A2C24" stroke-width="28"/><rect x="230" y="330" width="120" height="120" rx="60" fill="#A08977" opacity="0.35"/>
+  <text x="300" y="660" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#4A2C24">Cofresso Stoneware Mug</text>
+  <text x="300" y="690" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" letter-spacing="3" fill="#A08977">COFRESSO EQUIPMENT</text>
+</svg>

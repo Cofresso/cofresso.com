@@ -1,0 +1,14 @@
+.next
+node_modules
+pnpm-lock.yaml
+drizzle/meta
+coverage
+playwright-report
+test-results
+dist
+public/products
+*.png
+
+# pre-existing repo docs, not part of the scaffold
+README.md
+docs/

@@ -1,0 +1,33 @@
+'use server';
+
+import { redirect } from 'next/navigation';
+import type { FieldErrors } from '@/lib/action-result';
+import { readCartId } from '@/lib/cart/cookie';
+import { placeOrder, type PlaceOrderFailure } from '@/lib/checkout/place-order';
+import { checkoutSchema } from '@/lib/checkout/schemas';
+
+export type CheckoutActionState = {
+  error: string;
+  code?: PlaceOrderFailure;
+  fieldErrors?: FieldErrors;
+} | null;
+
+export async function placeOrderAction(
+  _prev: CheckoutActionState,
+  formData: FormData,
+): Promise<CheckoutActionState> {
+  const parsed = checkoutSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return {
+      error: 'Please fix the highlighted fields.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+  const cartId = await readCartId();
+  if (!cartId) return { error: 'Your cart has expired. Add your items again.', code: 'empty_cart' };
+
+  const result = await placeOrder({ cartId, input: parsed.data });
+  if (!result.ok) return { error: result.message, code: result.code };
+
+  redirect(`/checkout/success/${result.orderNumber}?t=${result.lookupToken}`);
+}

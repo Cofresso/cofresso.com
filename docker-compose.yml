@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cofresso-postgres
+    environment:
+      POSTGRES_USER: cofresso
+      POSTGRES_PASSWORD: cofresso
+      POSTGRES_DB: cofresso
+    ports:
+      - '5432:5432'
+    volumes:
+      - cofresso-pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cofresso -d cofresso']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  cofresso-pgdata:
