@@ -1,3 +1,12 @@
+# pnpm's build-script gate (pnpm 10+) blocks postinstall scripts for packages
+# it doesn't recognize by default. sharp and unrs-resolver are both resolved
+# via prebuilt platform binaries shipped as optional dependencies
+# (@img/sharp-<platform> and @unrs/resolver-binding-<platform> respectively),
+# so their install scripts are unnecessary here and are intentionally skipped.
+# This same skip will occur in the Docker build on linux/x64 — that is expected
+# and does not affect functionality. If image optimisation (sharp) or module
+# resolution (unrs-resolver) ever fails in a container, run
+# `pnpm approve-builds` to revisit this decision.
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
