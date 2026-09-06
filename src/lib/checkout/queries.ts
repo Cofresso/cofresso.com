@@ -115,3 +115,16 @@ export async function getOrderForLookup(
   if (!order || order.email !== email.trim().toLowerCase()) return null;
   return toView(order);
 }
+
+export async function findLookupToken(
+  orderNumber: string,
+  email: string,
+  db: Db = getDb(),
+): Promise<string | null> {
+  const order = await db.query.orders.findFirst({
+    where: eq(orders.orderNumber, normalizeOrderNumber(orderNumber)),
+    columns: { email: true, lookupToken: true },
+  });
+  if (!order || order.email !== email.trim().toLowerCase()) return null;
+  return order.lookupToken;
+}
