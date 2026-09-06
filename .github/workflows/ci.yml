@@ -1,0 +1,326 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  TEST_DATABASE_URL: postgres://cofresso:cofresso@localhost:5432/cofresso_test
+  DATABASE_URL: postgres://cofresso:cofresso@localhost:5432/cofresso_test
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: pnpm lint
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: pnpm typecheck
+
+  unit:
+    name: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: pnpm test:unit --coverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage
+          retention-days: 7
+
+  integration:
+    name: integration
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: cofresso
+          POSTGRES_PASSWORD: cofresso
+          POSTGRES_DB: cofresso_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cofresso"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: pnpm test:integration
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**') }}
+          restore-keys: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+      - run: pnpm build
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: cofresso
+          POSTGRES_PASSWORD: cofresso
+          POSTGRES_DB: cofresso_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cofresso"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - run: pnpm exec playwright install --with-deps chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+      - run: pnpm exec playwright install-deps chromium
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+      - run: pnpm build
+      - run: pnpm test:e2e
+        env:
+          CI: true
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
+
+  deploy-preview:
+    name: deploy-preview
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: [lint, typecheck, unit, integration, build, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    environment:
+      name: preview
+      url: ${{ steps.url.outputs.preview_url }}
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      REPO: ${{ vars.GCP_ARTIFACT_REPO }}
+      TAG: pr-${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: meta
+        run: |
+          SHORT=$(git rev-parse --short "${{ github.event.pull_request.head.sha }}")
+          echo "short_sha=$SHORT" >> "$GITHUB_OUTPUT"
+          echo "image=$REPO/web:${TAG}-${SHORT}" >> "$GITHUB_OUTPUT"
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+          token_format: access_token
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.GCP_REGION }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.image }}
+          build-args: GIT_SHA=${{ steps.meta.outputs.short_sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: Migrate and seed preview database
+        run: |
+          gcloud run jobs update cofresso-migrate-preview --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
+          gcloud run jobs execute cofresso-migrate-preview --region "$REGION" --project "$PROJECT_ID" --wait
+          gcloud run jobs execute cofresso-migrate-preview --region "$REGION" --project "$PROJECT_ID" --wait --args="dist/db.mjs,seed"
+
+      - name: Deploy tagged revision (no traffic)
+        run: |
+          gcloud run deploy cofresso-web-preview \
+            --image "${{ steps.meta.outputs.image }}" \
+            --region "$REGION" --project "$PROJECT_ID" \
+            --no-traffic --tag "$TAG" --quiet
+
+      - id: url
+        run: |
+          URL=$(gcloud run services describe cofresso-web-preview --region "$REGION" --project "$PROJECT_ID" --format json \
+            | jq -r --arg tag "$TAG" '.status.traffic[] | select(.tag == $tag) | .url')
+          echo "preview_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Preview: $URL"
+
+      - name: Smoke test
+        run: |
+          for _ in $(seq 1 12); do
+            if curl -fsS "${{ steps.url.outputs.preview_url }}/api/health" | tee /tmp/health.json | grep -q '"db":"up"'; then exit 0; fi
+            sleep 5
+          done
+          echo "Health check failed"; cat /tmp/health.json || true; exit 1
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview
+          message: |
+            ### 🚀 Preview deployed
+
+            | | |
+            | --- | --- |
+            | URL | ${{ steps.url.outputs.preview_url }} |
+            | Image | `${{ steps.meta.outputs.image }}` |
+            | Commit | `${{ steps.meta.outputs.short_sha }}` |
+
+            Zero-traffic revision on `cofresso-web-preview`, tagged `${{ env.TAG }}`. Uses the shared preview database. Lighthouse results are attached as a workflow artifact.
+
+      - name: Lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        continue-on-error: true
+        with:
+          urls: |
+            ${{ steps.url.outputs.preview_url }}/
+            ${{ steps.url.outputs.preview_url }}/products/morning-frame
+            ${{ steps.url.outputs.preview_url }}/cart
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: false
+
+  deploy-production:
+    name: deploy-production
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [lint, typecheck, unit, integration, build, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+      deployments: write
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      REPO: ${{ vars.GCP_ARTIFACT_REPO }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: meta
+        run: |
+          SHORT=$(git rev-parse --short HEAD)
+          echo "short_sha=$SHORT" >> "$GITHUB_OUTPUT"
+          echo "image=$REPO/web:sha-$SHORT" >> "$GITHUB_OUTPUT"
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+          token_format: access_token
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.GCP_REGION }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ steps.meta.outputs.image }}
+            ${{ env.REPO }}/web:latest
+          build-args: GIT_SHA=${{ steps.meta.outputs.short_sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: Migrate and seed production database
+        run: |
+          gcloud run jobs update cofresso-migrate --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
+          gcloud run jobs execute cofresso-migrate --region "$REGION" --project "$PROJECT_ID" --wait
+          gcloud run jobs execute cofresso-migrate --region "$REGION" --project "$PROJECT_ID" --wait --args="dist/db.mjs,seed"
+
+      - name: Deploy
+        run: |
+          gcloud run deploy cofresso-web --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
+
+      - name: Smoke test (Cloud Run URL)
+        run: |
+          URL=$(gcloud run services describe cofresso-web --region "$REGION" --project "$PROJECT_ID" --format 'value(status.url)')
+          for _ in $(seq 1 12); do
+            if curl -fsS "$URL/api/health" | tee /tmp/health.json | grep -q "\"commit\":\"${{ steps.meta.outputs.short_sha }}\""; then
+              echo "Serving ${{ steps.meta.outputs.short_sha }} at $URL"; exit 0
+            fi
+            sleep 5
+          done
+          echo "New revision not healthy"; cat /tmp/health.json || true; exit 1
+
+      - name: Smoke test (public URL)
+        run: curl -fsS "${{ vars.PRODUCTION_URL }}/api/health"
+
+      - name: Summary
+        run: |
+          {
+            echo "### ✅ Production deployed"
+            echo
+            echo "- Image: \`${{ steps.meta.outputs.image }}\`"
+            echo "- URL: ${{ vars.PRODUCTION_URL }}"
+          } >> "$GITHUB_STEP_SUMMARY"
