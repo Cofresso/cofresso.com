@@ -103,7 +103,7 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Playwright version
         id: pw
-        run: echo "version=$(pnpm ls @playwright/test --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(JSON.parse(d)[0].devDependencies["@playwright/test"].version))')" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
         id: pw-cache
         with:
@@ -201,7 +201,7 @@ jobs:
 
       - name: Smoke test
         run: |
-          for i in $(seq 1 12); do
+          for _ in $(seq 1 12); do
             if curl -fsS "${{ steps.url.outputs.preview_url }}/api/health" | tee /tmp/health.json | grep -q '"db":"up"'; then exit 0; fi
             sleep 5
           done
@@ -305,7 +305,7 @@ jobs:
       - name: Smoke test (Cloud Run URL)
         run: |
           URL=$(gcloud run services describe cofresso-web --region "$REGION" --project "$PROJECT_ID" --format 'value(status.url)')
-          for i in $(seq 1 12); do
+          for _ in $(seq 1 12); do
             if curl -fsS "$URL/api/health" | tee /tmp/health.json | grep -q "\"commit\":\"${{ steps.meta.outputs.short_sha }}\""; then
               echo "Serving ${{ steps.meta.outputs.short_sha }} at $URL"; exit 0
             fi
