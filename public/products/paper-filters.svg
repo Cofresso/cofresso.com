@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750" width="600" height="750" role="img" aria-label="Paper Filters, size 02">
+  <rect width="600" height="750" fill="#F6F1EB"/>
+  <ellipse cx="300" cy="590" rx="190" ry="26" fill="#4A2C24" opacity="0.12"/>
+  <path d="M160 240 h280 l-90 250 h-100z" fill="#FFFDFA" stroke="#A08977" stroke-width="4"/><path d="M175 255 h250 l-85 225 h-80z" fill="#FFFDFA" stroke="#A08977" stroke-width="3"/><path d="M190 270 h220 l-80 200 h-60z" fill="#FFFDFA" stroke="#A08977" stroke-width="3"/>
+  <text x="300" y="660" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#4A2C24">Paper Filters, size 02</text>
+  <text x="300" y="690" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" letter-spacing="3" fill="#A08977">COFRESSO EQUIPMENT</text>
+</svg>

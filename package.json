@@ -25,6 +25,7 @@
     "db:seed": "tsx scripts/db.ts seed",
     "db:reset": "tsx scripts/db.ts reset",
     "db:studio": "drizzle-kit studio",
+    "art:generate": "tsx scripts/generate-product-art.ts",
     "build:db": "esbuild scripts/db.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/db.mjs --alias:@=./src --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\""
   },
   "dependencies": {
