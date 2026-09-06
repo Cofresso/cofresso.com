@@ -1,0 +1,49 @@
+name: Rollback production
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Revision name to route 100% traffic to (leave empty for the previous revision)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Pick target revision
+        id: pick
+        env:
+          REGION: ${{ vars.GCP_REGION }}
+          PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: |
+          if [ -n "${{ inputs.revision }}" ]; then
+            TARGET="${{ inputs.revision }}"
+          else
+            # Newest revision that is not currently serving.
+            SERVING=$(gcloud run services describe cofresso-web --region "$REGION" --project "$PROJECT_ID" --format json | jq -r '.status.traffic[] | select(.percent > 0) | .revisionName' | head -n1)
+            TARGET=$(gcloud run revisions list --service cofresso-web --region "$REGION" --project "$PROJECT_ID" --format 'value(metadata.name)' --sort-by '~metadata.creationTimestamp' | grep -v "^$SERVING$" | head -n1)
+          fi
+          [ -n "$TARGET" ] || { echo "No rollback target found"; exit 1; }
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "Rolling back to $TARGET"
+      - name: Shift traffic
+        run: |
+          gcloud run services update-traffic cofresso-web \
+            --region "${{ vars.GCP_REGION }}" --project "${{ vars.GCP_PROJECT_ID }}" \
+            --to-revisions "${{ steps.pick.outputs.target }}=100" --quiet
+      - name: Verify
+        run: curl -fsS "${{ vars.PRODUCTION_URL }}/api/health"
