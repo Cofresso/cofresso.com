@@ -40,7 +40,10 @@ export function Sheet({
 
   return (
     <div
-      className={cn('fixed inset-0 z-50', open ? 'pointer-events-auto' : 'pointer-events-none')}
+      className={cn(
+        'fixed inset-0 z-50',
+        open ? 'pointer-events-auto' : 'pointer-events-none invisible',
+      )}
       aria-hidden={!open}
     >
       <div
@@ -74,7 +77,11 @@ export function Sheet({
             <IconX />
           </button>
         </header>
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        {/* Unmounted while closed: the drawer variant of this sheet renders the same
+            data-testids as the full cart/page content it mirrors (cart lines, summary,
+            free-shipping bar, ...), so keeping it mounted off-screen would leave two
+            matches for every such testid on any page where the cart has items. */}
+        <div className="flex-1 overflow-y-auto">{open ? children : null}</div>
         {footer ? (
           <div className="border-latte/30 bg-cream border-t px-5 py-4">{footer}</div>
         ) : null}
