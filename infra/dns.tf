@@ -25,3 +25,12 @@ resource "google_dns_record_set" "www" {
   ttl          = 300
   rrdatas      = [google_compute_global_address.lb.address]
 }
+
+# Google Workspace mail. Restored from the registrar zone when nameservers moved to Cloud DNS.
+resource "google_dns_record_set" "mx" {
+  name         = google_dns_managed_zone.root.dns_name
+  managed_zone = google_dns_managed_zone.root.name
+  type         = "MX"
+  ttl          = 3600
+  rrdatas      = ["1 smtp.google.com."]
+}
