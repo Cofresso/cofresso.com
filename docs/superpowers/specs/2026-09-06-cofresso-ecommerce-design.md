@@ -24,15 +24,15 @@ Success looks like:
 
 ## Decisions already made
 
-| Decision | Choice |
-| --- | --- |
-| Data layer | Cloud SQL Postgres 16 + Drizzle ORM with checked-in migrations |
-| Payments | Simulated provider behind a `PaymentProvider` interface; test card numbers drive outcomes |
-| Environments | PR previews + production; no persistent staging |
-| Coframe SDK | Integration point only: typed analytics events + script slot in root layout gated by server env `COFRAME_SITE_KEY` |
-| Hosting | Cloud Run + global HTTPS load balancer, Terraform in `infra/`, GitHub Actions via Workload Identity Federation |
-| Cloud Run scaling | Production keeps one minimum instance so cold starts do not skew web-vitals tests |
-| Repo | `cofresso/cofresso.com` on GitHub, public, default branch `main` |
+| Decision          | Choice                                                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Data layer        | Cloud SQL Postgres 16 + Drizzle ORM with checked-in migrations                                                     |
+| Payments          | Simulated provider behind a `PaymentProvider` interface; test card numbers drive outcomes                          |
+| Environments      | PR previews + production; no persistent staging                                                                    |
+| Coframe SDK       | Integration point only: typed analytics events + script slot in root layout gated by server env `COFRAME_SITE_KEY` |
+| Hosting           | Cloud Run + global HTTPS load balancer, Terraform in `infra/`, GitHub Actions via Workload Identity Federation     |
+| Cloud Run scaling | Production keeps one minimum instance so cold starts do not skew web-vitals tests                                  |
+| Repo              | `cofresso/cofresso.com` on GitHub, public, default branch `main`                                                   |
 
 ## Known constraints
 
@@ -74,14 +74,14 @@ Success looks like:
 Palette derived from `logo.png` (two offset rounded parallelograms, tan and
 dark brown, with a steam swoosh):
 
-| Token | Value | Use |
-| --- | --- | --- |
+| Token    | Value     | Use                                          |
+| -------- | --------- | -------------------------------------------- |
 | espresso | `#4A2C24` | primary text, dark surfaces, primary buttons |
-| latte | `#A08977` | secondary surfaces, borders, muted text |
-| cream | `#F6F1EB` | page background |
-| foam | `#FFFDFA` | cards |
-| copper | `#C8763A` | accent, CTAs, badges |
-| leaf | `#5F7A5A` | success, "in stock" |
+| latte    | `#A08977` | secondary surfaces, borders, muted text      |
+| cream    | `#F6F1EB` | page background                              |
+| foam     | `#FFFDFA` | cards                                        |
+| copper   | `#C8763A` | accent, CTAs, badges                         |
+| leaf     | `#5F7A5A` | success, "in stock"                          |
 
 Typography: Fraunces (display, serif) and Inter (body). The logo is used as
 the mark; the wordmark "Cofresso" is set in Fraunces.
@@ -149,43 +149,54 @@ Implemented as pure functions in `src/lib/pricing/` and unit tested.
 
 ```ts
 interface PaymentProvider {
-  authorize(input: { amountCents: number; currency: 'USD'; card: CardInput; idempotencyKey: string }):
-    Promise<{ ok: true; reference: string } | { ok: false; code: 'declined' | 'insufficient_funds' | 'invalid_card' | 'processing_error'; message: string }>;
+  authorize(input: {
+    amountCents: number;
+    currency: 'USD';
+    card: CardInput;
+    idempotencyKey: string;
+  }): Promise<
+    | { ok: true; reference: string }
+    | {
+        ok: false;
+        code: 'declined' | 'insufficient_funds' | 'invalid_card' | 'processing_error';
+        message: string;
+      }
+  >;
 }
 ```
 
 `SimulatedPaymentProvider` accepts any Luhn-valid number with a future
 expiry and 3 to 4 digit CVC, and maps well-known test numbers:
 
-| Number | Result |
-| --- | --- |
-| 4242 4242 4242 4242 | approved |
-| 4000 0000 0000 0002 | declined |
+| Number              | Result             |
+| ------------------- | ------------------ |
+| 4242 4242 4242 4242 | approved           |
+| 4000 0000 0000 0002 | declined           |
 | 4000 0000 0000 9995 | insufficient_funds |
-| 4000 0000 0000 0119 | processing_error |
+| 4000 0000 0000 0119 | processing_error   |
 
 Card numbers never touch the database or logs. Only the reference and the
 last four digits are retained.
 
 ## Routes
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Hero, featured products, collections, story, brew guides teaser, reviews strip, newsletter |
-| `/shop` | Product listing. Filters (collection, roast, origin), sort (featured, price asc/desc, newest) via search params |
-| `/collections/[slug]` | Collection listing |
-| `/products/[slug]` | Product page: gallery, size selector, grind selector, one-time vs subscribe-and-save, add to cart, tasting notes, origin details, reviews, related products |
-| `/cart` | Full cart page. Also a slide-over cart drawer available site-wide |
-| `/checkout` | Single page with steps: contact, shipping, payment, review. Server action places the order |
-| `/checkout/success/[orderNumber]?t=<lookup_token>` | Confirmation |
-| `/orders` | Guest lookup form: order number + email |
-| `/orders/[orderNumber]?t=<lookup_token>` | Order detail |
-| `/search?q=` | Postgres `ILIKE` search on name, tagline, origin, tasting notes |
-| `/about`, `/faq` | Content pages |
-| `/brew-guides`, `/brew-guides/[slug]` | Typed content in `src/content/` |
-| `/coffee` | 302 to https://github.com/coframe/coffee |
-| `/api/health` | `{ status, db, version, commit }`, 200 or 503. Checks DB with a 2 second timeout |
-| `/sitemap.xml`, `/robots.txt`, `/humans.txt` | Standard files; humans.txt carries the easter egg |
+| Route                                              | Purpose                                                                                                                                                     |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                                | Hero, featured products, collections, story, brew guides teaser, reviews strip, newsletter                                                                  |
+| `/shop`                                            | Product listing. Filters (collection, roast, origin), sort (featured, price asc/desc, newest) via search params                                             |
+| `/collections/[slug]`                              | Collection listing                                                                                                                                          |
+| `/products/[slug]`                                 | Product page: gallery, size selector, grind selector, one-time vs subscribe-and-save, add to cart, tasting notes, origin details, reviews, related products |
+| `/cart`                                            | Full cart page. Also a slide-over cart drawer available site-wide                                                                                           |
+| `/checkout`                                        | Single page with steps: contact, shipping, payment, review. Server action places the order                                                                  |
+| `/checkout/success/[orderNumber]?t=<lookup_token>` | Confirmation                                                                                                                                                |
+| `/orders`                                          | Guest lookup form: order number + email                                                                                                                     |
+| `/orders/[orderNumber]?t=<lookup_token>`           | Order detail                                                                                                                                                |
+| `/search?q=`                                       | Postgres `ILIKE` search on name, tagline, origin, tasting notes                                                                                             |
+| `/about`, `/faq`                                   | Content pages                                                                                                                                               |
+| `/brew-guides`, `/brew-guides/[slug]`              | Typed content in `src/content/`                                                                                                                             |
+| `/coffee`                                          | 302 to https://github.com/coframe/coffee                                                                                                                    |
+| `/api/health`                                      | `{ status, db, version, commit }`, 200 or 503. Checks DB with a 2 second timeout                                                                            |
+| `/sitemap.xml`, `/robots.txt`, `/humans.txt`       | Standard files; humans.txt carries the easter egg                                                                                                           |
 
 Every route has loading and error boundaries where meaningful. Custom
 `not-found` page. `www.cofresso.com` redirects 308 to the apex in middleware.
@@ -342,7 +353,7 @@ Workflows:
   (Playwright against the built app and the service container, seeded;
   uploads the report on failure).
 - `deploy-preview` job in `ci.yml`, `if: github.event_name == 'pull_request'
-  && !github.event.pull_request.head.repo.fork`, `needs` all check jobs.
+&& !github.event.pull_request.head.repo.fork`, `needs` all check jobs.
   Steps: WIF auth, buildx with GHA cache, push `web:pr-<n>-<sha>`, execute
   `cofresso-migrate-preview` with the new image, deploy to
   `cofresso-web-preview` with `--no-traffic --tag pr-<n>`, sticky PR comment

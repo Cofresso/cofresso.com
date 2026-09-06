@@ -54,6 +54,7 @@ infra/
 ### Task 1: Install Terraform and bootstrap the project
 
 **Files:**
+
 - Create: `infra/bootstrap.sh`, `infra/README.md`
 
 - [ ] **Step 1: Install Terraform**
@@ -62,11 +63,13 @@ infra/
 brew tap hashicorp/tap && brew install hashicorp/tap/terraform
 terraform -version
 ```
+
 Expected: `Terraform v1.1x.x` or newer.
 
 - [ ] **Step 2: Bootstrap script**
 
 `infra/bootstrap.sh`:
+
 ```bash
 #!/usr/bin/env bash
 # One-time project bootstrap. Idempotent. Everything after this is Terraform.
@@ -118,12 +121,14 @@ echo "Next: cd infra && terraform init && terraform plan"
 ```bash
 cd infra && ./bootstrap.sh
 ```
+
 Expected: project created (or exists), billing linked, bucket created. If `gcloud projects create` fails with "project id already exists", rerun with `PROJECT_ID=cofresso-web ./bootstrap.sh` and use that id everywhere below.
 
 - [ ] **Step 4: README**
 
 `infra/README.md`:
-```markdown
+
+````markdown
 # Infrastructure
 
 Terraform for cofresso.com on GCP. State lives in `gs://cofresso-prod-tfstate`.
@@ -136,6 +141,7 @@ terraform init
 terraform plan
 terraform apply
 ```
+````
 
 ## Day to day
 
@@ -150,24 +156,27 @@ Container images and the deployed revision are managed by CI, not Terraform (`ig
 ## Outputs you will need
 
 `terraform output` prints the nameservers to paste into the registrar, the load balancer IP, Cloud Run URLs, the WIF provider resource name and service account emails used by GitHub Actions.
-```
+
+````
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add infra && git commit -m "infra: add GCP bootstrap script and infra README"
-```
+````
 
 ---
 
 ### Task 2: Terraform foundation: versions, providers, variables, APIs, Artifact Registry, IAM
 
 **Files:**
+
 - Create: `infra/versions.tf`, `infra/providers.tf`, `infra/variables.tf`, `infra/terraform.tfvars`, `infra/apis.tf`, `infra/artifact-registry.tf`, `infra/iam.tf`
 
 - [ ] **Step 1: Write the files**
 
 `infra/versions.tf`:
+
 ```hcl
 terraform {
   required_version = ">= 1.9"
@@ -191,6 +200,7 @@ terraform {
 ```
 
 `infra/providers.tf`:
+
 ```hcl
 provider "google" {
   project = var.project_id
@@ -203,6 +213,7 @@ data "google_project" "this" {
 ```
 
 `infra/variables.tf`:
+
 ```hcl
 variable "project_id" {
   type        = string
@@ -245,6 +256,7 @@ variable "alert_email" {
 ```
 
 `infra/terraform.tfvars`:
+
 ```hcl
 project_id        = "cofresso-prod"
 region            = "us-central1"
@@ -253,6 +265,7 @@ github_repository = "cofresso/cofresso.com"
 ```
 
 `infra/apis.tf`:
+
 ```hcl
 locals {
   services = [
@@ -280,6 +293,7 @@ resource "google_project_service" "apis" {
 ```
 
 `infra/artifact-registry.tf`:
+
 ```hcl
 resource "google_artifact_registry_repository" "web" {
   location      = var.region
@@ -311,6 +325,7 @@ resource "google_artifact_registry_repository" "web" {
 ```
 
 `infra/iam.tf`:
+
 ```hcl
 # Runtime identity for Cloud Run services and jobs.
 resource "google_service_account" "runtime" {
@@ -392,6 +407,7 @@ terraform validate
 terraform apply -target=google_project_service.apis -auto-approve
 terraform apply -auto-approve
 ```
+
 Expected: APIs enabled, repository and four service accounts created. Enabling APIs can take a couple of minutes; if a later resource fails with "API not enabled", wait 60 seconds and re-run `terraform apply`.
 
 - [ ] **Step 3: Commit**
@@ -405,11 +421,13 @@ git add infra && git commit -m "infra: add Terraform foundation with APIs, Artif
 ### Task 3: Cloud SQL and secrets
 
 **Files:**
+
 - Create: `infra/cloudsql.tf`, `infra/secrets.tf`
 
 - [ ] **Step 1: Write the files**
 
 `infra/cloudsql.tf`:
+
 ```hcl
 resource "random_password" "db" {
   length  = 32
@@ -480,6 +498,7 @@ resource "google_sql_user" "app" {
 ```
 
 `infra/secrets.tf`:
+
 ```hcl
 resource "google_secret_manager_secret" "db_password" {
   secret_id = "db-password"
@@ -512,6 +531,7 @@ resource "google_secret_manager_secret_iam_member" "planner_reads_db_password" {
 ```bash
 terraform fmt -recursive && terraform validate && terraform apply -auto-approve
 ```
+
 Expected: instance creation takes 5–10 minutes. Afterwards `gcloud sql instances describe cofresso-pg --project cofresso-prod --format='value(connectionName)'` prints `cofresso-prod:us-central1:cofresso-pg`.
 
 - [ ] **Step 3: Commit**
@@ -525,11 +545,13 @@ git add infra && git commit -m "infra: add Cloud SQL Postgres 16 instance, datab
 ### Task 4: Cloud Run services and migration jobs
 
 **Files:**
+
 - Create: `infra/cloudrun.tf`
 
 - [ ] **Step 1: Write the file**
 
 `infra/cloudrun.tf`:
+
 ```hcl
 locals {
   # Cloud Run needs an image to create the service. CI replaces it on first deploy and
@@ -838,6 +860,7 @@ resource "google_cloud_run_v2_service_iam_member" "preview_public" {
 ```bash
 terraform fmt -recursive && terraform validate && terraform apply -auto-approve
 ```
+
 Expected: two services (serving the hello placeholder) and two jobs. `gcloud run services list --project cofresso-prod` shows both URLs. If the org policy `iam.allowedPolicyMemberDomains` blocks `allUsers`, note it and continue; the LB path still needs public invoker, so ask the org admin to exempt the project.
 
 - [ ] **Step 3: Commit**
@@ -851,11 +874,13 @@ git add infra && git commit -m "infra: add Cloud Run services and migration jobs
 ### Task 5: Load balancer, certificate and DNS
 
 **Files:**
+
 - Create: `infra/loadbalancer.tf`, `infra/dns.tf`
 
 - [ ] **Step 1: Write the files**
 
 `infra/loadbalancer.tf`:
+
 ```hcl
 resource "google_compute_global_address" "lb" {
   name = "cofresso-lb-ip"
@@ -949,6 +974,7 @@ resource "google_compute_global_forwarding_rule" "http" {
 ```
 
 `infra/dns.tf`:
+
 ```hcl
 resource "google_dns_managed_zone" "root" {
   name        = "cofresso-com"
@@ -985,6 +1011,7 @@ resource "google_dns_record_set" "www" {
 terraform fmt -recursive && terraform validate && terraform apply -auto-approve
 gcloud dns managed-zones describe cofresso-com --project cofresso-prod --format='value(nameServers)'
 ```
+
 Expected: four `ns-cloud-*.googledomains.com.` nameservers. The certificate will show `PROVISIONING` until DNS points at the LB; that is expected.
 
 - [ ] **Step 3: Commit**
@@ -998,11 +1025,13 @@ git add infra && git commit -m "infra: add global HTTPS load balancer with CDN, 
 ### Task 6: Workload Identity Federation, monitoring and outputs
 
 **Files:**
+
 - Create: `infra/wif.tf`, `infra/monitoring.tf`, `infra/outputs.tf`
 
 - [ ] **Step 1: Write the files**
 
 `infra/wif.tf`:
+
 ```hcl
 resource "google_iam_workload_identity_pool" "github" {
   workload_identity_pool_id = "github"
@@ -1057,6 +1086,7 @@ resource "google_service_account_iam_member" "applier_wif" {
 ```
 
 `infra/monitoring.tf`:
+
 ```hcl
 resource "google_monitoring_uptime_check_config" "health" {
   display_name = "cofresso.com /api/health"
@@ -1125,6 +1155,7 @@ resource "google_monitoring_alert_policy" "uptime" {
 ```
 
 `infra/outputs.tf`:
+
 ```hcl
 output "project_number" {
   value = data.google_project.this.number
@@ -1179,6 +1210,7 @@ output "applier_service_account" {
 terraform fmt -recursive && terraform validate && terraform apply -auto-approve
 terraform output
 ```
+
 Expected: `wif_provider` looks like `projects/<number>/locations/global/workloadIdentityPools/github/providers/github-oidc`.
 
 - [ ] **Step 3: Commit**
@@ -1212,6 +1244,7 @@ for JOB in cofresso-migrate cofresso-migrate-preview; do
   gcloud run jobs execute $JOB --region us-central1 --project cofresso-prod --wait --args="dist/db.mjs,seed"
 done
 ```
+
 Expected: four successful executions. Check logs with `gcloud logging read 'resource.type="cloud_run_job"' --limit 20 --project cofresso-prod` if any fail.
 
 - [ ] **Step 3: Deploy both services**
@@ -1225,6 +1258,7 @@ curl -s -o /dev/null -w "%{http_code}\n" $WEB_URL/products/morning-frame
 LB_IP=$(cd infra && terraform output -raw load_balancer_ip)
 curl -sk --resolve cofresso.com:443:$LB_IP https://cofresso.com/api/health
 ```
+
 Expected: health `{"status":"ok","db":"up",...}` from the run.app URL; product page 200; the LB request returns the same JSON (with `-k` because the cert is not yet issued).
 
 - [ ] **Step 4: Hand the nameservers to the domain owner**

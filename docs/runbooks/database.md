@@ -23,6 +23,7 @@ gcloud run jobs execute cofresso-migrate --region us-central1 --project cofresso
 gcloud run jobs execute cofresso-migrate-preview --region us-central1 --project cofresso-prod --wait \
   --args="dist/db.mjs,reset" --update-env-vars ALLOW_DB_RESET=true
 ```
+
 Never run `reset` against `cofresso-migrate`.
 
 ## Backups
