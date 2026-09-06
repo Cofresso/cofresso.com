@@ -8,7 +8,8 @@ updates:
     open-pull-requests-limit: 5
     groups:
       next:
-        patterns: ['next', 'react', 'react-dom', '@types/react', '@types/react-dom', 'eslint-config-next']
+        patterns:
+          ['next', 'react', 'react-dom', '@types/react', '@types/react-dom', 'eslint-config-next']
       drizzle:
         patterns: ['drizzle-*']
       testing:
