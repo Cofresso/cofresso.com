@@ -29,7 +29,7 @@ Success looks like:
 | Data layer | Cloud SQL Postgres 16 + Drizzle ORM with checked-in migrations |
 | Payments | Simulated provider behind a `PaymentProvider` interface; test card numbers drive outcomes |
 | Environments | PR previews + production; no persistent staging |
-| Coframe SDK | Integration point only: typed analytics events + env-gated script slot in root layout |
+| Coframe SDK | Integration point only: typed analytics events + script slot in root layout gated by server env `COFRAME_SITE_KEY` |
 | Hosting | Cloud Run + global HTTPS load balancer, Terraform in `infra/`, GitHub Actions via Workload Identity Federation |
 | Cloud Run scaling | Production keeps one minimum instance so cold starts do not skew web-vitals tests |
 | Repo | `cofresso/cofresso.com` on GitHub, public, default branch `main` |
@@ -104,8 +104,8 @@ All money is integer cents. All ids are UUIDs unless noted. Timestamps are
   nullable, stock_quantity, position. Price and stock live here.
 - `collections`: id, slug (unique), name, description, position.
 - `product_collections`: product_id, collection_id, position. Composite PK.
-- `carts`: id, created_at, updated_at. Id stored in an httpOnly, SameSite=Lax
-  cookie `cofresso_cart`.
+- `carts`: id, discount_code nullable (the applied promo), created_at,
+  updated_at. Id stored in an httpOnly, SameSite=Lax cookie `cofresso_cart`.
 - `cart_items`: id, cart_id, variant_id, quantity, grind
   (`whole_bean` | `drip` | `espresso` | `french_press` | `pour_over` | null),
   purchase_type (`one_time` | `subscription`), subscription_interval_weeks
@@ -199,10 +199,12 @@ Every route has loading and error boundaries where meaningful. Custom
 
 `track(event)` pushes to `window.cofresso.events` (a bounded array) and
 dispatches a `cofresso:event` CustomEvent. Nothing is sent anywhere by
-default. `<ThirdPartyScripts />` in the root layout renders a script tag for
-the Coframe SDK only when `NEXT_PUBLIC_COFRAME_SITE_KEY` is set, using
-`NEXT_PUBLIC_COFRAME_SCRIPT_URL` if provided. Installing the SDK is a
-follow-up task by design.
+default. `<ThirdPartyScripts />` is a server component in the root layout
+that renders a script tag for the Coframe SDK only when the server env var
+`COFRAME_SITE_KEY` is set, using `COFRAME_SCRIPT_URL` if provided. These are
+read at request time, not build time, so the slot can be toggled per
+environment without rebuilding the image. Installing the SDK is a follow-up
+task by design.
 
 ## Code organization
 
@@ -248,6 +250,8 @@ Rules the codebase follows and `AGENTS.md` documents:
   import the db client.
 - Mutations are server actions in `actions.ts` files next to their route,
   validated with Zod, returning `{ ok: true, data } | { ok: false, error }`.
+  Cart actions are shared by several routes and live in
+  `src/lib/cart/actions.ts`.
 - Pricing, payments and cart logic are pure and tested in isolation.
 - Schema changes ship with a generated migration in the same PR.
 - No secrets in the repo. Env is validated at boot by `lib/env.ts`.
@@ -304,7 +308,9 @@ backend block. Everything else is Terraform.
   512 MiB, 1 vCPU, startup CPU boost, ingress all. Container image and env
   are managed by CI, so Terraform ignores changes to the template image.
 - Cloud Run v2 jobs `cofresso-migrate` and `cofresso-migrate-preview`
-  running `node scripts/migrate.mjs` in the same image.
+  running `node dist/db.mjs migrate` in the same image. CI executes the
+  same job with `--args=seed` afterwards; seeding is idempotent so the
+  catalog is managed as code.
 - Load balancer: global static IP, serverless NEG to `cofresso-web`,
   backend service with Cloud CDN enabled (cache mode `USE_ORIGIN_HEADERS`),
   URL map, Google-managed certificate for `cofresso.com` and
