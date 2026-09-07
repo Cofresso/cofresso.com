@@ -31,6 +31,14 @@ export default defineConfig({
         url: `${baseURL}/api/health`,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
-        env: { DATABASE_URL: TEST_DATABASE_URL, SITE_URL: baseURL, NODE_ENV: 'production' },
+        env: {
+          DATABASE_URL: TEST_DATABASE_URL,
+          SITE_URL: baseURL,
+          NODE_ENV: 'production',
+          // Fills the Coframe SDK slot so the consent-gating spec has something to assert on.
+          // The script itself is a local stub, so no test ever reaches the real CDN.
+          COFRAME_SITE_KEY: 'test-key',
+          COFRAME_SCRIPT_URL: `${baseURL}/coframe-sdk.stub.js`,
+        },
       },
 });

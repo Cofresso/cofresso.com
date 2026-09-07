@@ -9,6 +9,7 @@ locals {
     DB_SOCKET_DIR        = "/cloudsql/${local.sql_connection}"
     DB_USER              = google_sql_user.app.name
     GOOGLE_CLOUD_PROJECT = var.project_id
+    UX_INTERRUPTIONS     = var.ux_interruptions
   }
 }
 

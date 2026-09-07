@@ -29,7 +29,12 @@ export type AnalyticsEvent =
     }
   | { name: 'apply_promo'; code: string; success: boolean }
   | { name: 'newsletter_signup'; source: string }
-  | { name: 'search'; query: string; resultCount: number };
+  | { name: 'search'; query: string; resultCount: number }
+  | { name: 'popup_shown'; trigger: 'timer' | 'exit_intent' }
+  | { name: 'popup_dismissed' }
+  | { name: 'consent_updated'; analytics: boolean; marketing: boolean }
+  | { name: 'chat_opened' }
+  | { name: 'toast_shown'; toastId: string };
 
 export type AnalyticsEventName = AnalyticsEvent['name'];
 

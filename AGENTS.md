@@ -18,6 +18,7 @@ Cofresso is an ecommerce storefront for a fictional coffee roaster. It is a real
 - **Card data never touches the database or logs.** Only `card_last4` and the provider reference are stored. Never log a drizzle error either — its `message` embeds the statement and every bound parameter; log `describeDbError(err)` from `src/lib/db/errors.ts` plus the ids you need.
 - **Payment authorization happens inside the `placeOrder` transaction**, while the variant rows are locked `FOR UPDATE`. That is safe with the simulated provider because it never does I/O. When a real gateway replaces it, either give `authorize` a hard timeout or move authorization out of the lock window — a slow gateway would otherwise hold row locks on the affected variants and stall every other checkout for the same product.
 - **Tests accompany changes.** Unit tests next to the code (`*.test.ts`), integration tests in `tests/integration`, end-to-end in `tests/e2e`. Prefer `data-testid` hooks for e2e selectors.
+- **The interruptions are a feature, not clutter.** The email popup, cookie banner, chat bubble, social-proof toasts, rotating announcement bar and lazily revealed sections exist so this app exercises computer-use QA agents the way a real storefront does. Every one of them is keyboard-accessible and dismissible, and none may appear on `/checkout*` or `/orders*`. Timings live in `src/lib/interruptions/config.ts`; `UX_INTERRUPTIONS=off` in the server env removes all of them. The e2e suite runs with them **on** — call `dismissInterruptions(page)` from `tests/e2e/helpers.ts` after the first navigation a spec interacts with rather than turning them off.
 - **Conventional Commits** for commit messages and PR titles (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`, `build:`, `ci:`).
 
 ## Where things live
@@ -27,8 +28,10 @@ Cofresso is an ecommerce storefront for a fictional coffee roaster. It is a real
 | `src/app`                                                           | Routes. Route groups: `(marketing)`, `(shop)`, `(checkout)`, plus `api/`             |
 | `src/components/ui`                                                 | Presentational primitives (Button, Input, Sheet, …)                                  |
 | `src/components/{layout,product,cart,checkout,marketing,analytics}` | Domain components                                                                    |
+| `src/components/interruptions`                                      | Popup, cookie banner, chat bubble, toasts, announcement rotator, `Deferred`          |
 | `src/lib/db`                                                        | Drizzle client, schema, catalog/newsletter queries, error helpers, seed              |
 | `src/lib/pricing` `payments` `cart` `checkout`                      | Domain logic; `cart/queries.ts` and `checkout/queries.ts` hold their own reads       |
+| `src/lib/interruptions`                                             | Interruption config, consent/suppression/toast/countdown helpers, chat script        |
 | `src/lib/analytics`                                                 | Typed events + `track()`; SDK slot in `components/analytics/third-party-scripts.tsx` |
 | `src/content`                                                       | Brew guides and FAQ as typed data                                                    |
 | `scripts/`                                                          | `db.ts` CLI (bundled to `dist/db.mjs` for the image), product art generator          |
@@ -44,6 +47,7 @@ Cofresso is an ecommerce storefront for a fictional coffee roaster. It is a real
 - **Add a page:** create `page.tsx` under the right route group; add it to `src/app/sitemap.ts` if public.
 - **Change pricing rules:** edit `src/lib/pricing`, update `src/lib/pricing/index.test.ts` first.
 - **Add an analytics event:** extend the union in `src/lib/analytics/events.ts`; call `track()` from a client component.
+- **Change an interruption's timing:** edit `src/lib/interruptions/config.ts`. Tests fast-forward `page.clock` rather than shortening the config, so no test needs updating.
 - **Verify before you finish:** `pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:integration`, and `pnpm build && pnpm test:e2e` for UI changes.
 
 ## Deployment model
