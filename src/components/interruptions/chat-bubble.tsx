@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { IconX } from '@/components/ui/icons';
+import { IconMessageCircle, IconX } from '@/components/ui/icons';
 import { track } from '@/lib/analytics/track';
 import {
   chatGreeting,
@@ -235,7 +235,7 @@ export function ChatBubble() {
           chatOpen ? 'hidden' : bottom,
         )}
       >
-        <ChatIcon />
+        <IconMessageCircle width={24} height={24} />
         {unread ? (
           <span
             data-testid="chat-unread"
@@ -246,24 +246,5 @@ export function ChatBubble() {
         ) : null}
       </button>
     </>
-  );
-}
-
-function ChatIcon() {
-  return (
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M21 12a8 8 0 0 1-8 8H8l-4 3v-4.6A8 8 0 0 1 13 4a8 8 0 0 1 8 8Z" />
-      <path d="M9 11h.01M13 11h.01M17 11h.01" />
-    </svg>
   );
 }
