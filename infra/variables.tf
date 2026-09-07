@@ -17,8 +17,8 @@ variable "domain" {
 
 variable "github_repository" {
   type        = string
-  description = "owner/repo allowed to assume the deploy service accounts"
-  default     = "cofresso/cofresso.com"
+  description = "owner/repo allowed to assume the deploy service accounts. Must match GitHub's canonical owner/repo casing exactly; the WIF attribute condition is case-sensitive."
+  default     = "Cofresso/cofresso.com"
 }
 
 variable "db_tier" {
