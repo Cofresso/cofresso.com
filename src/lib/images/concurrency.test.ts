@@ -41,4 +41,12 @@ describe('mapWithConcurrency', () => {
       '1b',
     ]);
   });
+
+  it('propagates a worker rejection', async () => {
+    await expect(
+      mapWithConcurrency([1], 2, async () => {
+        throw new Error('x');
+      }),
+    ).rejects.toThrow('x');
+  });
 });

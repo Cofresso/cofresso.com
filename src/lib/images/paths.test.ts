@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ASSETS_BASE_URL } from './manifest';
 import {
   assetUrl,
+  bucketObjectName,
   collectionObjectPath,
   guideObjectPath,
   homeObjectPath,
@@ -27,6 +28,15 @@ describe('paths', () => {
 
   it('builds public URLs under the assets base', () => {
     expect(assetUrl('home/hero-deadbeef.webp')).toBe(`${ASSETS_BASE_URL}/home/hero-deadbeef.webp`);
+  });
+
+  it('prefixes the bucket object name without affecting the public URL', () => {
+    expect(bucketObjectName('products/morning-frame/morning-frame-front-abcdef12.webp')).toBe(
+      'assets/products/morning-frame/morning-frame-front-abcdef12.webp',
+    );
+    expect(assetUrl('products/morning-frame/morning-frame-front-abcdef12.webp')).toBe(
+      `${ASSETS_BASE_URL}/products/morning-frame/morning-frame-front-abcdef12.webp`,
+    );
   });
 
   it('pins the immutable cache header and content type', () => {

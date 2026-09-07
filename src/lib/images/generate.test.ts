@@ -179,4 +179,21 @@ describe('runImageJobs', () => {
     expect(result.manifest.home.story).toBeUndefined();
     expect(result.failures).toEqual([{ key: 'home:story', error: 'bad request' }]);
   });
+
+  it('keeps the original entry when a forced regeneration fails', async () => {
+    const first = await runImageJobs(EMPTY_MANIFEST, deps(), options);
+    const originalHero = first.manifest.home.hero;
+
+    const failing = deps({
+      generate: vi.fn(async () => {
+        throw Object.assign(new Error('bad request'), { status: 400 });
+      }),
+    });
+    const result = await runImageJobs(first.manifest, failing, { ...options, force: true });
+
+    expect(result.manifest.home.hero).toEqual(originalHero);
+    expect(result.failures).toEqual(
+      expect.arrayContaining([{ key: 'home:hero', error: 'bad request' }]),
+    );
+  });
 });

@@ -8,6 +8,7 @@ import sharp from 'sharp';
 import { contentImages } from '../src/lib/images/content';
 import { runImageJobs, type ImageDeps, type RunOptions } from '../src/lib/images/generate';
 import { serializeManifest } from '../src/lib/images/manifest';
+import { bucketObjectName } from '../src/lib/images/paths';
 import type { ImageSize } from '../src/lib/images/prompts';
 
 // The key lives outside the repository. `.superpowers/` is git-ignored; the
@@ -62,7 +63,8 @@ function parseFlags(argv: readonly string[]): Flags {
         break;
       case '--help':
         console.log(
-          'Usage: pnpm images:generate [--only <slug|collections|home|guides>] [--force] [--dry-run] [--concurrency 6] [--model gpt-image-2] [--bucket cofresso-prod-assets]',
+          'Usage: pnpm images:generate [--only <slug|collections|home|guides>] [--force] [--dry-run] [--concurrency 6] [--model gpt-image-2] [--bucket cofresso-prod-assets]\n' +
+            'Objects are written under an `assets/` prefix in the bucket (the load balancer forwards the full request path), even though public URLs and --only values have no such prefix.',
         );
         process.exit(0);
       default:
@@ -169,7 +171,10 @@ async function main(): Promise<void> {
       return { data, width: info.width, height: info.height };
     },
     async upload({ objectPath, body, contentType, cacheControl }) {
-      await bucket.file(objectPath).save(body, {
+      // The load balancer's backend bucket forwards the full request path, so
+      // objects live under `assets/` in the bucket even though the public URL
+      // (and the `objectPath` the planner produces) has no such prefix.
+      await bucket.file(bucketObjectName(objectPath)).save(body, {
         contentType,
         resumable: false,
         metadata: { cacheControl },
