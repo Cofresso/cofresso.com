@@ -9,8 +9,8 @@ import {
   products,
   reviews,
 } from '@/lib/db/schema';
-import { contentImages } from '@/lib/images/content';
-import { sortProductImages, type ImagesManifest } from '@/lib/images/manifest';
+import { collectionImage, contentImages, productImagesFor } from '@/lib/images/content';
+import type { ImagesManifest } from '@/lib/images/manifest';
 import { seedCollections, seedDiscountCodes, seedProducts } from './data';
 import { stableId } from './ids';
 import { buildSeedReviews } from './reviews';
@@ -38,7 +38,7 @@ export async function runSeed(db: Db, options: SeedOptions = {}): Promise<SeedSu
 
   await db.transaction(async (tx) => {
     for (const c of seedCollections) {
-      const hero = manifest.collections[c.slug];
+      const hero = collectionImage(c.slug, manifest);
       if (hero) heroCount += 1;
       await tx
         .insert(collections)
@@ -131,7 +131,7 @@ export async function runSeed(db: Db, options: SeedOptions = {}): Promise<SeedSu
 
       // The manifest is authoritative: upsert what it has, then delete the
       // kinds it no longer lists so a regenerated set never leaves orphans.
-      const images = sortProductImages(manifest.products[p.slug] ?? []);
+      const images = productImagesFor(p.slug, manifest);
       imageCount += images.length;
       for (const [index, image] of images.entries()) {
         await tx

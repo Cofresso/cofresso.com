@@ -19,18 +19,30 @@ export function contentImages(): ImagesManifest {
   return cached;
 }
 
-export function homeImage(name: HomeImageName): ManifestImage | null {
-  return contentImages().home[name] ?? null;
+export function homeImage(
+  name: HomeImageName,
+  manifest: ImagesManifest = contentImages(),
+): ManifestImage | null {
+  return manifest.home[name] ?? null;
 }
 
-export function guideImage(slug: string): ManifestImage | null {
-  return contentImages().guides[slug] ?? null;
+export function guideImage(
+  slug: string,
+  manifest: ImagesManifest = contentImages(),
+): ManifestImage | null {
+  return manifest.guides[slug] ?? null;
 }
 
-export function collectionImage(slug: string): ManifestImage | null {
-  return contentImages().collections[slug] ?? null;
+export function collectionImage(
+  slug: string,
+  manifest: ImagesManifest = contentImages(),
+): ManifestImage | null {
+  return manifest.collections[slug] ?? null;
 }
 
-export function productImagesFor(slug: string): ManifestProductImage[] {
-  return sortProductImages(contentImages().products[slug] ?? []);
+export function productImagesFor(
+  slug: string,
+  manifest: ImagesManifest = contentImages(),
+): ManifestProductImage[] {
+  return sortProductImages(manifest.products[slug] ?? []);
 }
