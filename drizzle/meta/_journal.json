@@ -15,6 +15,13 @@
       "when": 1788731000624,
       "tag": "0001_stock_nonneg",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788752821602,
+      "tag": "0002_product_images",
+      "breakpoints": true
     }
   ]
 }

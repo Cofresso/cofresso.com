@@ -4,11 +4,13 @@
 
 Browser → Global HTTPS load balancer (Google-managed cert, Cloud CDN for `/_next/static`) → Cloud Run `cofresso-web` → Cloud SQL Postgres via the Cloud SQL Unix socket.
 
+`/assets/*` is the one exception: the URL map sends it to a CDN-backed backend bucket over `gs://cofresso-prod-assets`, which holds the generated product photography. Objects are content-addressed WebP with a one-year immutable cache, so they never hit Cloud Run. Public URLs are `https://cofresso.com/assets/<path>`, but inside the bucket the object lives at `assets/<path>` — the backend bucket forwards the full request path to Cloud Storage, so `bucketObjectName()` (`src/lib/images/paths.ts`) adds that `assets/` prefix when uploading.
+
 Every page is server-rendered on request. Reads use Drizzle query modules — `src/lib/db/queries` for catalog and newsletter, `src/lib/cart/queries.ts` for the cart, `src/lib/checkout/queries.ts` for orders; writes are server actions. The cart id lives in an httpOnly cookie and cart state lives in Postgres, so the header count, drawer and cart page all render from the same source after `revalidatePath('/', 'layout')`. The header and drawer share one read per request through `getCurrentCart` (`src/lib/cart/request-cache.ts`, React `cache`).
 
 ## Domain
 
-- **Catalog:** `products` → `product_variants` (size, price, stock); `collections` via `product_collections`; `reviews`.
+- **Catalog:** `products` → `product_variants` (size, price, stock); `collections` via `product_collections`; `reviews`; `product_images` (one row per product and kind: `front`, `detail`, `lifestyle`, `packaging`), seeded from `content/images.manifest.json` alongside `collections.hero_image_url`.
 - **Cart:** `carts` (+ applied `discount_code`) → `cart_items` (variant, quantity, grind, one-time or subscription with interval). Lines merge on `(cart, variant, grind, purchase_type, interval)`.
 - **Checkout:** `placeOrder` runs one transaction: lock variants `FOR UPDATE`, verify stock, evaluate the promo, authorize payment through `PaymentProvider`, insert `orders` + `order_items` (price snapshot), decrement stock, bump discount usage, clear the cart. `idempotency_key` makes double submits return the existing order. Authorization runs inside the lock window, which only holds because the simulated provider does no I/O; a real gateway needs a timeout on `authorize`, or authorization moved out of the transaction.
 - **Pricing:** pure functions. Subscription 15% → discount code → shipping ($6, free ≥ $45) → tax 8%.

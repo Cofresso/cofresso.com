@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it } from 'vitest';
-import { lowestPriceCents } from '../../src/lib/catalog/types';
+import { lowestPriceCents, primaryImage } from '../../src/lib/catalog/types';
 import {
   getCollectionBySlug,
   getProductBySlug,
@@ -84,5 +84,36 @@ describe('catalog queries', () => {
     const recent = await listRecentReviews(5, db);
     expect(recent).toHaveLength(5);
     expect(recent[0].product.slug).toBeTruthy();
+  });
+
+  it('returns product images in position order on cards and detail', async () => {
+    const items = await listProducts(undefined, db);
+    for (const item of items) {
+      const positions = item.images.map((i) => i.position);
+      expect(positions).toEqual([...positions].sort((a, b) => a - b));
+      expect(new Set(item.images.map((i) => i.kind)).size).toBe(item.images.length);
+      for (const image of item.images) {
+        expect(image.productId).toBe(item.product.id);
+        expect(image.url).toContain('/assets/');
+        expect(image.alt.length).toBeGreaterThan(0);
+      }
+    }
+
+    const detail = await getProductBySlug('morning-frame', db);
+    expect(detail!.images.map((i) => i.position)).toEqual(
+      detail!.images.map((_, i) => i).slice(0, detail!.images.length),
+    );
+    if (detail!.images.length > 0) expect(primaryImage(detail!.images)!.kind).toBe('front');
+  });
+
+  it('exposes collection hero columns', async () => {
+    const list = await listCollections(db);
+    for (const collection of list) {
+      expect(collection).toHaveProperty('heroImageUrl');
+      expect(collection).toHaveProperty('heroImageAlt');
+      if (collection.heroImageUrl) expect(collection.heroImageUrl).toContain('/assets/');
+    }
+    const blends = await getCollectionBySlug('blends', db);
+    expect(blends).toHaveProperty('heroImageUrl');
   });
 });

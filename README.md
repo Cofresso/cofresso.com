@@ -30,7 +30,50 @@ pnpm dev                      # http://localhost:3000
 | `pnpm db:migrate` / `db:seed` / `db:reset` | Apply migrations / upsert catalog / drop + migrate + seed (needs `ALLOW_DB_RESET=true`) |
 | `pnpm db:studio`                           | Drizzle Studio                                                                          |
 | `pnpm art:generate`                        | Regenerate product SVGs from seed data                                                  |
+| `pnpm images:generate`                     | Regenerate photography with the OpenAI Images API (see below)                           |
 | `pnpm build:db`                            | Bundle the db CLI for the Docker image                                                  |
+
+## Product imagery
+
+Photography is generated once, not at request time. `scripts/generate-images.ts` builds a
+deterministic prompt per image from `src/lib/db/seed/data.ts` and `src/content/brew-guides`,
+calls the OpenAI Images API, converts to WebP (longest edge 1600 px, quality 80), uploads to
+`gs://cofresso-prod-assets` under a content-addressed name, and records the result in
+`content/images.manifest.json`.
+
+That manifest is the source of truth. `pnpm db:seed` reads it to fill `product_images` and
+`collections.hero_image_url`; the homepage, brew-guide and collection images are read from it
+directly through `src/lib/images/content.ts`. A missing entry is not an error — the product
+falls back to its SVG art in `public/products/`.
+
+Objects are served by the same load balancer that fronts Cloud Run: `/assets/*` routes to a
+CDN-backed backend bucket, so a URL looks like
+`https://cofresso.com/assets/products/morning-frame/morning-frame-front-1a2b3c4d.webp`. The
+uploaded object's own metadata sets `Cache-Control: public, max-age=31536000, immutable`, and
+Cloud CDN's edge cache can hold it that long (`max_ttl`), but the assets backend bucket's CDN
+policy also sets a one-day `client_ttl`, which is what the CDN actually rewrites into the
+response a browser sees — `curl -I` against a live URL shows `max-age=86400`. Because names carry
+a content hash, a regenerated image gets a new URL and never needs a cache purge either way. In
+the bucket itself the object lives under an `assets/` prefix
+(`gs://cofresso-prod-assets/assets/products/...`), because the load balancer's backend bucket
+forwards the full request path through to Cloud Storage — `bucketObjectName()` in
+`src/lib/images/paths.ts` adds that prefix when uploading.
+
+To regenerate:
+
+```bash
+export OPENAI_API_KEY=...                                    # or .superpowers/sdd/images/.env
+export GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token)
+
+pnpm images:generate --dry-run                # what would be generated, no cost
+pnpm images:generate --only morning-frame     # one product (4 images)
+pnpm images:generate                          # everything missing from the manifest
+pnpm images:generate --only morning-frame --force   # replace existing entries
+pnpm db:seed                                  # push the manifest into the database
+```
+
+A full run is 82 images, roughly $16 and 10–20 minutes at concurrency 6. Commit the updated
+`content/images.manifest.json`; never commit the API key.
 
 ## Interruptions
 

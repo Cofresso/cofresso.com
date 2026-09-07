@@ -2,8 +2,15 @@ import Image from 'next/image';
 import { ButtonLink } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import type { ProductCardData } from '@/lib/catalog/types';
+import type { ManifestImage } from '@/lib/images/manifest';
 
-export function Hero({ featured }: { featured: ProductCardData[] }) {
+export function Hero({
+  featured,
+  image,
+}: {
+  featured: ProductCardData[];
+  image?: ManifestImage | null;
+}) {
   const [a, b, c] = featured;
   return (
     <section className="bg-espresso text-foam relative overflow-hidden" data-testid="hero">
@@ -51,20 +58,36 @@ export function Hero({ featured }: { featured: ProductCardData[] }) {
             </div>
           </dl>
         </div>
-        <div className="relative mx-auto grid w-full max-w-md grid-cols-3 items-end gap-3">
-          {[b, a, c].filter(Boolean).map((item, i) => (
+        {image ? (
+          <div
+            className="relative aspect-[3/2] w-full overflow-hidden rounded-3xl shadow-2xl"
+            data-testid="hero-image"
+          >
             <Image
-              key={item.product.id}
-              src={item.product.imagePath}
-              alt={item.product.name}
-              width={300}
-              height={375}
-              unoptimized
+              src={image.url}
+              alt={image.alt}
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
               priority
-              className={i === 1 ? 'scale-110 drop-shadow-2xl' : 'opacity-90 drop-shadow-xl'}
+              className="object-cover"
             />
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div className="relative mx-auto grid w-full max-w-md grid-cols-3 items-end gap-3">
+            {[b, a, c].filter(Boolean).map((item, i) => (
+              <Image
+                key={item.product.id}
+                src={item.product.imagePath}
+                alt={item.product.name}
+                width={300}
+                height={375}
+                unoptimized
+                priority
+                className={i === 1 ? 'scale-110 drop-shadow-2xl' : 'opacity-90 drop-shadow-xl'}
+              />
+            ))}
+          </div>
+        )}
       </Container>
     </section>
   );

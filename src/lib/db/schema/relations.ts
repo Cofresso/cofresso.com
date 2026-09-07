@@ -1,16 +1,28 @@
 import { relations } from 'drizzle-orm';
 import { cartItems, carts } from './cart';
-import { collections, productCollections, productVariants, products, reviews } from './catalog';
+import {
+  collections,
+  productCollections,
+  productImages,
+  productVariants,
+  products,
+  reviews,
+} from './catalog';
 import { orderItems, orders } from './orders';
 
 export const productsRelations = relations(products, ({ many }) => ({
   variants: many(productVariants),
+  images: many(productImages),
   productCollections: many(productCollections),
   reviews: many(reviews),
 }));
 
 export const productVariantsRelations = relations(productVariants, ({ one }) => ({
   product: one(products, { fields: [productVariants.productId], references: [products.id] }),
+}));
+
+export const productImagesRelations = relations(productImages, ({ one }) => ({
+  product: one(products, { fields: [productImages.productId], references: [products.id] }),
 }));
 
 export const collectionsRelations = relations(collections, ({ many }) => ({

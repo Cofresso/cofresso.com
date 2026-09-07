@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Deferred } from '@/components/interruptions/deferred';
 import { AddToCartForm } from '@/components/product/add-to-cart-form';
 import { ProductDetails } from '@/components/product/product-details';
+import { ProductGallery } from '@/components/product/product-gallery';
 import { ProductGrid } from '@/components/product/product-grid';
 import { ReviewList } from '@/components/product/review-list';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,7 @@ import { Rating } from '@/components/ui/rating';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { Skeleton } from '@/components/ui/skeleton';
 import { categoryLabel, roastLabel } from '@/lib/catalog/labels';
-import { lowestPriceCents } from '@/lib/catalog/types';
+import { lowestPriceCents, primaryImage } from '@/lib/catalog/types';
 import { getProductBySlug, listRelatedProducts } from '@/lib/db/queries/catalog';
 import { getServerEnv } from '@/lib/env';
 import { interruptionsEnabled } from '@/lib/interruptions/enabled';
@@ -24,13 +24,14 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getProductBySlug((await params).slug);
   if (!data) return { title: 'Product not found' };
+  const lead = primaryImage(data.images);
   return {
     title: data.product.name,
     description: data.product.tagline,
     openGraph: {
       title: data.product.name,
       description: data.product.tagline,
-      images: [data.product.imagePath],
+      images: [lead?.url ?? data.product.imagePath],
     },
   };
 }
@@ -39,7 +40,7 @@ export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const data = await getProductBySlug(slug);
   if (!data) notFound();
-  const { product, variants, rating, collections, reviews } = data;
+  const { product, variants, rating, images, collections, reviews } = data;
   const related = await listRelatedProducts(product, 4);
   const base = getServerEnv().SITE_URL;
   const deferSections = interruptionsEnabled();
@@ -49,7 +50,7 @@ export default async function ProductPage({ params }: Props) {
     '@type': 'Product',
     name: product.name,
     description: product.tagline,
-    image: `${base}${product.imagePath}`,
+    image: images.length ? images.map((i) => i.url) : [`${base}${product.imagePath}`],
     sku: variants[0]?.sku,
     brand: { '@type': 'Brand', name: 'Cofresso' },
     offers: {
@@ -92,17 +93,12 @@ export default async function ProductPage({ params }: Props) {
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-        <div className="bg-foam relative overflow-hidden rounded-3xl">
-          <Image
-            src={product.imagePath}
-            alt={product.name}
-            width={600}
-            height={750}
-            unoptimized
-            priority
-            className="h-auto w-full"
+        <div className="relative">
+          <ProductGallery
+            images={images}
+            fallback={{ src: product.imagePath, alt: product.name }}
           />
-          <div className="absolute top-4 left-4 flex gap-2">
+          <div className="pointer-events-none absolute top-4 left-4 z-20 flex gap-2">
             {product.roastLevel ? <Badge>{roastLabel(product.roastLevel)} roast</Badge> : null}
             {product.featured ? <Badge tone="copper">Staff pick</Badge> : null}
           </div>
