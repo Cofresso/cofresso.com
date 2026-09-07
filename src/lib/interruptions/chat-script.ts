@@ -31,6 +31,3 @@ export const chatQuickReplies: readonly ChatQuickReply[] = [
       'Standard shipping is $6 and lands in 2-5 business days, free over $45. We roast Monday to Thursday and ship the same afternoon.',
   },
 ] as const;
-
-export const chatFallback =
-  'I only know three things, and you have found the edges of all of them. Email hello@cofresso.com and a human will pick it up.';

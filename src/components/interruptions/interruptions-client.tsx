@@ -1,6 +1,7 @@
 'use client';
 
 import type { Consent } from '@/lib/interruptions/consent';
+import { ChatBubble } from './chat-bubble';
 import { CookieBanner } from './cookie-banner';
 import { EmailCaptureModal } from './email-capture-modal';
 import { InterruptionStateProvider } from './state';
@@ -15,6 +16,7 @@ export function InterruptionsClient({ consent }: { consent: Consent | null }) {
     <InterruptionStateProvider>
       <CookieBanner consent={consent} />
       <EmailCaptureModal />
+      <ChatBubble />
     </InterruptionStateProvider>
   );
 }

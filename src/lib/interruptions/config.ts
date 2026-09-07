@@ -15,7 +15,7 @@ export const interruptionsConfig = {
     excludedPrefixes: ['/checkout', '/orders'],
   },
   consent: { cookieName: 'cofresso_consent', maxAgeDays: 180, gateSdkOnAnalytics: true },
-  chat: { unreadAfterMs: 30000 },
+  chat: { unreadAfterMs: 30000, typingMs: 600 },
   toasts: { firstAfterMs: 12000, intervalMs: 25000, visibleMs: 6000, maxPerSession: 3 },
   announcement: { rotateMs: 6000 },
   deferred: { rootMargin: '200px' },
