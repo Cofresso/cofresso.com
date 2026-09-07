@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { addToCart, closeDrawer, dismissInterruptions } from './helpers';
+import { addToCart, closeDrawer, dismissInterruptions, suppressPopup } from './helpers';
+
+test.beforeEach(async ({ page }) => {
+  // The popup is covered by interruptions.spec.ts; here it would only land mid-flow.
+  await suppressPopup(page);
+});
 
 test.describe('product and cart', () => {
   test('variant and subscription change the price, add to cart opens the drawer', async ({

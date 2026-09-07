@@ -1,4 +1,46 @@
 import { expect, type Page } from '@playwright/test';
+import {
+  POPUP_STORAGE_KEY,
+  serializeSuppression,
+  suppressionFor,
+} from '../../src/lib/interruptions/suppression';
+
+/**
+ * Seed the email-capture popup's suppression record before the first navigation, so it never
+ * fires partway through a spec.
+ *
+ * `dismissInterruptions` can only clear what is already on screen; it cannot pre-empt a popup
+ * whose 8s timer has not run out yet, and a spec that spends longer than that on a route the
+ * popup is allowed on will have a modal land on top of it. Seeding storage is what a returning
+ * visitor who already said no looks like, so the storefront specs still run against a fully
+ * live storefront — banner, chat, toasts and rotator all included — and the interruptions spec
+ * is left to test the popup itself.
+ */
+export async function suppressPopup(page: Page) {
+  const record = serializeSuppression(suppressionFor('dismissed', new Date()));
+  await page.addInitScript(
+    ([key, value]) => {
+      try {
+        window.localStorage.setItem(key, value);
+      } catch {
+        /* storage unavailable — the spec will have to dismiss the popup instead */
+      }
+    },
+    [POPUP_STORAGE_KEY, record] as const,
+  );
+}
+
+/**
+ * Wait until the page is interactive. An unhydrated button swallows a click silently and
+ * Playwright's actionability checks cannot tell the difference. `AnalyticsProvider` buffers a
+ * `page_view` from an effect on mount, which makes it a reliable signal.
+ */
+export async function waitForHydration(page: Page) {
+  await page.waitForFunction(() => {
+    const buffered = (window as unknown as { cofresso?: { events: unknown[] } }).cofresso;
+    return (buffered?.events.length ?? 0) > 0;
+  });
+}
 
 /**
  * Clear the interruptions a real visitor has to get past before they can use the page: accept

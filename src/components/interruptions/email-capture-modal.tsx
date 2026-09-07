@@ -11,14 +11,13 @@ import { interruptionsConfig } from '@/lib/interruptions/config';
 import {
   isPopupExcludedPath,
   parseSuppression,
+  POPUP_STORAGE_KEY,
   serializeSuppression,
   shouldShowPopup,
   suppressionFor,
   type PopupSuppression,
 } from '@/lib/interruptions/suppression';
 import { useInterruptionState } from './state';
-
-export const POPUP_STORAGE_KEY = 'cofresso:popup';
 
 type Trigger = 'timer' | 'exit_intent';
 

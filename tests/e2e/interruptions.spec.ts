@@ -1,20 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { interruptionsConfig } from '../../src/lib/interruptions/config';
-import { addToCart } from './helpers';
+import { addToCart, waitForHydration } from './helpers';
 
 const { popup, chat, toasts, announcement } = interruptionsConfig;
-
-/**
- * Gate on hydration before interacting: an unhydrated button swallows the click silently, and
- * Playwright's actionability checks cannot tell the difference. `AnalyticsProvider` buffers a
- * `page_view` from an effect on mount, which makes it a reliable signal.
- */
-async function waitForHydration(page: Page) {
-  await page.waitForFunction(() => {
-    const buffered = (window as unknown as { cofresso?: { events: unknown[] } }).cofresso;
-    return (buffered?.events.length ?? 0) > 0;
-  });
-}
 
 /** Local noon, well clear of midnight so the countdown assertions have room either side. */
 const CLOCK_START = new Date('2026-09-06T12:00:00-07:00');

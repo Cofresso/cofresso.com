@@ -9,6 +9,12 @@ export interface PopupSuppression {
   until: string;
 }
 
+/**
+ * Where the record lives. Kept here beside the serializer rather than in the component so the
+ * e2e helpers can seed it without importing a `'use client'` module.
+ */
+export const POPUP_STORAGE_KEY = 'cofresso:popup';
+
 const STATES: readonly PopupSuppression['state'][] = ['dismissed', 'subscribed'];
 
 const DAY_MS = 24 * 60 * 60 * 1000;

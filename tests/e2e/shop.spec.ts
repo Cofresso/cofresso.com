@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { dismissInterruptions } from './helpers';
+import { dismissInterruptions, suppressPopup } from './helpers';
+
+test.beforeEach(async ({ page }) => {
+  // The popup is covered by interruptions.spec.ts; here it would only land mid-flow.
+  await suppressPopup(page);
+});
 
 test.describe('shop', () => {
   test('filters by roast and sorts by price', async ({ page }) => {
