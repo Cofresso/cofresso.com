@@ -36,6 +36,10 @@ output "deployer_service_account" {
   value = google_service_account.deployer.email
 }
 
+output "preview_deployer_service_account" {
+  value = google_service_account.deployer_preview.email
+}
+
 output "planner_service_account" {
   value = google_service_account.planner.email
 }

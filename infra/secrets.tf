@@ -17,8 +17,5 @@ resource "google_secret_manager_secret_iam_member" "runtime_reads_db_password" {
   member    = "serviceAccount:${google_service_account.runtime.email}"
 }
 
-resource "google_secret_manager_secret_iam_member" "planner_reads_db_password" {
-  secret_id = google_secret_manager_secret.db_password.id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${google_service_account.planner.email}"
-}
+# The planner deliberately has NO access to this secret: `terraform plan` runs on pull
+# requests, and the plan does not need to read the password back.
