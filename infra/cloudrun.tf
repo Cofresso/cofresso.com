@@ -96,6 +96,10 @@ resource "google_cloud_run_v2_service" "web" {
       template[0].containers[0].image,
       template[0].labels,
       template[0].annotations,
+      # Traffic is owned by CI, not Terraform: `deploy-production` moves it to the latest
+      # revision and the rollback workflow pins it to a named one. Without this an apply
+      # during a rollback would silently shift traffic back to the broken revision.
+      traffic,
       client,
       client_version,
     ]
@@ -236,7 +240,10 @@ resource "google_cloud_run_v2_job" "migrate" {
       containers {
         image   = local.placeholder_image
         command = ["node"]
-        args    = ["dist/db.mjs", "migrate"]
+        # `deploy` migrates and then runs the idempotent seed in one execution, so CI never
+        # needs `gcloud run jobs execute --args=...` (broken in gcloud 548.x, which sends an
+        # unknown `priorityTier` field and fails client-side).
+        args = ["dist/db.mjs", "deploy"]
 
         resources {
           limits = { cpu = "1", memory = "512Mi" }

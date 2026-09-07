@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import type { FieldErrors } from '@/lib/action-result';
 import { readCartId } from '@/lib/cart/cookie';
@@ -28,6 +29,10 @@ export async function placeOrderAction(
 
   const result = await placeOrder({ cartId, input: parsed.data });
   if (!result.ok) return { error: result.message, code: result.code };
+
+  // placeOrder empties the cart in the database; refresh the shared layout (header cart badge)
+  // so it reflects that on the next render instead of showing the pre-order item count.
+  revalidatePath('/', 'layout');
 
   redirect(`/checkout/success/${result.orderNumber}?t=${result.lookupToken}`);
 }

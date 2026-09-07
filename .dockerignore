@@ -1,0 +1,17 @@
+.git
+.github
+.next
+node_modules
+coverage
+playwright-report
+test-results
+dist
+docs
+infra
+tests
+.env
+.env.*
+*.md
+.DS_Store
+.superpowers
+.terraform

@@ -50,6 +50,7 @@ docs/runbooks/database.md
 ### Task 1: Repository hygiene and variables
 
 **Files:**
+
 - Create: `.github/CODEOWNERS`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`, `.github/dependabot.yml`, `.github/workflows/pr-title.yml`
 
 - [ ] **Step 1: Set repository variables from Terraform outputs**
@@ -66,11 +67,13 @@ gh variable set GCP_ARTIFACT_REPO --repo cofresso/cofresso.com --body "$(terrafo
 gh variable set PRODUCTION_URL --repo cofresso/cofresso.com --body "$(terraform output -raw web_url)"
 gh variable list --repo cofresso/cofresso.com
 ```
+
 `PRODUCTION_URL` starts as the run.app URL and is switched to `https://cofresso.com` once DNS is live.
 
 - [ ] **Step 2: Hygiene files**
 
 `.github/CODEOWNERS`:
+
 ```
 # Default owners for everything
 *                 @joshpxyne
@@ -80,6 +83,7 @@ gh variable list --repo cofresso/cofresso.com
 ```
 
 `.github/pull_request_template.md`:
+
 ```markdown
 ## What
 
@@ -96,6 +100,7 @@ gh variable list --repo cofresso/cofresso.com
 ```
 
 `.github/ISSUE_TEMPLATE/bug_report.yml`:
+
 ```yaml
 name: Bug report
 description: Something on cofresso.com is broken
@@ -128,6 +133,7 @@ body:
 ```
 
 `.github/ISSUE_TEMPLATE/feature_request.yml`:
+
 ```yaml
 name: Feature request
 description: Propose a change to the storefront
@@ -152,11 +158,13 @@ body:
 ```
 
 `.github/ISSUE_TEMPLATE/config.yml`:
+
 ```yaml
 blank_issues_enabled: false
 ```
 
 `.github/dependabot.yml`:
+
 ```yaml
 version: 2
 updates:
@@ -168,7 +176,8 @@ updates:
     open-pull-requests-limit: 5
     groups:
       next:
-        patterns: ['next', 'react', 'react-dom', '@types/react', '@types/react-dom', 'eslint-config-next']
+        patterns:
+          ['next', 'react', 'react-dom', '@types/react', '@types/react-dom', 'eslint-config-next']
       drizzle:
         patterns: ['drizzle-*']
       testing:
@@ -200,6 +209,7 @@ updates:
 ```
 
 `.github/workflows/pr-title.yml`:
+
 ```yaml
 name: PR title
 
@@ -247,11 +257,13 @@ git add .github && git commit -m "ci: add CODEOWNERS, PR and issue templates, De
 ### Task 2: CI checks workflow
 
 **Files:**
+
 - Create: `.github/actions/setup/action.yml`, `.github/workflows/ci.yml` (checks only; deploy jobs added in Tasks 3 and 4)
 
 - [ ] **Step 1: Composite setup action**
 
 `.github/actions/setup/action.yml`:
+
 ```yaml
 name: Setup Node and pnpm
 description: Installs pnpm (from packageManager), Node 22 with pnpm cache, and dependencies.
@@ -270,6 +282,7 @@ runs:
 - [ ] **Step 2: `ci.yml` with the six check jobs**
 
 `.github/workflows/ci.yml`:
+
 ```yaml
 name: CI
 
@@ -411,12 +424,14 @@ git add .github && git commit -m "ci: add lint, typecheck, unit, integration, bu
 ### Task 3: Preview deploys, preview cleanup, Lighthouse
 
 **Files:**
+
 - Modify: `.github/workflows/ci.yml` (add `deploy-preview`)
 - Create: `.github/workflows/preview-cleanup.yml`, `lighthouserc.json`
 
 - [ ] **Step 1: Lighthouse config**
 
 `lighthouserc.json`:
+
 ```json
 {
   "ci": {
@@ -440,120 +455,122 @@ git add .github && git commit -m "ci: add lint, typecheck, unit, integration, bu
 - [ ] **Step 2: Append `deploy-preview` to `ci.yml`**
 
 Add under `jobs:`:
+
 ```yaml
-  deploy-preview:
-    name: deploy-preview
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    needs: [lint, typecheck, unit, integration, build, e2e]
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    permissions:
-      contents: read
-      id-token: write
-      pull-requests: write
-    environment:
-      name: preview
-      url: ${{ steps.url.outputs.preview_url }}
-    env:
-      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-      REGION: ${{ vars.GCP_REGION }}
-      REPO: ${{ vars.GCP_ARTIFACT_REPO }}
-      TAG: pr-${{ github.event.pull_request.number }}
-    steps:
-      - uses: actions/checkout@v4
+deploy-preview:
+  name: deploy-preview
+  if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+  needs: [lint, typecheck, unit, integration, build, e2e]
+  runs-on: ubuntu-latest
+  timeout-minutes: 25
+  permissions:
+    contents: read
+    id-token: write
+    pull-requests: write
+  environment:
+    name: preview
+    url: ${{ steps.url.outputs.preview_url }}
+  env:
+    PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+    REGION: ${{ vars.GCP_REGION }}
+    REPO: ${{ vars.GCP_ARTIFACT_REPO }}
+    TAG: pr-${{ github.event.pull_request.number }}
+  steps:
+    - uses: actions/checkout@v4
 
-      - id: meta
-        run: |
-          SHORT=$(git rev-parse --short "${{ github.event.pull_request.head.sha }}")
-          echo "short_sha=$SHORT" >> "$GITHUB_OUTPUT"
-          echo "image=$REPO/web:${TAG}-${SHORT}" >> "$GITHUB_OUTPUT"
+    - id: meta
+      run: |
+        SHORT=$(git rev-parse --short "${{ github.event.pull_request.head.sha }}")
+        echo "short_sha=$SHORT" >> "$GITHUB_OUTPUT"
+        echo "image=$REPO/web:${TAG}-${SHORT}" >> "$GITHUB_OUTPUT"
 
-      - id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOYER_SA }}
-          token_format: access_token
+    - id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+        service_account: ${{ vars.GCP_DEPLOYER_SA }}
+        token_format: access_token
 
-      - uses: google-github-actions/setup-gcloud@v2
+    - uses: google-github-actions/setup-gcloud@v2
 
-      - uses: docker/login-action@v3
-        with:
-          registry: ${{ vars.GCP_REGION }}-docker.pkg.dev
-          username: oauth2accesstoken
-          password: ${{ steps.auth.outputs.access_token }}
+    - uses: docker/login-action@v3
+      with:
+        registry: ${{ vars.GCP_REGION }}-docker.pkg.dev
+        username: oauth2accesstoken
+        password: ${{ steps.auth.outputs.access_token }}
 
-      - uses: docker/setup-buildx-action@v3
+    - uses: docker/setup-buildx-action@v3
 
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64
-          tags: ${{ steps.meta.outputs.image }}
-          build-args: GIT_SHA=${{ steps.meta.outputs.short_sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: false
+    - uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: true
+        platforms: linux/amd64
+        tags: ${{ steps.meta.outputs.image }}
+        build-args: GIT_SHA=${{ steps.meta.outputs.short_sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        provenance: false
 
-      - name: Migrate and seed preview database
-        run: |
-          gcloud run jobs update cofresso-migrate-preview --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
-          gcloud run jobs execute cofresso-migrate-preview --region "$REGION" --project "$PROJECT_ID" --wait
-          gcloud run jobs execute cofresso-migrate-preview --region "$REGION" --project "$PROJECT_ID" --wait --args="dist/db.mjs,seed"
+    - name: Migrate and seed preview database
+      run: |
+        gcloud run jobs update cofresso-migrate-preview --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
+        gcloud run jobs execute cofresso-migrate-preview --region "$REGION" --project "$PROJECT_ID" --wait
+        gcloud run jobs execute cofresso-migrate-preview --region "$REGION" --project "$PROJECT_ID" --wait --args="dist/db.mjs,seed"
 
-      - name: Deploy tagged revision (no traffic)
-        run: |
-          gcloud run deploy cofresso-web-preview \
-            --image "${{ steps.meta.outputs.image }}" \
-            --region "$REGION" --project "$PROJECT_ID" \
-            --no-traffic --tag "$TAG" --quiet
+    - name: Deploy tagged revision (no traffic)
+      run: |
+        gcloud run deploy cofresso-web-preview \
+          --image "${{ steps.meta.outputs.image }}" \
+          --region "$REGION" --project "$PROJECT_ID" \
+          --no-traffic --tag "$TAG" --quiet
 
-      - id: url
-        run: |
-          URL=$(gcloud run services describe cofresso-web-preview --region "$REGION" --project "$PROJECT_ID" --format json \
-            | jq -r --arg tag "$TAG" '.status.traffic[] | select(.tag == $tag) | .url')
-          echo "preview_url=$URL" >> "$GITHUB_OUTPUT"
-          echo "Preview: $URL"
+    - id: url
+      run: |
+        URL=$(gcloud run services describe cofresso-web-preview --region "$REGION" --project "$PROJECT_ID" --format json \
+          | jq -r --arg tag "$TAG" '.status.traffic[] | select(.tag == $tag) | .url')
+        echo "preview_url=$URL" >> "$GITHUB_OUTPUT"
+        echo "Preview: $URL"
 
-      - name: Smoke test
-        run: |
-          for i in $(seq 1 12); do
-            if curl -fsS "${{ steps.url.outputs.preview_url }}/api/health" | tee /tmp/health.json | grep -q '"db":"up"'; then exit 0; fi
-            sleep 5
-          done
-          echo "Health check failed"; cat /tmp/health.json || true; exit 1
+    - name: Smoke test
+      run: |
+        for i in $(seq 1 12); do
+          if curl -fsS "${{ steps.url.outputs.preview_url }}/api/health" | tee /tmp/health.json | grep -q '"db":"up"'; then exit 0; fi
+          sleep 5
+        done
+        echo "Health check failed"; cat /tmp/health.json || true; exit 1
 
-      - uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: preview
-          message: |
-            ### 🚀 Preview deployed
+    - uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        header: preview
+        message: |
+          ### 🚀 Preview deployed
 
-            | | |
-            | --- | --- |
-            | URL | ${{ steps.url.outputs.preview_url }} |
-            | Image | `${{ steps.meta.outputs.image }}` |
-            | Commit | `${{ steps.meta.outputs.short_sha }}` |
+          | | |
+          | --- | --- |
+          | URL | ${{ steps.url.outputs.preview_url }} |
+          | Image | `${{ steps.meta.outputs.image }}` |
+          | Commit | `${{ steps.meta.outputs.short_sha }}` |
 
-            Zero-traffic revision on `cofresso-web-preview`, tagged `${{ env.TAG }}`. Uses the shared preview database. Lighthouse results are attached as a workflow artifact.
+          Zero-traffic revision on `cofresso-web-preview`, tagged `${{ env.TAG }}`. Uses the shared preview database. Lighthouse results are attached as a workflow artifact.
 
-      - name: Lighthouse
-        uses: treosh/lighthouse-ci-action@v12
-        continue-on-error: true
-        with:
-          urls: |
-            ${{ steps.url.outputs.preview_url }}/
-            ${{ steps.url.outputs.preview_url }}/products/morning-frame
-            ${{ steps.url.outputs.preview_url }}/cart
-          configPath: ./lighthouserc.json
-          uploadArtifacts: true
-          temporaryPublicStorage: false
+    - name: Lighthouse
+      uses: treosh/lighthouse-ci-action@v12
+      continue-on-error: true
+      with:
+        urls: |
+          ${{ steps.url.outputs.preview_url }}/
+          ${{ steps.url.outputs.preview_url }}/products/morning-frame
+          ${{ steps.url.outputs.preview_url }}/cart
+        configPath: ./lighthouserc.json
+        uploadArtifacts: true
+        temporaryPublicStorage: false
 ```
 
 - [ ] **Step 3: Cleanup workflow**
 
 `.github/workflows/preview-cleanup.yml`:
+
 ```yaml
 name: Preview cleanup
 
@@ -593,108 +610,110 @@ git add .github lighthouserc.json && git commit -m "ci: deploy PR previews to Cl
 ### Task 4: Production deploy and rollback
 
 **Files:**
+
 - Modify: `.github/workflows/ci.yml` (add `deploy-production`)
 - Create: `.github/workflows/rollback.yml`, `docs/runbooks/deploy.md`, `docs/runbooks/rollback.md`, `docs/runbooks/database.md`
 
 - [ ] **Step 1: Append `deploy-production` to `ci.yml`**
 
 ```yaml
-  deploy-production:
-    name: deploy-production
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [lint, typecheck, unit, integration, build, e2e]
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    permissions:
-      contents: read
-      id-token: write
-      deployments: write
-    environment:
-      name: production
-      url: ${{ vars.PRODUCTION_URL }}
-    concurrency:
-      group: deploy-production
-      cancel-in-progress: false
-    env:
-      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-      REGION: ${{ vars.GCP_REGION }}
-      REPO: ${{ vars.GCP_ARTIFACT_REPO }}
-    steps:
-      - uses: actions/checkout@v4
+deploy-production:
+  name: deploy-production
+  if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  needs: [lint, typecheck, unit, integration, build, e2e]
+  runs-on: ubuntu-latest
+  timeout-minutes: 25
+  permissions:
+    contents: read
+    id-token: write
+    deployments: write
+  environment:
+    name: production
+    url: ${{ vars.PRODUCTION_URL }}
+  concurrency:
+    group: deploy-production
+    cancel-in-progress: false
+  env:
+    PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+    REGION: ${{ vars.GCP_REGION }}
+    REPO: ${{ vars.GCP_ARTIFACT_REPO }}
+  steps:
+    - uses: actions/checkout@v4
 
-      - id: meta
-        run: |
-          SHORT=$(git rev-parse --short HEAD)
-          echo "short_sha=$SHORT" >> "$GITHUB_OUTPUT"
-          echo "image=$REPO/web:sha-$SHORT" >> "$GITHUB_OUTPUT"
+    - id: meta
+      run: |
+        SHORT=$(git rev-parse --short HEAD)
+        echo "short_sha=$SHORT" >> "$GITHUB_OUTPUT"
+        echo "image=$REPO/web:sha-$SHORT" >> "$GITHUB_OUTPUT"
 
-      - id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOYER_SA }}
-          token_format: access_token
+    - id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+        service_account: ${{ vars.GCP_DEPLOYER_SA }}
+        token_format: access_token
 
-      - uses: google-github-actions/setup-gcloud@v2
+    - uses: google-github-actions/setup-gcloud@v2
 
-      - uses: docker/login-action@v3
-        with:
-          registry: ${{ vars.GCP_REGION }}-docker.pkg.dev
-          username: oauth2accesstoken
-          password: ${{ steps.auth.outputs.access_token }}
+    - uses: docker/login-action@v3
+      with:
+        registry: ${{ vars.GCP_REGION }}-docker.pkg.dev
+        username: oauth2accesstoken
+        password: ${{ steps.auth.outputs.access_token }}
 
-      - uses: docker/setup-buildx-action@v3
+    - uses: docker/setup-buildx-action@v3
 
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64
-          tags: |
-            ${{ steps.meta.outputs.image }}
-            ${{ env.REPO }}/web:latest
-          build-args: GIT_SHA=${{ steps.meta.outputs.short_sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: false
+    - uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: true
+        platforms: linux/amd64
+        tags: |
+          ${{ steps.meta.outputs.image }}
+          ${{ env.REPO }}/web:latest
+        build-args: GIT_SHA=${{ steps.meta.outputs.short_sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        provenance: false
 
-      - name: Migrate and seed production database
-        run: |
-          gcloud run jobs update cofresso-migrate --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
-          gcloud run jobs execute cofresso-migrate --region "$REGION" --project "$PROJECT_ID" --wait
-          gcloud run jobs execute cofresso-migrate --region "$REGION" --project "$PROJECT_ID" --wait --args="dist/db.mjs,seed"
+    - name: Migrate and seed production database
+      run: |
+        gcloud run jobs update cofresso-migrate --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
+        gcloud run jobs execute cofresso-migrate --region "$REGION" --project "$PROJECT_ID" --wait
+        gcloud run jobs execute cofresso-migrate --region "$REGION" --project "$PROJECT_ID" --wait --args="dist/db.mjs,seed"
 
-      - name: Deploy
-        run: |
-          gcloud run deploy cofresso-web --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
+    - name: Deploy
+      run: |
+        gcloud run deploy cofresso-web --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
 
-      - name: Smoke test (Cloud Run URL)
-        run: |
-          URL=$(gcloud run services describe cofresso-web --region "$REGION" --project "$PROJECT_ID" --format 'value(status.url)')
-          for i in $(seq 1 12); do
-            if curl -fsS "$URL/api/health" | tee /tmp/health.json | grep -q "\"commit\":\"${{ steps.meta.outputs.short_sha }}\""; then
-              echo "Serving ${{ steps.meta.outputs.short_sha }} at $URL"; exit 0
-            fi
-            sleep 5
-          done
-          echo "New revision not healthy"; cat /tmp/health.json || true; exit 1
+    - name: Smoke test (Cloud Run URL)
+      run: |
+        URL=$(gcloud run services describe cofresso-web --region "$REGION" --project "$PROJECT_ID" --format 'value(status.url)')
+        for i in $(seq 1 12); do
+          if curl -fsS "$URL/api/health" | tee /tmp/health.json | grep -q "\"commit\":\"${{ steps.meta.outputs.short_sha }}\""; then
+            echo "Serving ${{ steps.meta.outputs.short_sha }} at $URL"; exit 0
+          fi
+          sleep 5
+        done
+        echo "New revision not healthy"; cat /tmp/health.json || true; exit 1
 
-      - name: Smoke test (public URL)
-        run: curl -fsS "${{ vars.PRODUCTION_URL }}/api/health"
+    - name: Smoke test (public URL)
+      run: curl -fsS "${{ vars.PRODUCTION_URL }}/api/health"
 
-      - name: Summary
-        run: |
-          {
-            echo "### ✅ Production deployed"
-            echo
-            echo "- Image: \`${{ steps.meta.outputs.image }}\`"
-            echo "- URL: ${{ vars.PRODUCTION_URL }}"
-          } >> "$GITHUB_STEP_SUMMARY"
+    - name: Summary
+      run: |
+        {
+          echo "### ✅ Production deployed"
+          echo
+          echo "- Image: \`${{ steps.meta.outputs.image }}\`"
+          echo "- URL: ${{ vars.PRODUCTION_URL }}"
+        } >> "$GITHUB_STEP_SUMMARY"
 ```
 
 - [ ] **Step 2: Rollback workflow**
 
 `.github/workflows/rollback.yml`:
+
 ```yaml
 name: Rollback production
 
@@ -752,7 +771,8 @@ Note: after a rollback the service no longer routes to `LATEST`; the next `gclou
 - [ ] **Step 3: Runbooks**
 
 `docs/runbooks/deploy.md`:
-```markdown
+
+````markdown
 # Deploying
 
 ## Normal path
@@ -772,7 +792,9 @@ docker buildx build --platform linux/amd64 --build-arg GIT_SHA=$SHA -t $REPO/web
 gcloud run jobs update cofresso-migrate --image $REPO/web:sha-$SHA --region us-central1 && gcloud run jobs execute cofresso-migrate --region us-central1 --wait
 gcloud run deploy cofresso-web --image $REPO/web:sha-$SHA --region us-central1
 ```
-```
+````
+
+````
 
 `docs/runbooks/rollback.md`:
 ```markdown
@@ -783,10 +805,11 @@ gcloud run deploy cofresso-web --image $REPO/web:sha-$SHA --region us-central1
 3. Fix forward on `main`. The next merge deploys normally and takes traffic again.
 
 Migrations are additive by convention. If a migration must be reverted, write a new migration; never edit an applied one.
-```
+````
 
 `docs/runbooks/database.md`:
-```markdown
+
+````markdown
 # Database
 
 Cloud SQL Postgres 16, instance `cofresso-pg`, databases `cofresso` (production) and `cofresso_preview`.
@@ -797,6 +820,7 @@ Cloud SQL Postgres 16, instance `cofresso-pg`, databases `cofresso` (production)
 gcloud sql connect cofresso-pg --user=cofresso --database=cofresso --project cofresso-prod
 # password: gcloud secrets versions access latest --secret db-password --project cofresso-prod
 ```
+````
 
 ## Migrations
 
@@ -812,24 +836,27 @@ gcloud run jobs execute cofresso-migrate --region us-central1 --project cofresso
 gcloud run jobs execute cofresso-migrate-preview --region us-central1 --project cofresso-prod --wait \
   --args="dist/db.mjs,reset" --update-env-vars ALLOW_DB_RESET=true
 ```
+
 Never run `reset` against `cofresso-migrate`.
 
 ## Backups
 
 Daily automated backups, 7 retained. Restore through the Cloud SQL console or `gcloud sql backups restore`.
-```
+
+````
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add .github docs && git commit -m "ci: add production deploy, rollback workflow and runbooks"
-```
+````
 
 ---
 
 ### Task 5: Terraform workflow
 
 **Files:**
+
 - Create: `.github/workflows/infra.yml`
 
 - [ ] **Step 1: Workflow**
@@ -926,15 +953,16 @@ jobs:
 
 The plan comment wraps raw text; to render it as a code block, prepend and append triple backticks:
 
-```yaml
-      - id: plan
-        run: |
-          set +e
-          terraform plan -no-color -lock=false -out=tfplan > plan.txt 2>&1
-          echo "exit=$?" >> "$GITHUB_OUTPUT"
-          set -e
-          { echo '### Terraform plan'; echo; echo '```hcl'; head -c 60000 plan.txt; echo; echo '```'; } > plan-trimmed.txt
-```
+````yaml
+- id: plan
+  run: |
+    set +e
+    terraform plan -no-color -lock=false -out=tfplan > plan.txt 2>&1
+    echo "exit=$?" >> "$GITHUB_OUTPUT"
+    set -e
+    { echo '### Terraform plan'; echo; echo '```hcl'; head -c 60000 plan.txt; echo; echo '```'; } > plan-trimmed.txt
+````
+
 Use this version of the `plan` step.
 
 - [ ] **Step 2: Commit**
@@ -948,6 +976,7 @@ git add .github && git commit -m "ci: add Terraform validate, plan-on-PR and app
 ### Task 6: CodeQL
 
 **Files:**
+
 - Create: `.github/workflows/codeql.yml`
 
 - [ ] **Step 1: Workflow**
@@ -989,6 +1018,7 @@ jobs:
 git add .github && git commit -m "ci: add CodeQL analysis"
 git push origin main
 ```
+
 Watch the `CI` run on main: all six checks green, `deploy-production` green, and the site serving the new commit sha at the Cloud Run URL.
 
 ---
@@ -996,6 +1026,7 @@ Watch the `CI` run on main: all six checks green, `deploy-production` green, and
 ### Task 7: Repository settings, environments and branch protection
 
 **Files:**
+
 - Create: `docs/github-setup.md`
 
 - [ ] **Step 1: Apply settings**
@@ -1066,6 +1097,7 @@ gh api repos/$REPO/rulesets --jq '.[] | {id, name, enforcement}'
 - [ ] **Step 2: Document it**
 
 `docs/github-setup.md`:
+
 ```markdown
 # GitHub configuration
 
@@ -1073,16 +1105,16 @@ Everything CI needs that is not in a workflow file. Apply with an account that h
 
 ## Repository variables (non-secret)
 
-| Variable | Value |
-| --- | --- |
-| `GCP_PROJECT_ID` | `cofresso-prod` |
-| `GCP_REGION` | `us-central1` |
-| `GCP_WIF_PROVIDER` | `terraform output -raw wif_provider` |
-| `GCP_DEPLOYER_SA` | `terraform output -raw deployer_service_account` |
-| `GCP_PLANNER_SA` | `terraform output -raw planner_service_account` |
-| `GCP_APPLIER_SA` | `terraform output -raw applier_service_account` |
-| `GCP_ARTIFACT_REPO` | `terraform output -raw artifact_registry` |
-| `PRODUCTION_URL` | `https://cofresso.com` (Cloud Run URL until DNS is live) |
+| Variable            | Value                                                    |
+| ------------------- | -------------------------------------------------------- |
+| `GCP_PROJECT_ID`    | `cofresso-prod`                                          |
+| `GCP_REGION`        | `us-central1`                                            |
+| `GCP_WIF_PROVIDER`  | `terraform output -raw wif_provider`                     |
+| `GCP_DEPLOYER_SA`   | `terraform output -raw deployer_service_account`         |
+| `GCP_PLANNER_SA`    | `terraform output -raw planner_service_account`          |
+| `GCP_APPLIER_SA`    | `terraform output -raw applier_service_account`          |
+| `GCP_ARTIFACT_REPO` | `terraform output -raw artifact_registry`                |
+| `PRODUCTION_URL`    | `https://cofresso.com` (Cloud Run URL until DNS is live) |
 
 There are **no repository secrets**. Authentication is Workload Identity Federation.
 
@@ -1118,12 +1150,14 @@ git push -u origin ci/github-setup-docs
 gh pr create --title "docs: add GitHub configuration reference" --body "Documents repository variables, environments and the main ruleset applied in the CI/CD plan." --base main
 gh pr checks --watch
 ```
+
 Expected: `PR title` passes; six checks pass; `deploy-preview` posts a comment with a working URL; `Infrastructure` does not run (no infra changes). Open the preview URL, add something to the cart. Then:
 
 ```bash
 gh pr merge --squash --auto
 gh run watch $(gh run list --branch main --workflow CI --limit 1 --json databaseId --jq '.[0].databaseId')
 ```
+
 Expected: production deploy green, health returns the merged sha. Confirm the preview tag was removed:
 
 ```bash

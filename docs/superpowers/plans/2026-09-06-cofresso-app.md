@@ -68,12 +68,14 @@ README.md AGENTS.md CONTRIBUTING.md SECURITY.md docs/architecture.md
 ### Task 1: Scaffold the Next.js project with brand tokens, fonts, lint, format and unit test tooling
 
 **Files:**
+
 - Create: `package.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`, `eslint.config.mjs`, `.prettierrc`, `.prettierignore`, `.editorconfig`, `.nvmrc`, `.node-version`, `.gitignore`
 - Create: `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css`, `src/app/fonts.ts`, `src/app/icon.png`, `src/app/apple-icon.png`, `public/logo.png`
 - Create: `src/lib/utils.ts`, `src/lib/utils.test.ts`, `vitest.config.ts`, `vitest.setup.ts`
 - Create: `src/app/api/health/route.ts`
 
 **Interfaces:**
+
 - Produces: `cn(...inputs: ClassValue[]): string` in `src/lib/utils.ts`; Tailwind color tokens `espresso latte cream foam copper leaf`; font CSS variables `--font-display`, `--font-body`; pnpm scripts `dev build start lint format typecheck test:unit`.
 
 - [ ] **Step 1: Make sure pnpm 10 is available**
@@ -142,6 +144,7 @@ Replace `pnpm@10.0.0` with the exact output of `pnpm -v`.
 `.nvmrc` and `.node-version` both contain exactly `22`.
 
 `.editorconfig`:
+
 ```ini
 root = true
 
@@ -158,6 +161,7 @@ trim_trailing_whitespace = false
 ```
 
 `.prettierrc`:
+
 ```json
 {
   "semi": true,
@@ -169,6 +173,7 @@ trim_trailing_whitespace = false
 ```
 
 `.prettierignore`:
+
 ```
 .next
 node_modules
@@ -183,6 +188,7 @@ public/products
 ```
 
 Append to `.gitignore`:
+
 ```
 # cofresso
 .env
@@ -212,11 +218,24 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
   prettier,
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'dist/**', 'next-env.d.ts', 'coverage/**', 'playwright-report/**', 'test-results/**', 'drizzle/**']),
+  globalIgnores([
+    '.next/**',
+    'out/**',
+    'build/**',
+    'dist/**',
+    'next-env.d.ts',
+    'coverage/**',
+    'playwright-report/**',
+    'test-results/**',
+    'drizzle/**',
+  ]),
   {
     rules: {
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
     },
   },
 ]);
@@ -314,6 +333,7 @@ h4 {
 - [ ] **Step 9: Fonts via `next/font/local` from fontsource packages**
 
 `src/app/fonts.ts`:
+
 ```ts
 import localFont from 'next/font/local';
 
@@ -348,18 +368,22 @@ Next.js picks up `src/app/icon.png` and `src/app/apple-icon.png` as favicon and 
 - [ ] **Step 11: `cn` utility with a failing test first**
 
 `src/lib/utils.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { cn } from './utils';
 
 describe('cn', () => {
   it('merges class names and resolves tailwind conflicts', () => {
-    expect(cn('p-2', 'p-4', undefined, false && 'hidden', 'text-espresso')).toBe('p-4 text-espresso');
+    expect(cn('p-2', 'p-4', undefined, false && 'hidden', 'text-espresso')).toBe(
+      'p-4 text-espresso',
+    );
   });
 });
 ```
 
 `vitest.config.ts`:
+
 ```ts
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
@@ -379,6 +403,7 @@ export default defineConfig({
 ```
 
 `vitest.setup.ts`:
+
 ```ts
 import '@testing-library/jest-dom/vitest';
 ```
@@ -416,6 +441,7 @@ Expected: PASS (1 test).
 - [ ] **Step 13: Root layout, placeholder home, health route**
 
 `src/app/layout.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { fraunces, inter } from './fonts';
@@ -438,6 +464,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ```
 
 `src/app/page.tsx` (temporary, replaced in Task 12):
+
 ```tsx
 export default function HomePage() {
   return (
@@ -450,6 +477,7 @@ export default function HomePage() {
 ```
 
 `src/app/api/health/route.ts` (DB check added in Task 18):
+
 ```ts
 import { NextResponse } from 'next/server';
 
@@ -485,12 +513,14 @@ git commit -m "feat: scaffold Next.js app with brand tokens, fonts, lint and tes
 ### Task 2: Environment, logger, database client, Drizzle schema and migration tooling
 
 **Files:**
+
 - Create: `src/lib/env.ts`, `src/lib/env.test.ts`, `src/lib/logger.ts`, `src/lib/logger.test.ts`, `src/lib/config.ts`, `src/lib/action-result.ts`
 - Create: `src/lib/db/client.ts`, `src/lib/db/schema/index.ts`, `src/lib/db/schema/enums.ts`, `src/lib/db/schema/catalog.ts`, `src/lib/db/schema/cart.ts`, `src/lib/db/schema/orders.ts`, `src/lib/db/schema/marketing.ts`, `src/lib/db/schema/relations.ts`
 - Create: `drizzle.config.ts`, `drizzle/0000_*.sql` (generated), `docker-compose.yml`, `docker/postgres/init.sql`, `.env.example`, `scripts/db.ts`
 - Create: `vitest.integration.config.ts`, `tests/integration/global-setup.ts`, `tests/integration/schema.test.ts`
 
 **Interfaces:**
+
 - Produces: `getServerEnv(): ServerEnv`; `logger.info|warn|error(message, fields?)`; `siteConfig`; `type ActionResult<T>`; `getDb(): Db`; all Drizzle tables and `$inferSelect` types (`Product`, `ProductVariant`, `Collection`, `Cart`, `CartItem`, `DiscountCode`, `Order`, `OrderItem`, `Review`, `NewsletterSubscriber`); `orderNumberSeq`; pnpm scripts `db:generate db:migrate db:seed db:reset db:studio`.
 
 - [ ] **Step 1: Install deps**
@@ -503,6 +533,7 @@ pnpm add -D drizzle-kit tsx dotenv esbuild @types/uuid
 - [ ] **Step 2: Failing env tests**
 
 `src/lib/env.test.ts`:
+
 ```ts
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -565,7 +596,9 @@ const serverSchema = z
     ALLOW_DB_RESET: z.preprocess(emptyToUndefined, z.string().optional()),
   })
   .superRefine((env, ctx) => {
-    const hasParts = Boolean(env.DB_USER && env.DB_PASSWORD && env.DB_NAME && (env.DB_HOST || env.DB_SOCKET_DIR));
+    const hasParts = Boolean(
+      env.DB_USER && env.DB_PASSWORD && env.DB_NAME && (env.DB_HOST || env.DB_SOCKET_DIR),
+    );
     if (!env.DATABASE_URL && !hasParts) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -587,7 +620,9 @@ export function getServerEnv(): ServerEnv {
   if (cached) return cached;
   const parsed = serverSchema.safeParse(process.env);
   if (!parsed.success) {
-    const details = parsed.error.issues.map((i) => `${i.path.join('.') || 'env'}: ${i.message}`).join('\n');
+    const details = parsed.error.issues
+      .map((i) => `${i.path.join('.') || 'env'}: ${i.message}`)
+      .join('\n');
     throw new Error(`Invalid server environment:\n${details}`);
   }
   cached = parsed.data;
@@ -606,6 +641,7 @@ Expected: PASS (3 tests).
 - [ ] **Step 4: Logger with test**
 
 `src/lib/logger.test.ts`:
+
 ```ts
 import { describe, expect, it, vi } from 'vitest';
 import { createLogger } from './logger';
@@ -617,7 +653,12 @@ describe('logger', () => {
     log.info('hello', { orderNumber: 'CF-10001' });
     expect(write).toHaveBeenCalledTimes(1);
     const line = JSON.parse(write.mock.calls[0][0] as string);
-    expect(line).toMatchObject({ severity: 'INFO', message: 'hello', service: 'cofresso', orderNumber: 'CF-10001' });
+    expect(line).toMatchObject({
+      severity: 'INFO',
+      message: 'hello',
+      service: 'cofresso',
+      orderNumber: 'CF-10001',
+    });
     expect(typeof line.time).toBe('string');
   });
 
@@ -634,6 +675,7 @@ describe('logger', () => {
 ```
 
 `src/lib/logger.ts`:
+
 ```ts
 type Severity = 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR';
 type Fields = Record<string, unknown>;
@@ -676,7 +718,10 @@ export const logger: Logger = createLogger({ base: { service: 'cofresso-web' } }
  * Extract the Cloud Trace id from an incoming request so Cloud Logging can
  * group log lines with the request. Header format: TRACE_ID/SPAN_ID;o=1
  */
-export function traceFields(headers: Headers, projectId = process.env.GOOGLE_CLOUD_PROJECT): Fields {
+export function traceFields(
+  headers: Headers,
+  projectId = process.env.GOOGLE_CLOUD_PROJECT,
+): Fields {
   const header = headers.get('x-cloud-trace-context');
   if (!header || !projectId) return {};
   const traceId = header.split('/')[0];
@@ -690,6 +735,7 @@ Expected: PASS.
 - [ ] **Step 5: Site config and ActionResult**
 
 `src/lib/config.ts`:
+
 ```ts
 export const siteConfig = {
   name: 'Cofresso',
@@ -726,12 +772,12 @@ export type SubscriptionInterval = (typeof siteConfig.subscriptionIntervals)[num
 ```
 
 `src/lib/action-result.ts`:
+
 ```ts
 export type FieldErrors = Record<string, string[] | undefined>;
 
 export type ActionResult<T = undefined> =
-  | { ok: true; data: T }
-  | { ok: false; error: string; fieldErrors?: FieldErrors };
+  { ok: true; data: T } | { ok: false; error: string; fieldErrors?: FieldErrors };
 
 export function ok<T>(data: T): ActionResult<T> {
   return { ok: true, data };
@@ -745,12 +791,19 @@ export function fail<T = undefined>(error: string, fieldErrors?: FieldErrors): A
 - [ ] **Step 6: Drizzle schema**
 
 `src/lib/db/schema/enums.ts`:
+
 ```ts
 import { pgEnum } from 'drizzle-orm/pg-core';
 
 export const productCategoryEnum = pgEnum('product_category', ['coffee', 'equipment', 'merch']);
 export const roastLevelEnum = pgEnum('roast_level', ['light', 'medium', 'medium_dark', 'dark']);
-export const grindEnum = pgEnum('grind', ['whole_bean', 'drip', 'espresso', 'french_press', 'pour_over']);
+export const grindEnum = pgEnum('grind', [
+  'whole_bean',
+  'drip',
+  'espresso',
+  'french_press',
+  'pour_over',
+]);
 export const purchaseTypeEnum = pgEnum('purchase_type', ['one_time', 'subscription']);
 export const discountKindEnum = pgEnum('discount_kind', ['percent', 'fixed', 'free_shipping']);
 export const orderStatusEnum = pgEnum('order_status', ['paid', 'fulfilled', 'cancelled']);
@@ -764,9 +817,19 @@ export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 ```
 
 `src/lib/db/schema/catalog.ts`:
+
 ```ts
 import { sql } from 'drizzle-orm';
-import { boolean, index, integer, pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  index,
+  integer,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { productCategoryEnum, roastLevelEnum } from './enums';
 
 export const products = pgTable(
@@ -793,7 +856,10 @@ export const products = pgTable(
     active: boolean('active').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('products_category_idx').on(t.category), index('products_featured_idx').on(t.featured)],
+  (t) => [
+    index('products_category_idx').on(t.category),
+    index('products_featured_idx').on(t.featured),
+  ],
 );
 
 export const productVariants = pgTable(
@@ -862,6 +928,7 @@ export type Review = typeof reviews.$inferSelect;
 ```
 
 `src/lib/db/schema/cart.ts`:
+
 ```ts
 import { index, integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { productVariants } from './catalog';
@@ -905,8 +972,18 @@ export type NewCartItem = typeof cartItems.$inferInsert;
 ```
 
 `src/lib/db/schema/orders.ts`:
+
 ```ts
-import { boolean, index, integer, pgSequence, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  index,
+  integer,
+  pgSequence,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { products, productVariants } from './catalog';
 import { discountKindEnum, grindEnum, orderStatusEnum, purchaseTypeEnum } from './enums';
 
@@ -984,6 +1061,7 @@ export type NewOrderItem = typeof orderItems.$inferInsert;
 ```
 
 `src/lib/db/schema/marketing.ts`:
+
 ```ts
 import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
@@ -998,6 +1076,7 @@ export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
 ```
 
 `src/lib/db/schema/relations.ts`:
+
 ```ts
 import { relations } from 'drizzle-orm';
 import { cartItems, carts } from './cart';
@@ -1020,7 +1099,10 @@ export const collectionsRelations = relations(collections, ({ many }) => ({
 
 export const productCollectionsRelations = relations(productCollections, ({ one }) => ({
   product: one(products, { fields: [productCollections.productId], references: [products.id] }),
-  collection: one(collections, { fields: [productCollections.collectionId], references: [collections.id] }),
+  collection: one(collections, {
+    fields: [productCollections.collectionId],
+    references: [collections.id],
+  }),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -1031,7 +1113,10 @@ export const cartsRelations = relations(carts, ({ many }) => ({ items: many(cart
 
 export const cartItemsRelations = relations(cartItems, ({ one }) => ({
   cart: one(carts, { fields: [cartItems.cartId], references: [carts.id] }),
-  variant: one(productVariants, { fields: [cartItems.variantId], references: [productVariants.id] }),
+  variant: one(productVariants, {
+    fields: [cartItems.variantId],
+    references: [productVariants.id],
+  }),
 }));
 
 export const ordersRelations = relations(orders, ({ many }) => ({ items: many(orderItems) }));
@@ -1042,6 +1127,7 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
 ```
 
 `src/lib/db/schema/index.ts`:
+
 ```ts
 export * from './enums';
 export * from './catalog';
@@ -1054,6 +1140,7 @@ export * from './relations';
 - [ ] **Step 7: Database client**
 
 `src/lib/db/client.ts`:
+
 ```ts
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
@@ -1103,7 +1190,10 @@ export function getDb(): Db {
 /** Build an isolated client (used by scripts and tests that need to close it). */
 export function createIsolatedDb(connectionString: string) {
   const sql = postgres(connectionString, { max: 3 });
-  return { db: drizzle(sql, { schema, casing: 'snake_case' }), close: () => sql.end({ timeout: 5 }) };
+  return {
+    db: drizzle(sql, { schema, casing: 'snake_case' }),
+    close: () => sql.end({ timeout: 5 }),
+  };
 }
 ```
 
@@ -1112,6 +1202,7 @@ Remove `casing: 'snake_case'` if drizzle complains; the schema already names eve
 - [ ] **Step 8: Drizzle config, Docker Compose, env example**
 
 `drizzle.config.ts`:
+
 ```ts
 import { config } from 'dotenv';
 import { defineConfig } from 'drizzle-kit';
@@ -1131,6 +1222,7 @@ export default defineConfig({
 ```
 
 `docker-compose.yml`:
+
 ```yaml
 services:
   postgres:
@@ -1156,11 +1248,13 @@ volumes:
 ```
 
 `docker/postgres/init.sql`:
+
 ```sql
 CREATE DATABASE cofresso_test;
 ```
 
 `.env.example`:
+
 ```bash
 # Local Postgres from docker-compose.yml
 DATABASE_URL=postgres://cofresso:cofresso@localhost:5432/cofresso
@@ -1212,7 +1306,8 @@ function connectionString(): string {
   const { DB_USER, DB_PASSWORD, DB_NAME, DB_HOST, DB_PORT = '5432', DB_SOCKET_DIR } = process.env;
   if (DB_USER && DB_PASSWORD && DB_NAME) {
     const creds = `${encodeURIComponent(DB_USER)}:${encodeURIComponent(DB_PASSWORD)}`;
-    if (DB_SOCKET_DIR) return `postgres://${creds}@/${DB_NAME}?host=${encodeURIComponent(DB_SOCKET_DIR)}`;
+    if (DB_SOCKET_DIR)
+      return `postgres://${creds}@/${DB_NAME}?host=${encodeURIComponent(DB_SOCKET_DIR)}`;
     if (DB_HOST) return `postgres://${creds}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
   }
   throw new Error('No database configuration found (DATABASE_URL or DB_* variables).');
@@ -1280,6 +1375,7 @@ export async function runSeed(_db: Db): Promise<SeedSummary> {
 ```
 
 Add scripts to `package.json`:
+
 ```json
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/db.ts migrate",
@@ -1300,6 +1396,7 @@ Expected: bundle exists (a few hundred KB).
 - [ ] **Step 11: Integration test harness**
 
 `vitest.integration.config.ts`:
+
 ```ts
 import { defineConfig } from 'vitest/config';
 import path from 'node:path';
@@ -1319,6 +1416,7 @@ export default defineConfig({
 ```
 
 `tests/integration/global-setup.ts`:
+
 ```ts
 import { config } from 'dotenv';
 import { sql } from 'drizzle-orm';
@@ -1348,6 +1446,7 @@ export default async function setup() {
 ```
 
 `tests/integration/helpers.ts`:
+
 ```ts
 import { config } from 'dotenv';
 import { createIsolatedDb } from '../../src/lib/db/client';
@@ -1364,6 +1463,7 @@ export function testDb() {
 ```
 
 `tests/integration/schema.test.ts`:
+
 ```ts
 import { sql } from 'drizzle-orm';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -1380,8 +1480,17 @@ describe('schema', () => {
     const names = rows.map((r) => r.table_name);
     expect(names).toEqual(
       expect.arrayContaining([
-        'cart_items', 'carts', 'collections', 'discount_codes', 'newsletter_subscribers',
-        'order_items', 'orders', 'product_collections', 'product_variants', 'products', 'reviews',
+        'cart_items',
+        'carts',
+        'collections',
+        'discount_codes',
+        'newsletter_subscribers',
+        'order_items',
+        'orders',
+        'product_collections',
+        'product_variants',
+        'products',
+        'reviews',
       ]),
     );
   });
@@ -1411,16 +1520,19 @@ git commit -m "feat: add env validation, logger, Drizzle schema, migrations and 
 ### Task 3: Seed data, idempotent seeder and generated product art
 
 **Files:**
+
 - Create: `src/lib/db/seed/data.ts`, `src/lib/db/seed/reviews.ts`, `src/lib/db/seed/index.ts` (replace stub), `src/lib/db/seed/ids.ts`, `src/lib/db/seed/ids.test.ts`
 - Create: `scripts/generate-product-art.ts`, `public/products/*.svg` (generated)
 - Test: `tests/integration/seed.test.ts`
 
 **Interfaces:**
+
 - Produces: `seedCollections`, `seedProducts`, `seedDiscountCodes` typed arrays; `runSeed(db): Promise<SeedSummary>` (idempotent); `stableId(namespaceKey: string): string` (UUID v5); `/products/<slug>.svg` images. Slugs used by later tests: `morning-frame`, `dark-mode-espresso`, `ethiopia-yirgacheffe`, `night-build-decaf`, `gooseneck-kettle`; discount codes `WELCOME10`, `FREESHIP`, `COFRAME15`; collection slugs `single-origin`, `blends`, `decaf`, `equipment`.
 
 - [ ] **Step 1: Stable id helper with test**
 
 `src/lib/db/seed/ids.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { stableId } from './ids';
@@ -1435,6 +1547,7 @@ describe('stableId', () => {
 ```
 
 `src/lib/db/seed/ids.ts`:
+
 ```ts
 import { v5 as uuidv5 } from 'uuid';
 
@@ -1451,6 +1564,7 @@ Run: `pnpm test:unit src/lib/db/seed/ids.test.ts` → PASS.
 - [ ] **Step 2: Seed data**
 
 `src/lib/db/seed/data.ts`:
+
 ```ts
 import type { DiscountKind, ProductCategory, RoastLevel } from '@/lib/db/schema';
 
@@ -1499,20 +1613,55 @@ export interface SeedDiscountCode {
 }
 
 export const seedCollections: SeedCollection[] = [
-  { slug: 'single-origin', name: 'Single Origin', description: 'One farm, one region, one story in the cup.', position: 1 },
-  { slug: 'blends', name: 'Blends', description: 'Balanced profiles built for every day and every brewer.', position: 2 },
-  { slug: 'decaf', name: 'Decaf', description: 'Sugarcane and Swiss Water processed. All flavor, no jitters.', position: 3 },
-  { slug: 'equipment', name: 'Equipment', description: 'The tools we use on our own bar.', position: 4 },
+  {
+    slug: 'single-origin',
+    name: 'Single Origin',
+    description: 'One farm, one region, one story in the cup.',
+    position: 1,
+  },
+  {
+    slug: 'blends',
+    name: 'Blends',
+    description: 'Balanced profiles built for every day and every brewer.',
+    position: 2,
+  },
+  {
+    slug: 'decaf',
+    name: 'Decaf',
+    description: 'Sugarcane and Swiss Water processed. All flavor, no jitters.',
+    position: 3,
+  },
+  {
+    slug: 'equipment',
+    name: 'Equipment',
+    description: 'The tools we use on our own bar.',
+    position: 4,
+  },
 ];
 
 const coffeeSizes = (base: number, stock = 120): SeedVariant[] => [
   { sku: '', name: '12 oz', weightGrams: 340, priceCents: base, stockQuantity: stock },
-  { sku: '', name: '2 lb', weightGrams: 907, priceCents: Math.round(base * 2.45), stockQuantity: Math.round(stock / 3) },
-  { sku: '', name: '5 lb', weightGrams: 2268, priceCents: Math.round(base * 5.4), stockQuantity: Math.round(stock / 8) },
+  {
+    sku: '',
+    name: '2 lb',
+    weightGrams: 907,
+    priceCents: Math.round(base * 2.45),
+    stockQuantity: Math.round(stock / 3),
+  },
+  {
+    sku: '',
+    name: '5 lb',
+    weightGrams: 2268,
+    priceCents: Math.round(base * 5.4),
+    stockQuantity: Math.round(stock / 8),
+  },
 ];
 
 function withSkus(slug: string, variants: SeedVariant[]): SeedVariant[] {
-  return variants.map((v, i) => ({ ...v, sku: `${slug.toUpperCase().replace(/-/g, '')}-${i + 1}` }));
+  return variants.map((v, i) => ({
+    ...v,
+    sku: `${slug.toUpperCase().replace(/-/g, '')}-${i + 1}`,
+  }));
 }
 
 export const seedProducts: SeedProduct[] = [
@@ -1745,7 +1894,9 @@ export const seedProducts: SeedProduct[] = [
     category: 'equipment',
     tastingNotes: [],
     collections: ['equipment'],
-    variants: [{ sku: 'DRIPPER-1', name: 'Size 02', weightGrams: 380, priceCents: 3200, stockQuantity: 45 }],
+    variants: [
+      { sku: 'DRIPPER-1', name: 'Size 02', weightGrams: 380, priceCents: 3200, stockQuantity: 45 },
+    ],
     art: { shape: 'dripper', accent: '#F6F1EB' },
   },
   {
@@ -1758,8 +1909,21 @@ export const seedProducts: SeedProduct[] = [
     tastingNotes: [],
     collections: ['equipment'],
     variants: [
-      { sku: 'KETTLE-1', name: 'Matte black', weightGrams: 900, priceCents: 6800, stockQuantity: 30 },
-      { sku: 'KETTLE-2', name: 'Brushed steel', weightGrams: 900, priceCents: 6400, compareAtPriceCents: 6800, stockQuantity: 18 },
+      {
+        sku: 'KETTLE-1',
+        name: 'Matte black',
+        weightGrams: 900,
+        priceCents: 6800,
+        stockQuantity: 30,
+      },
+      {
+        sku: 'KETTLE-2',
+        name: 'Brushed steel',
+        weightGrams: 900,
+        priceCents: 6400,
+        compareAtPriceCents: 6800,
+        stockQuantity: 18,
+      },
     ],
     art: { shape: 'kettle', accent: '#33201A' },
   },
@@ -1772,7 +1936,9 @@ export const seedProducts: SeedProduct[] = [
     category: 'equipment',
     tastingNotes: [],
     collections: ['equipment'],
-    variants: [{ sku: 'GRINDER-1', name: 'Standard', weightGrams: 480, priceCents: 9900, stockQuantity: 22 }],
+    variants: [
+      { sku: 'GRINDER-1', name: 'Standard', weightGrams: 480, priceCents: 9900, stockQuantity: 22 },
+    ],
     art: { shape: 'grinder', accent: '#A08977' },
   },
   {
@@ -1784,29 +1950,37 @@ export const seedProducts: SeedProduct[] = [
     category: 'equipment',
     tastingNotes: [],
     collections: ['equipment'],
-    variants: [{ sku: 'SCALE-1', name: 'Standard', weightGrams: 300, priceCents: 4500, stockQuantity: 40 }],
+    variants: [
+      { sku: 'SCALE-1', name: 'Standard', weightGrams: 300, priceCents: 4500, stockQuantity: 40 },
+    ],
     art: { shape: 'scale', accent: '#4A2C24' },
   },
   {
     slug: 'paper-filters',
     name: 'Paper Filters, size 02',
     tagline: '100 oxygen-bleached cone filters.',
-    description: 'Oxygen-bleached, unbleached-taste-free cone filters that fit our dripper and any size 02 cone. Rinse once before brewing.',
+    description:
+      'Oxygen-bleached, unbleached-taste-free cone filters that fit our dripper and any size 02 cone. Rinse once before brewing.',
     category: 'equipment',
     tastingNotes: [],
     collections: ['equipment'],
-    variants: [{ sku: 'FILTERS-1', name: '100 pack', weightGrams: 150, priceCents: 900, stockQuantity: 300 }],
+    variants: [
+      { sku: 'FILTERS-1', name: '100 pack', weightGrams: 150, priceCents: 900, stockQuantity: 300 },
+    ],
     art: { shape: 'filters', accent: '#FFFDFA' },
   },
   {
     slug: 'cofresso-mug',
     name: 'Cofresso Stoneware Mug',
     tagline: '12 oz, espresso glaze, logo debossed.',
-    description: 'A heavy stoneware mug in our espresso brown with the double-bean logo debossed on the side. Dishwasher safe. Holds exactly one Morning Frame.',
+    description:
+      'A heavy stoneware mug in our espresso brown with the double-bean logo debossed on the side. Dishwasher safe. Holds exactly one Morning Frame.',
     category: 'merch',
     tastingNotes: [],
     collections: ['equipment'],
-    variants: [{ sku: 'MUG-1', name: '12 oz', weightGrams: 400, priceCents: 2400, stockQuantity: 60 }],
+    variants: [
+      { sku: 'MUG-1', name: '12 oz', weightGrams: 400, priceCents: 2400, stockQuantity: 60 },
+    ],
     art: { shape: 'mug', accent: '#4A2C24' },
   },
 ];
@@ -1821,6 +1995,7 @@ export const seedDiscountCodes: SeedDiscountCode[] = [
 - [ ] **Step 3: Review generator**
 
 `src/lib/db/seed/reviews.ts`:
+
 ```ts
 import { seedProducts } from './data';
 
@@ -1836,23 +2011,86 @@ export interface SeedReview {
 }
 
 const authors = [
-  'Priya R.', 'Marcus L.', 'Elena V.', 'Tom H.', 'Ayo B.', 'Sofia M.', 'Daniel K.', 'Hana S.',
-  'Luca P.', 'Grace W.', 'Omar F.', 'Nina T.', 'Jules A.', 'Ravi N.', 'Maya O.', 'Ben C.',
+  'Priya R.',
+  'Marcus L.',
+  'Elena V.',
+  'Tom H.',
+  'Ayo B.',
+  'Sofia M.',
+  'Daniel K.',
+  'Hana S.',
+  'Luca P.',
+  'Grace W.',
+  'Omar F.',
+  'Nina T.',
+  'Jules A.',
+  'Ravi N.',
+  'Maya O.',
+  'Ben C.',
 ];
 
-const coffeeTemplates: Array<{ rating: number; title: string; body: (notes: string[], name: string) => string }> = [
-  { rating: 5, title: 'Exactly as described', body: (n, name) => `The ${n[0]} note is right there from the first sip. ${name} has become my default morning coffee.` },
-  { rating: 5, title: 'Best pour over in months', body: (n) => `Brewed on a V60 at 1:16 and got a gorgeous cup: ${n[0]}, ${n[1]}, and a clean finish.` },
-  { rating: 4, title: 'Great, a little pricey', body: (n) => `Really enjoyable, especially the ${n[2] ?? n[0]} in the finish. Wish the 2 lb bag were a touch cheaper.` },
-  { rating: 4, title: 'Solid everyday cup', body: (_n, name) => `${name} is consistent bag to bag, which is more than I can say for most roasters.` },
-  { rating: 5, title: 'Subscription was the right call', body: () => 'Signed up for every four weeks and the roast date is always within a week of delivery. Fresh every time.' },
-  { rating: 3, title: 'Not for me, but well roasted', body: (n) => `The ${n[0]} was more pronounced than I like. Roast quality is clearly high though.` },
+const coffeeTemplates: Array<{
+  rating: number;
+  title: string;
+  body: (notes: string[], name: string) => string;
+}> = [
+  {
+    rating: 5,
+    title: 'Exactly as described',
+    body: (n, name) =>
+      `The ${n[0]} note is right there from the first sip. ${name} has become my default morning coffee.`,
+  },
+  {
+    rating: 5,
+    title: 'Best pour over in months',
+    body: (n) =>
+      `Brewed on a V60 at 1:16 and got a gorgeous cup: ${n[0]}, ${n[1]}, and a clean finish.`,
+  },
+  {
+    rating: 4,
+    title: 'Great, a little pricey',
+    body: (n) =>
+      `Really enjoyable, especially the ${n[2] ?? n[0]} in the finish. Wish the 2 lb bag were a touch cheaper.`,
+  },
+  {
+    rating: 4,
+    title: 'Solid everyday cup',
+    body: (_n, name) =>
+      `${name} is consistent bag to bag, which is more than I can say for most roasters.`,
+  },
+  {
+    rating: 5,
+    title: 'Subscription was the right call',
+    body: () =>
+      'Signed up for every four weeks and the roast date is always within a week of delivery. Fresh every time.',
+  },
+  {
+    rating: 3,
+    title: 'Not for me, but well roasted',
+    body: (n) =>
+      `The ${n[0]} was more pronounced than I like. Roast quality is clearly high though.`,
+  },
 ];
 
 const gearTemplates: Array<{ rating: number; title: string; body: (name: string) => string }> = [
-  { rating: 5, title: 'Well made', body: (name) => `The ${name} feels far more premium than the price. Packaging was thoughtful too.` },
-  { rating: 4, title: 'Does the job', body: (name) => `${name} works exactly as advertised. Took a star because shipping took a few days longer than expected.` },
-  { rating: 5, title: 'Upgraded my whole setup', body: () => 'Paired it with the Morning Frame subscription and my kitchen counter looks like a cafe now.' },
+  {
+    rating: 5,
+    title: 'Well made',
+    body: (name) =>
+      `The ${name} feels far more premium than the price. Packaging was thoughtful too.`,
+  },
+  {
+    rating: 4,
+    title: 'Does the job',
+    body: (name) =>
+      `${name} works exactly as advertised. Took a star because shipping took a few days longer than expected.`,
+  },
+  {
+    rating: 5,
+    title: 'Upgraded my whole setup',
+    body: () =>
+      'Paired it with the Morning Frame subscription and my kitchen counter looks like a cafe now.',
+  },
 ];
 
 export function buildSeedReviews(): SeedReview[] {
@@ -1895,6 +2133,7 @@ export function buildSeedReviews(): SeedReview[] {
 - [ ] **Step 4: Idempotent seeder (replaces the Task 2 stub)**
 
 `src/lib/db/seed/index.ts`:
+
 ```ts
 import { sql } from 'drizzle-orm';
 import type { Db } from '@/lib/db/client';
@@ -1953,7 +2192,10 @@ export async function runSeed(db: Db): Promise<SeedSummary> {
         active: true,
       };
       const { id: _id, slug: _slug, ...updatable } = values;
-      await tx.insert(products).values(values).onConflictDoUpdate({ target: products.slug, set: updatable });
+      await tx
+        .insert(products)
+        .values(values)
+        .onConflictDoUpdate({ target: products.slug, set: updatable });
 
       for (const v of p.variants) {
         const variantId = stableId(`variant:${v.sku}`);
@@ -1987,7 +2229,11 @@ export async function runSeed(db: Db): Promise<SeedSummary> {
       for (const [index, collectionSlug] of p.collections.entries()) {
         await tx
           .insert(productCollections)
-          .values({ productId, collectionId: stableId(`collection:${collectionSlug}`), position: index })
+          .values({
+            productId,
+            collectionId: stableId(`collection:${collectionSlug}`),
+            position: index,
+          })
           .onConflictDoUpdate({
             target: [productCollections.productId, productCollections.collectionId],
             set: { position: index },
@@ -2011,7 +2257,13 @@ export async function runSeed(db: Db): Promise<SeedSummary> {
         })
         .onConflictDoUpdate({
           target: reviews.id,
-          set: { authorName: r.authorName, rating: r.rating, title: r.title, body: r.body, verified: r.verified },
+          set: {
+            authorName: r.authorName,
+            rating: r.rating,
+            title: r.title,
+            body: r.body,
+            verified: r.verified,
+          },
         });
     }
 
@@ -2026,7 +2278,9 @@ export async function runSeed(db: Db): Promise<SeedSummary> {
     }
 
     // Keep the order number sequence ahead of any seeded/legacy data.
-    await tx.execute(sql`select setval('order_number_seq', greatest(nextval('order_number_seq'), 10001), false)`);
+    await tx.execute(
+      sql`select setval('order_number_seq', greatest(nextval('order_number_seq'), 10001), false)`,
+    );
   });
 
   return {
@@ -2042,6 +2296,7 @@ export async function runSeed(db: Db): Promise<SeedSummary> {
 - [ ] **Step 5: Integration test for idempotency**
 
 `tests/integration/seed.test.ts`:
+
 ```ts
 import { count, eq } from 'drizzle-orm';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -2068,11 +2323,20 @@ describe('runSeed', () => {
       .select()
       .from(productVariants)
       .where(eq(productVariants.sku, 'MORNINGFRAME-1'));
-    await db.update(productVariants).set({ stockQuantity: 7 }).where(eq(productVariants.id, variant.id));
+    await db
+      .update(productVariants)
+      .set({ stockQuantity: 7 })
+      .where(eq(productVariants.id, variant.id));
     await runSeed(db);
-    const [again] = await db.select().from(productVariants).where(eq(productVariants.id, variant.id));
+    const [again] = await db
+      .select()
+      .from(productVariants)
+      .where(eq(productVariants.id, variant.id));
     expect(again.stockQuantity).toBe(7);
-    await db.update(productVariants).set({ stockQuantity: variant.stockQuantity }).where(eq(productVariants.id, variant.id));
+    await db
+      .update(productVariants)
+      .set({ stockQuantity: variant.stockQuantity })
+      .where(eq(productVariants.id, variant.id));
   });
 });
 ```
@@ -2083,6 +2347,7 @@ Expected: PASS.
 - [ ] **Step 6: Product art generator**
 
 `scripts/generate-product-art.ts`:
+
 ```ts
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -2090,7 +2355,13 @@ import { seedProducts, type SeedProduct } from '../src/lib/db/seed/data';
 
 const W = 600;
 const H = 750;
-const palette = { espresso: '#4A2C24', latte: '#A08977', cream: '#F6F1EB', foam: '#FFFDFA', copper: '#C8763A' };
+const palette = {
+  espresso: '#4A2C24',
+  latte: '#A08977',
+  cream: '#F6F1EB',
+  foam: '#FFFDFA',
+  copper: '#C8763A',
+};
 
 function esc(s: string) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -2112,14 +2383,18 @@ function wrap(text: string, max = 16): string[] {
 
 function textContrast(hex: string) {
   const c = hex.replace('#', '');
-  const r = parseInt(c.slice(0, 2), 16), g = parseInt(c.slice(2, 4), 16), b = parseInt(c.slice(4, 6), 16);
+  const r = parseInt(c.slice(0, 2), 16),
+    g = parseInt(c.slice(2, 4), 16),
+    b = parseInt(c.slice(4, 6), 16);
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6 ? palette.espresso : palette.foam;
 }
 
 function roastDots(level: SeedProduct['roastLevel']) {
   const n = { light: 1, medium: 2, medium_dark: 3, dark: 4 }[level ?? 'medium'];
-  return Array.from({ length: 4 }, (_, i) =>
-    `<circle cx="${230 + i * 36}" cy="560" r="9" fill="${i < n ? palette.espresso : 'none'}" stroke="${palette.espresso}" stroke-width="3"/>`,
+  return Array.from(
+    { length: 4 },
+    (_, i) =>
+      `<circle cx="${230 + i * 36}" cy="560" r="9" fill="${i < n ? palette.espresso : 'none'}" stroke="${palette.espresso}" stroke-width="3"/>`,
   ).join('');
 }
 
@@ -2145,7 +2420,10 @@ function bag(p: SeedProduct): string {
   </g>
   <text x="300" y="262" text-anchor="middle" font-family="Georgia, serif" font-size="14" letter-spacing="4" fill="${fg}" opacity="0.85">COFRESSO</text>
   ${nameLines
-    .map((l, i) => `<text x="300" y="${nameY + i * 42}" text-anchor="middle" font-family="Georgia, serif" font-weight="600" font-size="34" fill="${fg}">${esc(l)}</text>`)
+    .map(
+      (l, i) =>
+        `<text x="300" y="${nameY + i * 42}" text-anchor="middle" font-family="Georgia, serif" font-weight="600" font-size="34" fill="${fg}">${esc(l)}</text>`,
+    )
     .join('')}
   <line x1="220" y1="${nameY + nameLines.length * 42 - 8}" x2="380" y2="${nameY + nameLines.length * 42 - 8}" stroke="${fg}" stroke-opacity="0.5"/>
   ${p.origin ? `<text x="300" y="${nameY + nameLines.length * 42 + 26}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="${fg}" opacity="0.9">${esc(p.origin.toUpperCase())}</text>` : ''}
@@ -2208,10 +2486,12 @@ git commit -m "feat: add catalog seed data, idempotent seeder and generated prod
 ### Task 4: Pure pricing module
 
 **Files:**
+
 - Create: `src/lib/pricing/types.ts`, `src/lib/pricing/index.ts`, `src/lib/pricing/discounts.ts`
 - Test: `src/lib/pricing/index.test.ts`, `src/lib/pricing/discounts.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `type PricingLine = { unitPriceCents: number; quantity: number; purchaseType: 'one_time' | 'subscription' }`
   - `type DiscountRule = { kind: 'percent' | 'fixed' | 'free_shipping'; value: number; minSubtotalCents: number }`
@@ -2223,9 +2503,16 @@ git commit -m "feat: add catalog seed data, idempotent seeder and generated prod
 - [ ] **Step 1: Failing tests for totals**
 
 `src/lib/pricing/index.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
-import { computeDiscountCents, computeTotals, effectiveUnitPriceCents, formatPrice, lineTotalCents } from './index';
+import {
+  computeDiscountCents,
+  computeTotals,
+  effectiveUnitPriceCents,
+  formatPrice,
+  lineTotalCents,
+} from './index';
 import type { PricingConfig, PricingLine } from './types';
 
 const cfg: PricingConfig = {
@@ -2235,7 +2522,11 @@ const cfg: PricingConfig = {
   taxRate: 0.08,
 };
 
-const line = (unitPriceCents: number, quantity = 1, purchaseType: PricingLine['purchaseType'] = 'one_time'): PricingLine => ({
+const line = (
+  unitPriceCents: number,
+  quantity = 1,
+  purchaseType: PricingLine['purchaseType'] = 'one_time',
+): PricingLine => ({
   unitPriceCents,
   quantity,
   purchaseType,
@@ -2260,10 +2551,18 @@ describe('lineTotalCents', () => {
 
 describe('computeDiscountCents', () => {
   it('handles percent, fixed and free shipping', () => {
-    expect(computeDiscountCents({ kind: 'percent', value: 10, minSubtotalCents: 0 }, 5400)).toBe(540);
-    expect(computeDiscountCents({ kind: 'fixed', value: 1000, minSubtotalCents: 0 }, 5400)).toBe(1000);
-    expect(computeDiscountCents({ kind: 'fixed', value: 10000, minSubtotalCents: 0 }, 5400)).toBe(5400);
-    expect(computeDiscountCents({ kind: 'free_shipping', value: 0, minSubtotalCents: 0 }, 5400)).toBe(0);
+    expect(computeDiscountCents({ kind: 'percent', value: 10, minSubtotalCents: 0 }, 5400)).toBe(
+      540,
+    );
+    expect(computeDiscountCents({ kind: 'fixed', value: 1000, minSubtotalCents: 0 }, 5400)).toBe(
+      1000,
+    );
+    expect(computeDiscountCents({ kind: 'fixed', value: 10000, minSubtotalCents: 0 }, 5400)).toBe(
+      5400,
+    );
+    expect(
+      computeDiscountCents({ kind: 'free_shipping', value: 0, minSubtotalCents: 0 }, 5400),
+    ).toBe(0);
     expect(computeDiscountCents(null, 5400)).toBe(0);
   });
 });
@@ -2293,7 +2592,11 @@ describe('computeTotals', () => {
   });
 
   it('applies subscription savings before the discount code', () => {
-    const t = computeTotals([line(2000, 2, 'subscription')], { kind: 'percent', value: 10, minSubtotalCents: 0 }, cfg);
+    const t = computeTotals(
+      [line(2000, 2, 'subscription')],
+      { kind: 'percent', value: 10, minSubtotalCents: 0 },
+      cfg,
+    );
     expect(t.subscriptionSavingsCents).toBe(600);
     expect(t.subtotalCents).toBe(3400);
     expect(t.discountCents).toBe(340);
@@ -2304,7 +2607,11 @@ describe('computeTotals', () => {
   });
 
   it('free shipping code zeroes shipping and nothing else', () => {
-    const t = computeTotals([line(1000)], { kind: 'free_shipping', value: 0, minSubtotalCents: 0 }, cfg);
+    const t = computeTotals(
+      [line(1000)],
+      { kind: 'free_shipping', value: 0, minSubtotalCents: 0 },
+      cfg,
+    );
     expect(t.discountCents).toBe(0);
     expect(t.shippingCents).toBe(0);
     expect(t.totalCents).toBe(1080);
@@ -2346,6 +2653,7 @@ Expected: FAIL, module not found.
 - [ ] **Step 2: Implement types and totals**
 
 `src/lib/pricing/types.ts`:
+
 ```ts
 export type PricingPurchaseType = 'one_time' | 'subscription';
 
@@ -2387,6 +2695,7 @@ export interface Totals {
 ```
 
 `src/lib/pricing/index.ts`:
+
 ```ts
 import { siteConfig } from '@/lib/config';
 import type { DiscountRule, PricingConfig, PricingLine, Totals } from './types';
@@ -2400,13 +2709,19 @@ export function subscriptionUnitPriceCents(unitPriceCents: number, cfg: PricingC
   return Math.round((unitPriceCents * (100 - cfg.subscriptionDiscountPercent)) / 100);
 }
 
-export function effectiveUnitPriceCents(line: PricingLine, cfg: PricingConfig = defaultPricingConfig): number {
+export function effectiveUnitPriceCents(
+  line: PricingLine,
+  cfg: PricingConfig = defaultPricingConfig,
+): number {
   return line.purchaseType === 'subscription'
     ? subscriptionUnitPriceCents(line.unitPriceCents, cfg)
     : line.unitPriceCents;
 }
 
-export function lineTotalCents(line: PricingLine, cfg: PricingConfig = defaultPricingConfig): number {
+export function lineTotalCents(
+  line: PricingLine,
+  cfg: PricingConfig = defaultPricingConfig,
+): number {
   return effectiveUnitPriceCents(line, cfg) * line.quantity;
 }
 
@@ -2435,9 +2750,14 @@ export function computeTotals(
   const discountedSubtotalCents = Math.max(0, subtotalCents - discountCents);
 
   const freeShippingUnlocked = discountedSubtotalCents >= cfg.freeShippingThresholdCents;
-  const freeShippingRemainingCents = Math.max(0, cfg.freeShippingThresholdCents - discountedSubtotalCents);
+  const freeShippingRemainingCents = Math.max(
+    0,
+    cfg.freeShippingThresholdCents - discountedSubtotalCents,
+  );
   const shippingCents =
-    itemCount === 0 || freeShippingUnlocked || rule?.kind === 'free_shipping' ? 0 : cfg.shippingFlatCents;
+    itemCount === 0 || freeShippingUnlocked || rule?.kind === 'free_shipping'
+      ? 0
+      : cfg.shippingFlatCents;
 
   const taxCents = Math.round(discountedSubtotalCents * cfg.taxRate);
   const totalCents = discountedSubtotalCents + shippingCents + taxCents;
@@ -2466,6 +2786,7 @@ export function formatPrice(cents: number): string {
 - [ ] **Step 3: Failing tests for discount code evaluation**
 
 `src/lib/pricing/discounts.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { evaluateDiscountCode, type DiscountCodeLike } from './discounts';
@@ -2489,11 +2810,18 @@ describe('evaluateDiscountCode', () => {
     });
   });
   it('rejects inactive codes', () => {
-    expect(evaluateDiscountCode({ ...base, active: false }, 5000, now)).toMatchObject({ ok: false, reason: 'inactive' });
+    expect(evaluateDiscountCode({ ...base, active: false }, 5000, now)).toMatchObject({
+      ok: false,
+      reason: 'inactive',
+    });
   });
   it('rejects codes that have not started or have expired', () => {
-    expect(evaluateDiscountCode({ ...base, startsAt: new Date('2027-01-01') }, 5000, now)).toMatchObject({ ok: false, reason: 'not_started' });
-    expect(evaluateDiscountCode({ ...base, expiresAt: new Date('2026-01-01') }, 5000, now)).toMatchObject({ ok: false, reason: 'expired' });
+    expect(
+      evaluateDiscountCode({ ...base, startsAt: new Date('2027-01-01') }, 5000, now),
+    ).toMatchObject({ ok: false, reason: 'not_started' });
+    expect(
+      evaluateDiscountCode({ ...base, expiresAt: new Date('2026-01-01') }, 5000, now),
+    ).toMatchObject({ ok: false, reason: 'expired' });
   });
   it('enforces the minimum subtotal with a helpful message', () => {
     const r = evaluateDiscountCode({ ...base, minSubtotalCents: 3000 }, 2500, now);
@@ -2521,15 +2849,21 @@ export interface DiscountCodeLike {
 export type DiscountFailure = 'inactive' | 'not_started' | 'expired' | 'min_subtotal';
 
 export type DiscountEvaluation =
-  | { ok: true; rule: DiscountRule }
-  | { ok: false; reason: DiscountFailure; message: string };
+  { ok: true; rule: DiscountRule } | { ok: false; reason: DiscountFailure; message: string };
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-export function evaluateDiscountCode(code: DiscountCodeLike, subtotalCents: number, now = new Date()): DiscountEvaluation {
-  if (!code.active) return { ok: false, reason: 'inactive', message: 'That code is no longer active.' };
-  if (code.startsAt && code.startsAt > now) return { ok: false, reason: 'not_started', message: 'That code is not active yet.' };
-  if (code.expiresAt && code.expiresAt < now) return { ok: false, reason: 'expired', message: 'That code has expired.' };
+export function evaluateDiscountCode(
+  code: DiscountCodeLike,
+  subtotalCents: number,
+  now = new Date(),
+): DiscountEvaluation {
+  if (!code.active)
+    return { ok: false, reason: 'inactive', message: 'That code is no longer active.' };
+  if (code.startsAt && code.startsAt > now)
+    return { ok: false, reason: 'not_started', message: 'That code is not active yet.' };
+  if (code.expiresAt && code.expiresAt < now)
+    return { ok: false, reason: 'expired', message: 'That code has expired.' };
   if (subtotalCents < code.minSubtotalCents) {
     return {
       ok: false,
@@ -2537,7 +2871,10 @@ export function evaluateDiscountCode(code: DiscountCodeLike, subtotalCents: numb
       message: `Spend at least ${usd.format(code.minSubtotalCents / 100)} to use ${code.code}.`,
     };
   }
-  return { ok: true, rule: { kind: code.kind, value: code.value, minSubtotalCents: code.minSubtotalCents } };
+  return {
+    ok: true,
+    rule: { kind: code.kind, value: code.value, minSubtotalCents: code.minSubtotalCents },
+  };
 }
 ```
 
@@ -2557,10 +2894,12 @@ git commit -m "feat: add pure pricing module with subscription, discount, shippi
 ### Task 5: Payment provider interface and simulated provider
 
 **Files:**
+
 - Create: `src/lib/payments/types.ts`, `src/lib/payments/luhn.ts`, `src/lib/payments/simulated.ts`, `src/lib/payments/index.ts`
 - Test: `src/lib/payments/luhn.test.ts`, `src/lib/payments/simulated.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `interface CardInput { number: string; expMonth: number; expYear: number; cvc: string; name: string }`
   - `interface AuthorizeInput { amountCents: number; currency: 'USD'; card: CardInput; idempotencyKey: string }`
@@ -2573,6 +2912,7 @@ git commit -m "feat: add pure pricing module with subscription, discount, shippi
 - [ ] **Step 1: Luhn test then implementation**
 
 `src/lib/payments/luhn.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { luhnCheck, normalizeCardNumber } from './luhn';
@@ -2596,6 +2936,7 @@ describe('luhn', () => {
 ```
 
 `src/lib/payments/luhn.ts`:
+
 ```ts
 export function normalizeCardNumber(input: string): string {
   return input.replace(/\D/g, '');
@@ -2622,6 +2963,7 @@ export function luhnCheck(input: string): boolean {
 - [ ] **Step 2: Simulated provider tests**
 
 `src/lib/payments/simulated.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { SimulatedPaymentProvider, TEST_CARDS } from './simulated';
@@ -2650,15 +2992,36 @@ describe('SimulatedPaymentProvider', () => {
     }
   });
   it('maps the decline test cards', async () => {
-    await expect(authorize(card(TEST_CARDS.declined))).resolves.toMatchObject({ ok: false, code: 'declined' });
-    await expect(authorize(card(TEST_CARDS.insufficientFunds))).resolves.toMatchObject({ ok: false, code: 'insufficient_funds' });
-    await expect(authorize(card(TEST_CARDS.processingError))).resolves.toMatchObject({ ok: false, code: 'processing_error' });
+    await expect(authorize(card(TEST_CARDS.declined))).resolves.toMatchObject({
+      ok: false,
+      code: 'declined',
+    });
+    await expect(authorize(card(TEST_CARDS.insufficientFunds))).resolves.toMatchObject({
+      ok: false,
+      code: 'insufficient_funds',
+    });
+    await expect(authorize(card(TEST_CARDS.processingError))).resolves.toMatchObject({
+      ok: false,
+      code: 'processing_error',
+    });
   });
   it('rejects invalid card data', async () => {
-    await expect(authorize(card('4242 4242 4242 4241'))).resolves.toMatchObject({ ok: false, code: 'invalid_card' });
-    await expect(authorize(card(TEST_CARDS.approved, { expYear: 2020 }))).resolves.toMatchObject({ ok: false, code: 'invalid_card' });
-    await expect(authorize(card(TEST_CARDS.approved, { cvc: '1' }))).resolves.toMatchObject({ ok: false, code: 'invalid_card' });
-    await expect(authorize(card(TEST_CARDS.approved, { expMonth: 13 }))).resolves.toMatchObject({ ok: false, code: 'invalid_card' });
+    await expect(authorize(card('4242 4242 4242 4241'))).resolves.toMatchObject({
+      ok: false,
+      code: 'invalid_card',
+    });
+    await expect(authorize(card(TEST_CARDS.approved, { expYear: 2020 }))).resolves.toMatchObject({
+      ok: false,
+      code: 'invalid_card',
+    });
+    await expect(authorize(card(TEST_CARDS.approved, { cvc: '1' }))).resolves.toMatchObject({
+      ok: false,
+      code: 'invalid_card',
+    });
+    await expect(authorize(card(TEST_CARDS.approved, { expMonth: 13 }))).resolves.toMatchObject({
+      ok: false,
+      code: 'invalid_card',
+    });
   });
   it('approves any other Luhn-valid card', async () => {
     const r = await authorize(card('5555 5555 5555 4444'));
@@ -2676,6 +3039,7 @@ describe('SimulatedPaymentProvider', () => {
 - [ ] **Step 3: Implement types, simulated provider and index**
 
 `src/lib/payments/types.ts`:
+
 ```ts
 export interface CardInput {
   number: string;
@@ -2692,7 +3056,8 @@ export interface AuthorizeInput {
   idempotencyKey: string;
 }
 
-export type PaymentDeclineCode = 'declined' | 'insufficient_funds' | 'invalid_card' | 'processing_error';
+export type PaymentDeclineCode =
+  'declined' | 'insufficient_funds' | 'invalid_card' | 'processing_error';
 
 export type AuthorizeResult =
   | { ok: true; reference: string; last4: string }
@@ -2705,6 +3070,7 @@ export interface PaymentProvider {
 ```
 
 `src/lib/payments/simulated.ts`:
+
 ```ts
 import { randomUUID } from 'node:crypto';
 import { luhnCheck, normalizeCardNumber } from './luhn';
@@ -2719,8 +3085,14 @@ export const TEST_CARDS = {
 
 const outcomes: Record<string, { code: PaymentDeclineCode; message: string }> = {
   [TEST_CARDS.declined]: { code: 'declined', message: 'Your card was declined.' },
-  [TEST_CARDS.insufficientFunds]: { code: 'insufficient_funds', message: 'Your card has insufficient funds.' },
-  [TEST_CARDS.processingError]: { code: 'processing_error', message: 'We could not process your card. Try again.' },
+  [TEST_CARDS.insufficientFunds]: {
+    code: 'insufficient_funds',
+    message: 'Your card has insufficient funds.',
+  },
+  [TEST_CARDS.processingError]: {
+    code: 'processing_error',
+    message: 'We could not process your card. Try again.',
+  },
 };
 
 export class SimulatedPaymentProvider implements PaymentProvider {
@@ -2733,28 +3105,42 @@ export class SimulatedPaymentProvider implements PaymentProvider {
 
   async authorize(input: AuthorizeInput): Promise<AuthorizeResult> {
     const number = normalizeCardNumber(input.card.number);
-    const invalid = (message: string): AuthorizeResult => ({ ok: false, code: 'invalid_card', message });
+    const invalid = (message: string): AuthorizeResult => ({
+      ok: false,
+      code: 'invalid_card',
+      message,
+    });
 
     if (!luhnCheck(number)) return invalid('That card number does not look right.');
     if (!/^\d{3,4}$/.test(input.card.cvc)) return invalid('Enter the 3 or 4 digit security code.');
-    if (!Number.isInteger(input.card.expMonth) || input.card.expMonth < 1 || input.card.expMonth > 12) {
+    if (
+      !Number.isInteger(input.card.expMonth) ||
+      input.card.expMonth < 1 ||
+      input.card.expMonth > 12
+    ) {
       return invalid('Enter a valid expiry month.');
     }
     const now = this.now();
     const expiresEnd = new Date(Date.UTC(input.card.expYear, input.card.expMonth, 1));
     if (expiresEnd <= now) return invalid('That card has expired.');
     if (input.card.name.trim().length < 2) return invalid('Enter the name on the card.');
-    if (input.amountCents <= 0) return { ok: false, code: 'processing_error', message: 'Nothing to charge.' };
+    if (input.amountCents <= 0)
+      return { ok: false, code: 'processing_error', message: 'Nothing to charge.' };
 
     const forced = outcomes[number];
     if (forced) return { ok: false, ...forced };
 
-    return { ok: true, reference: `sim_${randomUUID().replace(/-/g, '').slice(0, 20)}`, last4: number.slice(-4) };
+    return {
+      ok: true,
+      reference: `sim_${randomUUID().replace(/-/g, '').slice(0, 20)}`,
+      last4: number.slice(-4),
+    };
   }
 }
 ```
 
 `src/lib/payments/index.ts`:
+
 ```ts
 import { SimulatedPaymentProvider } from './simulated';
 import type { PaymentProvider } from './types';
@@ -2788,10 +3174,12 @@ git commit -m "feat: add PaymentProvider interface with simulated provider and t
 ### Task 6: Cart domain: cookie, queries, mutations, server actions
 
 **Files:**
+
 - Create: `src/lib/cart/cookie.ts`, `src/lib/cart/types.ts`, `src/lib/cart/schemas.ts`, `src/lib/cart/queries.ts`, `src/lib/cart/mutations.ts`, `src/lib/cart/actions.ts`
 - Test: `src/lib/cart/schemas.test.ts`, `tests/integration/cart.test.ts`
 
 **Interfaces:**
+
 - Consumes: `getDb`, schema tables (Task 2), pricing (Task 4), `ActionResult` helpers (Task 2).
 - Produces:
   - `CART_COOKIE_NAME = 'cofresso_cart'`; `readCartId(): Promise<string | null>`; `writeCartId(id): Promise<void>`; `clearCartCookie(): Promise<void>`
@@ -2806,6 +3194,7 @@ git commit -m "feat: add PaymentProvider interface with simulated provider and t
 - [ ] **Step 1: Cookie helpers**
 
 `src/lib/cart/cookie.ts`:
+
 ```ts
 import { cookies } from 'next/headers';
 
@@ -2838,6 +3227,7 @@ export async function clearCartCookie(): Promise<void> {
 - [ ] **Step 2: Types and Zod schema (with test)**
 
 `src/lib/cart/types.ts`:
+
 ```ts
 import type { Grind, ProductCategory, PurchaseType } from '@/lib/db/schema';
 import type { DiscountRule, Totals } from '@/lib/pricing';
@@ -2867,6 +3257,7 @@ export interface CartView {
 ```
 
 `src/lib/cart/schemas.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { addToCartSchema } from './schemas';
@@ -2874,24 +3265,49 @@ import { addToCartSchema } from './schemas';
 describe('addToCartSchema', () => {
   const variantId = '3f2d0d3e-2f4a-4a7e-9d5b-4c6c1d2f3a4b';
   it('accepts a one-time whole-bean line', () => {
-    const r = addToCartSchema.safeParse({ variantId, quantity: '2', grind: 'whole_bean', purchaseType: 'one_time' });
+    const r = addToCartSchema.safeParse({
+      variantId,
+      quantity: '2',
+      grind: 'whole_bean',
+      purchaseType: 'one_time',
+    });
     expect(r.success).toBe(true);
-    if (r.success) expect(r.data).toEqual({ variantId, quantity: 2, grind: 'whole_bean', purchaseType: 'one_time', subscriptionIntervalWeeks: null });
+    if (r.success)
+      expect(r.data).toEqual({
+        variantId,
+        quantity: 2,
+        grind: 'whole_bean',
+        purchaseType: 'one_time',
+        subscriptionIntervalWeeks: null,
+      });
   });
   it('requires an interval for subscriptions', () => {
-    expect(addToCartSchema.safeParse({ variantId, quantity: 1, purchaseType: 'subscription' }).success).toBe(false);
-    const ok = addToCartSchema.safeParse({ variantId, quantity: 1, purchaseType: 'subscription', subscriptionIntervalWeeks: '4' });
+    expect(
+      addToCartSchema.safeParse({ variantId, quantity: 1, purchaseType: 'subscription' }).success,
+    ).toBe(false);
+    const ok = addToCartSchema.safeParse({
+      variantId,
+      quantity: 1,
+      purchaseType: 'subscription',
+      subscriptionIntervalWeeks: '4',
+    });
     expect(ok.success).toBe(true);
     if (ok.success) expect(ok.data.subscriptionIntervalWeeks).toBe(4);
   });
   it('caps quantity and rejects bad ids', () => {
-    expect(addToCartSchema.safeParse({ variantId, quantity: 11, purchaseType: 'one_time' }).success).toBe(false);
-    expect(addToCartSchema.safeParse({ variantId: 'nope', quantity: 1, purchaseType: 'one_time' }).success).toBe(false);
+    expect(
+      addToCartSchema.safeParse({ variantId, quantity: 11, purchaseType: 'one_time' }).success,
+    ).toBe(false);
+    expect(
+      addToCartSchema.safeParse({ variantId: 'nope', quantity: 1, purchaseType: 'one_time' })
+        .success,
+    ).toBe(false);
   });
 });
 ```
 
 `src/lib/cart/schemas.ts`:
+
 ```ts
 import { z } from 'zod';
 import { grindEnum, purchaseTypeEnum } from '@/lib/db/schema';
@@ -2906,15 +3322,28 @@ export const addToCartSchema = z
     purchaseType: z.enum(purchaseTypeEnum.enumValues).default('one_time'),
     subscriptionIntervalWeeks: z.preprocess(
       emptyToNull,
-      z.coerce.number().int().refine((n) => [2, 4, 6].includes(n), 'Choose 2, 4 or 6 weeks').nullable().default(null),
+      z.coerce
+        .number()
+        .int()
+        .refine((n) => [2, 4, 6].includes(n), 'Choose 2, 4 or 6 weeks')
+        .nullable()
+        .default(null),
     ),
   })
   .superRefine((v, ctx) => {
     if (v.purchaseType === 'subscription' && v.subscriptionIntervalWeeks === null) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['subscriptionIntervalWeeks'], message: 'Choose a delivery interval.' });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['subscriptionIntervalWeeks'],
+        message: 'Choose a delivery interval.',
+      });
     }
   })
-  .transform((v) => ({ ...v, subscriptionIntervalWeeks: v.purchaseType === 'subscription' ? v.subscriptionIntervalWeeks : null }));
+  .transform((v) => ({
+    ...v,
+    subscriptionIntervalWeeks:
+      v.purchaseType === 'subscription' ? v.subscriptionIntervalWeeks : null,
+  }));
 
 export type AddLineInput = z.infer<typeof addToCartSchema>;
 
@@ -2938,11 +3367,18 @@ Run: `pnpm test:unit src/lib/cart` → PASS.
 - [ ] **Step 3: Queries**
 
 `src/lib/cart/queries.ts`:
+
 ```ts
 import { eq, sql } from 'drizzle-orm';
 import { getDb, type Db } from '@/lib/db/client';
 import { cartItems, carts, discountCodes } from '@/lib/db/schema';
-import { computeTotals, effectiveUnitPriceCents, evaluateDiscountCode, lineTotalCents, type DiscountRule } from '@/lib/pricing';
+import {
+  computeTotals,
+  effectiveUnitPriceCents,
+  evaluateDiscountCode,
+  lineTotalCents,
+  type DiscountRule,
+} from '@/lib/pricing';
 import type { CartLine, CartView } from './types';
 
 export async function getCartView(cartId: string, db: Db = getDb()): Promise<CartView | null> {
@@ -2958,7 +3394,11 @@ export async function getCartView(cartId: string, db: Db = getDb()): Promise<Car
   if (!cart) return null;
 
   const lines: CartLine[] = cart.items.map((item) => {
-    const pricingLine = { unitPriceCents: item.variant.priceCents, quantity: item.quantity, purchaseType: item.purchaseType };
+    const pricingLine = {
+      unitPriceCents: item.variant.priceCents,
+      quantity: item.quantity,
+      purchaseType: item.purchaseType,
+    };
     return {
       id: item.id,
       quantity: item.quantity,
@@ -2984,13 +3424,19 @@ export async function getCartView(cartId: string, db: Db = getDb()): Promise<Car
     };
   });
 
-  const pricingLines = lines.map((l) => ({ unitPriceCents: l.unitPriceCents, quantity: l.quantity, purchaseType: l.purchaseType }));
+  const pricingLines = lines.map((l) => ({
+    unitPriceCents: l.unitPriceCents,
+    quantity: l.quantity,
+    purchaseType: l.purchaseType,
+  }));
   const preDiscount = computeTotals(pricingLines, null);
 
   let discount: DiscountRule | null = null;
   let discountMessage: string | null = null;
   if (cart.discountCode) {
-    const row = await db.query.discountCodes.findFirst({ where: eq(discountCodes.code, cart.discountCode) });
+    const row = await db.query.discountCodes.findFirst({
+      where: eq(discountCodes.code, cart.discountCode),
+    });
     if (!row) {
       discountMessage = 'That code is no longer available.';
     } else {
@@ -3022,6 +3468,7 @@ export async function getCartItemCount(cartId: string, db: Db = getDb()): Promis
 - [ ] **Step 4: Mutations**
 
 `src/lib/cart/mutations.ts`:
+
 ```ts
 import { and, eq, sql } from 'drizzle-orm';
 import type { Db } from '@/lib/db/client';
@@ -3029,7 +3476,8 @@ import { cartItems, carts, discountCodes, productVariants } from '@/lib/db/schem
 import { computeTotals, evaluateDiscountCode } from '@/lib/pricing';
 import type { AddLineInput } from './schemas';
 
-export type CartMutationCode = 'variant_not_found' | 'out_of_stock' | 'line_not_found' | 'invalid_code';
+export type CartMutationCode =
+  'variant_not_found' | 'out_of_stock' | 'line_not_found' | 'invalid_code';
 
 export class CartMutationError extends Error {
   constructor(
@@ -3043,7 +3491,10 @@ export class CartMutationError extends Error {
 
 export async function ensureCart(db: Db, cartId: string | null): Promise<string> {
   if (cartId) {
-    const existing = await db.query.carts.findFirst({ where: eq(carts.id, cartId), columns: { id: true } });
+    const existing = await db.query.carts.findFirst({
+      where: eq(carts.id, cartId),
+      columns: { id: true },
+    });
     if (existing) return existing.id;
   }
   const [created] = await db.insert(carts).values({}).returning({ id: carts.id });
@@ -3059,7 +3510,8 @@ export async function addLine(db: Db, cartId: string, input: AddLineInput) {
     where: eq(productVariants.id, input.variantId),
     with: { product: { columns: { active: true, category: true } } },
   });
-  if (!variant || !variant.product.active) throw new CartMutationError('variant_not_found', 'That product is not available.');
+  if (!variant || !variant.product.active)
+    throw new CartMutationError('variant_not_found', 'That product is not available.');
 
   const grind = variant.product.category === 'coffee' ? (input.grind ?? 'whole_bean') : null;
 
@@ -3082,7 +3534,9 @@ export async function addLine(db: Db, cartId: string, input: AddLineInput) {
   if (nextQuantity > variant.stockQuantity) {
     throw new CartMutationError(
       'out_of_stock',
-      variant.stockQuantity === 0 ? 'That item is sold out.' : `Only ${variant.stockQuantity} left in stock.`,
+      variant.stockQuantity === 0
+        ? 'That item is sold out.'
+        : `Only ${variant.stockQuantity} left in stock.`,
     );
   }
 
@@ -3109,7 +3563,10 @@ export async function setLineQuantity(db: Db, cartId: string, lineId: string, qu
   });
   if (!line) throw new CartMutationError('line_not_found', 'That item is no longer in your cart.');
   if (quantity > line.variant.stockQuantity) {
-    throw new CartMutationError('out_of_stock', `Only ${line.variant.stockQuantity} left in stock.`);
+    throw new CartMutationError(
+      'out_of_stock',
+      `Only ${line.variant.stockQuantity} left in stock.`,
+    );
   }
   await db.update(cartItems).set({ quantity }).where(eq(cartItems.id, lineId));
   await touch(db, cartId);
@@ -3121,7 +3578,9 @@ export async function removeLine(db: Db, cartId: string, lineId: string) {
 }
 
 export async function applyDiscountCode(db: Db, cartId: string, code: string) {
-  const row = await db.query.discountCodes.findFirst({ where: eq(discountCodes.code, code.toUpperCase()) });
+  const row = await db.query.discountCodes.findFirst({
+    where: eq(discountCodes.code, code.toUpperCase()),
+  });
   if (!row) throw new CartMutationError('invalid_code', 'We do not recognize that code.');
 
   const items = await db.query.cartItems.findMany({
@@ -3129,34 +3588,56 @@ export async function applyDiscountCode(db: Db, cartId: string, code: string) {
     with: { variant: { columns: { priceCents: true } } },
   });
   const subtotal = computeTotals(
-    items.map((i) => ({ unitPriceCents: i.variant.priceCents, quantity: i.quantity, purchaseType: i.purchaseType })),
+    items.map((i) => ({
+      unitPriceCents: i.variant.priceCents,
+      quantity: i.quantity,
+      purchaseType: i.purchaseType,
+    })),
     null,
   ).subtotalCents;
 
   const evaluation = evaluateDiscountCode(row, subtotal);
   if (!evaluation.ok) throw new CartMutationError('invalid_code', evaluation.message);
 
-  await db.update(carts).set({ discountCode: row.code, updatedAt: new Date() }).where(eq(carts.id, cartId));
+  await db
+    .update(carts)
+    .set({ discountCode: row.code, updatedAt: new Date() })
+    .where(eq(carts.id, cartId));
   return row.code;
 }
 
 export async function clearDiscountCode(db: Db, cartId: string) {
-  await db.update(carts).set({ discountCode: null, updatedAt: new Date() }).where(eq(carts.id, cartId));
+  await db
+    .update(carts)
+    .set({ discountCode: null, updatedAt: new Date() })
+    .where(eq(carts.id, cartId));
 }
 
 export async function clearCart(db: Db, cartId: string) {
   await db.delete(cartItems).where(eq(cartItems.cartId, cartId));
-  await db.update(carts).set({ discountCode: null, updatedAt: new Date() }).where(eq(carts.id, cartId));
+  await db
+    .update(carts)
+    .set({ discountCode: null, updatedAt: new Date() })
+    .where(eq(carts.id, cartId));
 }
 ```
 
 - [ ] **Step 5: Integration tests**
 
 `tests/integration/cart.test.ts`:
+
 ```ts
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { addLine, applyDiscountCode, CartMutationError, clearCart, ensureCart, removeLine, setLineQuantity } from '../../src/lib/cart/mutations';
+import {
+  addLine,
+  applyDiscountCode,
+  CartMutationError,
+  clearCart,
+  ensureCart,
+  removeLine,
+  setLineQuantity,
+} from '../../src/lib/cart/mutations';
 import { getCartItemCount, getCartView } from '../../src/lib/cart/queries';
 import { productVariants } from '../../src/lib/db/schema';
 import { testDb } from './helpers';
@@ -3177,9 +3658,27 @@ describe('cart', () => {
 
   it('adds, merges and prices lines', async () => {
     const v = await variantBySku('MORNINGFRAME-1');
-    await addLine(db, cartId, { variantId: v.id, quantity: 1, grind: 'whole_bean', purchaseType: 'one_time', subscriptionIntervalWeeks: null });
-    await addLine(db, cartId, { variantId: v.id, quantity: 2, grind: 'whole_bean', purchaseType: 'one_time', subscriptionIntervalWeeks: null });
-    await addLine(db, cartId, { variantId: v.id, quantity: 1, grind: 'drip', purchaseType: 'one_time', subscriptionIntervalWeeks: null });
+    await addLine(db, cartId, {
+      variantId: v.id,
+      quantity: 1,
+      grind: 'whole_bean',
+      purchaseType: 'one_time',
+      subscriptionIntervalWeeks: null,
+    });
+    await addLine(db, cartId, {
+      variantId: v.id,
+      quantity: 2,
+      grind: 'whole_bean',
+      purchaseType: 'one_time',
+      subscriptionIntervalWeeks: null,
+    });
+    await addLine(db, cartId, {
+      variantId: v.id,
+      quantity: 1,
+      grind: 'drip',
+      purchaseType: 'one_time',
+      subscriptionIntervalWeeks: null,
+    });
 
     const view = await getCartView(cartId, db);
     expect(view?.lines).toHaveLength(2);
@@ -3192,25 +3691,51 @@ describe('cart', () => {
 
   it('applies subscription pricing per line', async () => {
     const v = await variantBySku('MORNINGFRAME-1');
-    await addLine(db, cartId, { variantId: v.id, quantity: 1, grind: 'whole_bean', purchaseType: 'subscription', subscriptionIntervalWeeks: 4 });
+    await addLine(db, cartId, {
+      variantId: v.id,
+      quantity: 1,
+      grind: 'whole_bean',
+      purchaseType: 'subscription',
+      subscriptionIntervalWeeks: 4,
+    });
     const view = await getCartView(cartId, db);
     expect(view!.lines[0].effectiveUnitPriceCents).toBe(Math.round(v.priceCents * 0.85));
-    expect(view!.totals.subscriptionSavingsCents).toBe(v.priceCents - Math.round(v.priceCents * 0.85));
+    expect(view!.totals.subscriptionSavingsCents).toBe(
+      v.priceCents - Math.round(v.priceCents * 0.85),
+    );
   });
 
   it('enforces stock', async () => {
     const v = await variantBySku('KETTLE-2');
     await expect(
-      addLine(db, cartId, { variantId: v.id, quantity: 10, grind: null, purchaseType: 'one_time', subscriptionIntervalWeeks: null }),
+      addLine(db, cartId, {
+        variantId: v.id,
+        quantity: 10,
+        grind: null,
+        purchaseType: 'one_time',
+        subscriptionIntervalWeeks: null,
+      }),
     ).resolves.toBeUndefined();
     await expect(
-      addLine(db, cartId, { variantId: v.id, quantity: 10, grind: null, purchaseType: 'one_time', subscriptionIntervalWeeks: null }),
+      addLine(db, cartId, {
+        variantId: v.id,
+        quantity: 10,
+        grind: null,
+        purchaseType: 'one_time',
+        subscriptionIntervalWeeks: null,
+      }),
     ).rejects.toMatchObject({ code: 'out_of_stock' });
   });
 
   it('updates and removes lines', async () => {
     const v = await variantBySku('MUG-1');
-    await addLine(db, cartId, { variantId: v.id, quantity: 1, grind: null, purchaseType: 'one_time', subscriptionIntervalWeeks: null });
+    await addLine(db, cartId, {
+      variantId: v.id,
+      quantity: 1,
+      grind: null,
+      purchaseType: 'one_time',
+      subscriptionIntervalWeeks: null,
+    });
     let view = await getCartView(cartId, db);
     await setLineQuantity(db, cartId, view!.lines[0].id, 3);
     view = await getCartView(cartId, db);
@@ -3218,15 +3743,27 @@ describe('cart', () => {
     await setLineQuantity(db, cartId, view!.lines[0].id, 0);
     view = await getCartView(cartId, db);
     expect(view!.lines).toHaveLength(0);
-    await expect(setLineQuantity(db, cartId, view!.id, 1)).rejects.toBeInstanceOf(CartMutationError);
+    await expect(setLineQuantity(db, cartId, view!.id, 1)).rejects.toBeInstanceOf(
+      CartMutationError,
+    );
     await removeLine(db, cartId, '00000000-0000-0000-0000-000000000000');
   });
 
   it('applies and validates discount codes', async () => {
     const v = await variantBySku('MORNINGFRAME-1');
-    await addLine(db, cartId, { variantId: v.id, quantity: 1, grind: 'whole_bean', purchaseType: 'one_time', subscriptionIntervalWeeks: null });
-    await expect(applyDiscountCode(db, cartId, 'NOPE')).rejects.toMatchObject({ code: 'invalid_code' });
-    await expect(applyDiscountCode(db, cartId, 'coframe15')).rejects.toMatchObject({ code: 'invalid_code' }); // min $30
+    await addLine(db, cartId, {
+      variantId: v.id,
+      quantity: 1,
+      grind: 'whole_bean',
+      purchaseType: 'one_time',
+      subscriptionIntervalWeeks: null,
+    });
+    await expect(applyDiscountCode(db, cartId, 'NOPE')).rejects.toMatchObject({
+      code: 'invalid_code',
+    });
+    await expect(applyDiscountCode(db, cartId, 'coframe15')).rejects.toMatchObject({
+      code: 'invalid_code',
+    }); // min $30
     await applyDiscountCode(db, cartId, 'welcome10');
     const view = await getCartView(cartId, db);
     expect(view!.discountCode).toBe('WELCOME10');
@@ -3235,12 +3772,24 @@ describe('cart', () => {
 
   it('reports a stored code that no longer applies', async () => {
     const v = await variantBySku('MORNINGFRAME-2'); // 2 lb, above $30
-    await addLine(db, cartId, { variantId: v.id, quantity: 1, grind: 'whole_bean', purchaseType: 'one_time', subscriptionIntervalWeeks: null });
+    await addLine(db, cartId, {
+      variantId: v.id,
+      quantity: 1,
+      grind: 'whole_bean',
+      purchaseType: 'one_time',
+      subscriptionIntervalWeeks: null,
+    });
     await applyDiscountCode(db, cartId, 'COFRAME15');
     const view = await getCartView(cartId, db);
     await removeLine(db, cartId, view!.lines[0].id);
     const mug = await variantBySku('MUG-1');
-    await addLine(db, cartId, { variantId: mug.id, quantity: 1, grind: null, purchaseType: 'one_time', subscriptionIntervalWeeks: null });
+    await addLine(db, cartId, {
+      variantId: mug.id,
+      quantity: 1,
+      grind: null,
+      purchaseType: 'one_time',
+      subscriptionIntervalWeeks: null,
+    });
     const after = await getCartView(cartId, db);
     expect(after!.discount).toBeNull();
     expect(after!.discountMessage).toContain('$30.00');
@@ -3256,6 +3805,7 @@ Expected: PASS.
 - [ ] **Step 6: Server actions**
 
 `src/lib/cart/actions.ts`:
+
 ```ts
 'use server';
 
@@ -3306,7 +3856,10 @@ export async function addToCartAction(
   }
 }
 
-export async function updateCartLineAction(lineId: string, quantity: number): Promise<ActionResult> {
+export async function updateCartLineAction(
+  lineId: string,
+  quantity: number,
+): Promise<ActionResult> {
   const parsed = updateQuantitySchema.safeParse({ lineId, quantity });
   if (!parsed.success) return fail('Invalid quantity.');
   const cartId = await readCartId();
@@ -3332,7 +3885,10 @@ export async function removeCartLineAction(lineId: string): Promise<ActionResult
   }
 }
 
-export async function applyPromoAction(_prev: ActionResult<{ code: string }> | null, formData: FormData): Promise<ActionResult<{ code: string }>> {
+export async function applyPromoAction(
+  _prev: ActionResult<{ code: string }> | null,
+  formData: FormData,
+): Promise<ActionResult<{ code: string }>> {
   const parsed = promoCodeSchema.safeParse({ code: formData.get('code') });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Enter a code.');
   const cartId = await readCartId();
@@ -3372,10 +3928,12 @@ git commit -m "feat: add cart cookie, queries, mutations and server actions"
 ### Task 7: Checkout: schemas, order placement transaction, order queries
 
 **Files:**
+
 - Create: `src/lib/checkout/schemas.ts`, `src/lib/checkout/order-number.ts`, `src/lib/checkout/place-order.ts`, `src/lib/checkout/queries.ts`
 - Test: `src/lib/checkout/schemas.test.ts`, `src/lib/checkout/order-number.test.ts`, `tests/integration/place-order.test.ts`
 
 **Interfaces:**
+
 - Consumes: cart queries/mutations (Task 6), pricing (Task 4), payments (Task 5), schema (Task 2).
 - Produces:
   - `checkoutSchema` (Zod) and `type CheckoutInput = { email; shippingName; address1; address2?; city; state; postalCode; country; cardNumber; cardName; expMonth; expYear; cvc; idempotencyKey }`, plus step schemas `contactSchema`, `shippingSchema`, `paymentSchema`
@@ -3389,6 +3947,7 @@ git commit -m "feat: add cart cookie, queries, mutations and server actions"
 - [ ] **Step 1: Schemas + tests**
 
 `src/lib/checkout/schemas.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { checkoutSchema, shippingSchema } from './schemas';
@@ -3426,17 +3985,23 @@ describe('checkoutSchema', () => {
     expect(shippingSchema.safeParse({ ...valid, postalCode: '12' }).success).toBe(false);
   });
   it('rejects a Luhn-invalid card at the schema level', () => {
-    expect(checkoutSchema.safeParse({ ...valid, cardNumber: '4242 4242 4242 4241' }).success).toBe(false);
+    expect(checkoutSchema.safeParse({ ...valid, cardNumber: '4242 4242 4242 4241' }).success).toBe(
+      false,
+    );
   });
 });
 ```
 
 `src/lib/checkout/schemas.ts`:
+
 ```ts
 import { z } from 'zod';
 import { luhnCheck } from '@/lib/payments/luhn';
 
-const optionalText = z.preprocess((v) => (typeof v === 'string' && v.trim() === '' ? undefined : v), z.string().trim().max(120).optional());
+const optionalText = z.preprocess(
+  (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+  z.string().trim().max(120).optional(),
+);
 
 export const contactSchema = z.object({
   email: z.string().trim().toLowerCase().email('Enter a valid email address.'),
@@ -3449,7 +4014,12 @@ export const shippingSchema = z.object({
   city: z.string().trim().min(2, 'Enter a city.').max(80),
   state: z.string().trim().min(2, 'Enter a state or region.').max(40),
   postalCode: z.string().trim().min(3, 'Enter a postal code.').max(12),
-  country: z.string().trim().length(2, 'Use a two-letter country code.').toUpperCase().default('US'),
+  country: z
+    .string()
+    .trim()
+    .length(2, 'Use a two-letter country code.')
+    .toUpperCase()
+    .default('US'),
 });
 
 export const paymentSchema = z.object({
@@ -3457,7 +4027,10 @@ export const paymentSchema = z.object({
   cardName: z.string().trim().min(2, 'Enter the name on the card.').max(120),
   expMonth: z.coerce.number().int().min(1, 'Enter a valid month.').max(12, 'Enter a valid month.'),
   expYear: z.coerce.number().int().min(2024).max(2100),
-  cvc: z.string().trim().regex(/^\d{3,4}$/, 'Enter the 3 or 4 digit code.'),
+  cvc: z
+    .string()
+    .trim()
+    .regex(/^\d{3,4}$/, 'Enter the 3 or 4 digit code.'),
 });
 
 export const checkoutSchema = contactSchema.merge(shippingSchema).merge(paymentSchema).extend({
@@ -3473,6 +4046,7 @@ export type CheckoutInput = z.infer<typeof checkoutSchema>;
 - [ ] **Step 2: Order number helpers + test**
 
 `src/lib/checkout/order-number.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { formatOrderNumber, isOrderNumber, normalizeOrderNumber } from './order-number';
@@ -3492,6 +4066,7 @@ describe('order numbers', () => {
 ```
 
 `src/lib/checkout/order-number.ts`:
+
 ```ts
 export function formatOrderNumber(sequence: number): string {
   return `CF-${String(sequence).padStart(5, '0')}`;
@@ -3509,6 +4084,7 @@ export function isOrderNumber(input: string): boolean {
 - [ ] **Step 3: Failing integration tests for placeOrder**
 
 `tests/integration/place-order.test.ts`:
+
 ```ts
 import { eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
@@ -3551,7 +4127,13 @@ async function variantBySku(sku: string) {
 async function cartWith(sku: string, quantity = 1) {
   const cartId = await ensureCart(db, null);
   const v = await variantBySku(sku);
-  await addLine(db, cartId, { variantId: v.id, quantity, grind: null, purchaseType: 'one_time', subscriptionIntervalWeeks: null });
+  await addLine(db, cartId, {
+    variantId: v.id,
+    quantity,
+    grind: null,
+    purchaseType: 'one_time',
+    subscriptionIntervalWeeks: null,
+  });
   return { cartId, variant: v };
 }
 
@@ -3575,7 +4157,11 @@ describe('placeOrder', () => {
 
     const order = await getOrderForConfirmation(result.orderNumber, result.lookupToken, db);
     expect(order).not.toBeNull();
-    expect(order!.items[0]).toMatchObject({ variantId: variant.id, quantity: 2, unitPriceCents: variant.priceCents });
+    expect(order!.items[0]).toMatchObject({
+      variantId: variant.id,
+      quantity: 2,
+      unitPriceCents: variant.priceCents,
+    });
     expect(order!.totals.discountCents).toBe(Math.round(variant.priceCents * 2 * 0.1));
     expect(order!.discountCode).toBe('WELCOME10');
     expect(order!.cardLast4).toBe('4242');
@@ -3596,13 +4182,20 @@ describe('placeOrder', () => {
 
   it('rejects an empty cart', async () => {
     const cartId = await ensureCart(db, null);
-    await expect(placeOrder({ cartId, input: input(), db })).resolves.toMatchObject({ ok: false, code: 'empty_cart' });
+    await expect(placeOrder({ cartId, input: input(), db })).resolves.toMatchObject({
+      ok: false,
+      code: 'empty_cart',
+    });
   });
 
   it('fails on decline and leaves stock and cart untouched', async () => {
     const { cartId } = await cartWith('FILTERS-1', 3);
     const before = (await variantBySku('FILTERS-1')).stockQuantity;
-    const result = await placeOrder({ cartId, input: input({ cardNumber: TEST_CARDS.declined }), db });
+    const result = await placeOrder({
+      cartId,
+      input: input({ cardNumber: TEST_CARDS.declined }),
+      db,
+    });
     expect(result).toMatchObject({ ok: false, code: 'payment_declined' });
     expect((await variantBySku('FILTERS-1')).stockQuantity).toBe(before);
     expect((await getCartView(cartId, db))!.lines).toHaveLength(1);
@@ -3610,10 +4203,16 @@ describe('placeOrder', () => {
 
   it('fails when stock ran out after the item was added', async () => {
     const { cartId, variant } = await cartWith('GRINDER-1', 2);
-    await db.update(productVariants).set({ stockQuantity: 1 }).where(eq(productVariants.id, variant.id));
+    await db
+      .update(productVariants)
+      .set({ stockQuantity: 1 })
+      .where(eq(productVariants.id, variant.id));
     const result = await placeOrder({ cartId, input: input(), db });
     expect(result).toMatchObject({ ok: false, code: 'out_of_stock' });
-    await db.update(productVariants).set({ stockQuantity: variant.stockQuantity }).where(eq(productVariants.id, variant.id));
+    await db
+      .update(productVariants)
+      .set({ stockQuantity: variant.stockQuantity })
+      .where(eq(productVariants.id, variant.id));
   });
 });
 ```
@@ -3624,19 +4223,33 @@ Expected: FAIL (module not found).
 - [ ] **Step 4: Implement placeOrder**
 
 `src/lib/checkout/place-order.ts`:
+
 ```ts
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { randomBytes } from 'node:crypto';
 import { clearCart } from '@/lib/cart/mutations';
 import { getDb, type Db } from '@/lib/db/client';
-import { cartItems, carts, discountCodes, orderItems, orders, productVariants } from '@/lib/db/schema';
+import {
+  cartItems,
+  carts,
+  discountCodes,
+  orderItems,
+  orders,
+  productVariants,
+} from '@/lib/db/schema';
 import { logger } from '@/lib/logger';
 import { getPaymentProvider, type PaymentProvider } from '@/lib/payments';
-import { computeTotals, effectiveUnitPriceCents, evaluateDiscountCode, type DiscountRule } from '@/lib/pricing';
+import {
+  computeTotals,
+  effectiveUnitPriceCents,
+  evaluateDiscountCode,
+  type DiscountRule,
+} from '@/lib/pricing';
 import { formatOrderNumber } from './order-number';
 import type { CheckoutInput } from './schemas';
 
-export type PlaceOrderFailure = 'empty_cart' | 'out_of_stock' | 'payment_declined' | 'invalid_discount' | 'unknown';
+export type PlaceOrderFailure =
+  'empty_cart' | 'out_of_stock' | 'payment_declined' | 'invalid_discount' | 'unknown';
 
 export type PlaceOrderResult =
   | { ok: true; orderId: string; orderNumber: string; lookupToken: string }
@@ -3668,15 +4281,28 @@ export async function placeOrder(params: {
     where: eq(orders.idempotencyKey, input.idempotencyKey),
     columns: { id: true, orderNumber: true, lookupToken: true },
   });
-  if (existing) return { ok: true, orderId: existing.id, orderNumber: existing.orderNumber, lookupToken: existing.lookupToken };
+  if (existing)
+    return {
+      ok: true,
+      orderId: existing.id,
+      orderNumber: existing.orderNumber,
+      lookupToken: existing.lookupToken,
+    };
 
   try {
     return await db.transaction(async (tx) => {
-      const cart = await tx.query.carts.findFirst({ where: eq(carts.id, cartId), columns: { id: true, discountCode: true } });
+      const cart = await tx.query.carts.findFirst({
+        where: eq(carts.id, cartId),
+        columns: { id: true, discountCode: true },
+      });
       const items = cart
-        ? await tx.query.cartItems.findMany({ where: eq(cartItems.cartId, cartId), orderBy: (t, { asc }) => [asc(t.createdAt)] })
+        ? await tx.query.cartItems.findMany({
+            where: eq(cartItems.cartId, cartId),
+            orderBy: (t, { asc }) => [asc(t.createdAt)],
+          })
         : [];
-      if (!cart || items.length === 0) throw new PlaceOrderError('empty_cart', 'Your cart is empty.');
+      if (!cart || items.length === 0)
+        throw new PlaceOrderError('empty_cart', 'Your cart is empty.');
 
       const variantIds = items.map((i) => i.variantId);
       const lockedVariants = await tx
@@ -3686,13 +4312,19 @@ export async function placeOrder(params: {
         .for('update');
       const variantById = new Map(lockedVariants.map((v) => [v.id, v]));
       const products = await tx.query.products.findMany({
-        where: (p, { inArray: inArr }) => inArr(p.id, [...new Set(lockedVariants.map((v) => v.productId))]),
+        where: (p, { inArray: inArr }) =>
+          inArr(p.id, [...new Set(lockedVariants.map((v) => v.productId))]),
       });
       const productById = new Map(products.map((p) => [p.id, p]));
 
       for (const item of items) {
         const variant = variantById.get(item.variantId);
-        if (!variant) throw new PlaceOrderError('out_of_stock', 'An item in your cart is no longer available.', item.id);
+        if (!variant)
+          throw new PlaceOrderError(
+            'out_of_stock',
+            'An item in your cart is no longer available.',
+            item.id,
+          );
         if (variant.stockQuantity < item.quantity) {
           const product = productById.get(variant.productId);
           throw new PlaceOrderError(
@@ -3712,11 +4344,16 @@ export async function placeOrder(params: {
       let discount: DiscountRule | null = null;
       let discountRow: typeof discountCodes.$inferSelect | undefined;
       if (cart.discountCode) {
-        discountRow = await tx.query.discountCodes.findFirst({ where: eq(discountCodes.code, cart.discountCode) });
+        discountRow = await tx.query.discountCodes.findFirst({
+          where: eq(discountCodes.code, cart.discountCode),
+        });
         const subtotal = computeTotals(pricingLines, null).subtotalCents;
         const evaluation = discountRow ? evaluateDiscountCode(discountRow, subtotal, now) : null;
         if (!evaluation || !evaluation.ok) {
-          throw new PlaceOrderError('invalid_discount', evaluation?.message ?? 'Your promo code is no longer valid. Remove it to continue.');
+          throw new PlaceOrderError(
+            'invalid_discount',
+            evaluation?.message ?? 'Your promo code is no longer valid. Remove it to continue.',
+          );
         }
         discount = evaluation.rule;
       }
@@ -3727,11 +4364,19 @@ export async function placeOrder(params: {
         amountCents: totals.totalCents,
         currency: 'USD',
         idempotencyKey: input.idempotencyKey,
-        card: { number: input.cardNumber, expMonth: input.expMonth, expYear: input.expYear, cvc: input.cvc, name: input.cardName },
+        card: {
+          number: input.cardNumber,
+          expMonth: input.expMonth,
+          expYear: input.expYear,
+          cvc: input.cvc,
+          name: input.cardName,
+        },
       });
       if (!authorization.ok) throw new PlaceOrderError('payment_declined', authorization.message);
 
-      const [{ nextval }] = await tx.execute<{ nextval: string }>(sql`select nextval('order_number_seq') as nextval`);
+      const [{ nextval }] = await tx.execute<{ nextval: string }>(
+        sql`select nextval('order_number_seq') as nextval`,
+      );
       const orderNumber = formatOrderNumber(Number(nextval));
       const lookupToken = randomBytes(16).toString('hex');
 
@@ -3777,7 +4422,11 @@ export async function placeOrder(params: {
             grind: item.grind,
             purchaseType: item.purchaseType,
             subscriptionIntervalWeeks: item.subscriptionIntervalWeeks,
-            unitPriceCents: effectiveUnitPriceCents({ unitPriceCents: variant.priceCents, quantity: item.quantity, purchaseType: item.purchaseType }),
+            unitPriceCents: effectiveUnitPriceCents({
+              unitPriceCents: variant.priceCents,
+              quantity: item.quantity,
+              purchaseType: item.purchaseType,
+            }),
             quantity: item.quantity,
           };
         }),
@@ -3791,12 +4440,19 @@ export async function placeOrder(params: {
       }
 
       if (discountRow) {
-        await tx.update(discountCodes).set({ usageCount: sql`${discountCodes.usageCount} + 1` }).where(eq(discountCodes.id, discountRow.id));
+        await tx
+          .update(discountCodes)
+          .set({ usageCount: sql`${discountCodes.usageCount} + 1` })
+          .where(eq(discountCodes.id, discountRow.id));
       }
 
       await clearCart(tx as unknown as Db, cartId);
 
-      logger.info('order placed', { orderNumber, totalCents: totals.totalCents, items: items.length });
+      logger.info('order placed', {
+        orderNumber,
+        totalCents: totals.totalCents,
+        items: items.length,
+      });
       return { ok: true, orderId: order.id, orderNumber, lookupToken } satisfies PlaceOrderResult;
     });
   } catch (err) {
@@ -3804,7 +4460,11 @@ export async function placeOrder(params: {
       return { ok: false, code: err.code, message: err.message, lineId: err.lineId };
     }
     logger.error('placeOrder failed', { err, cartId });
-    return { ok: false, code: 'unknown', message: 'Something went wrong placing your order. You have not been charged.' };
+    return {
+      ok: false,
+      code: 'unknown',
+      message: 'Something went wrong placing your order. You have not been charged.',
+    };
   }
 }
 ```
@@ -3814,6 +4474,7 @@ Note on `clearCart(tx as unknown as Db, cartId)`: Drizzle's transaction type is 
 - [ ] **Step 5: Order queries**
 
 `src/lib/checkout/queries.ts`:
+
 ```ts
 import { eq } from 'drizzle-orm';
 import { getDb, type Db } from '@/lib/db/client';
@@ -3842,8 +4503,22 @@ export interface OrderView {
   email: string;
   status: Order['status'];
   createdAt: Date;
-  shipping: { name: string; address1: string; address2: string | null; city: string; state: string; postalCode: string; country: string };
-  totals: { subtotalCents: number; discountCents: number; shippingCents: number; taxCents: number; totalCents: number };
+  shipping: {
+    name: string;
+    address1: string;
+    address2: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  totals: {
+    subtotalCents: number;
+    discountCents: number;
+    shippingCents: number;
+    taxCents: number;
+    totalCents: number;
+  };
   discountCode: string | null;
   cardLast4: string | null;
   items: OrderItemView[];
@@ -3899,13 +4574,21 @@ async function findOrder(orderNumber: string, db: Db) {
   });
 }
 
-export async function getOrderForConfirmation(orderNumber: string, token: string, db: Db = getDb()): Promise<OrderView | null> {
+export async function getOrderForConfirmation(
+  orderNumber: string,
+  token: string,
+  db: Db = getDb(),
+): Promise<OrderView | null> {
   const order = await findOrder(orderNumber, db);
   if (!order || !token || order.lookupToken !== token) return null;
   return toView(order);
 }
 
-export async function getOrderForLookup(orderNumber: string, email: string, db: Db = getDb()): Promise<OrderView | null> {
+export async function getOrderForLookup(
+  orderNumber: string,
+  email: string,
+  db: Db = getDb(),
+): Promise<OrderView | null> {
   const order = await findOrder(orderNumber, db);
   if (!order || order.email !== email.trim().toLowerCase()) return null;
   return toView(order);
@@ -3928,18 +4611,21 @@ git commit -m "feat: add checkout schemas and transactional order placement with
 ### Task 8: Analytics events, SDK slot, easter eggs, robots, sitemap
 
 **Files:**
+
 - Create: `src/lib/analytics/events.ts`, `src/lib/analytics/track.ts`, `src/lib/analytics/global.d.ts`
 - Create: `src/components/analytics/analytics-provider.tsx`, `src/components/analytics/third-party-scripts.tsx`, `src/components/analytics/console-easter-egg.tsx`
 - Create: `src/app/coffee/route.ts`, `public/humans.txt`, `src/app/robots.ts`, `src/app/sitemap.ts`
 - Test: `src/lib/analytics/track.test.ts`
 
 **Interfaces:**
+
 - Produces: `type AnalyticsEvent` union (see below); `track(event: AnalyticsEvent): void`; `<AnalyticsProvider />`, `<ThirdPartyScripts />`, `<ConsoleEasterEgg />`; `window.cofresso.events`.
 - Consumes: `siteConfig.easterEggUrl`, `getServerEnv()`, product/collection list queries from Task 12/13 for the sitemap (`listProductSlugs`, `listCollections` — define `listProductSlugs` in Task 13; until then the sitemap imports only what exists and Task 13 extends it).
 
 - [ ] **Step 1: Event types**
 
 `src/lib/analytics/events.ts`:
+
 ```ts
 export interface AnalyticsItem {
   productId: string;
@@ -3963,7 +4649,13 @@ export type AnalyticsEvent =
   | { name: 'begin_checkout'; valueCents: number; itemCount: number }
   | { name: 'add_shipping_info'; valueCents: number }
   | { name: 'add_payment_info'; valueCents: number }
-  | { name: 'purchase'; orderNumber: string; valueCents: number; items: AnalyticsItem[]; discountCode?: string | null }
+  | {
+      name: 'purchase';
+      orderNumber: string;
+      valueCents: number;
+      items: AnalyticsItem[];
+      discountCode?: string | null;
+    }
   | { name: 'apply_promo'; code: string; success: boolean }
   | { name: 'newsletter_signup'; source: string }
   | { name: 'search'; query: string; resultCount: number };
@@ -3977,6 +4669,7 @@ export interface TrackedEvent {
 ```
 
 `src/lib/analytics/global.d.ts`:
+
 ```ts
 import type { TrackedEvent } from './events';
 
@@ -3992,6 +4685,7 @@ export {};
 - [ ] **Step 2: Failing test for `track`**
 
 `src/lib/analytics/track.test.ts`:
+
 ```ts
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -4015,7 +4709,8 @@ describe('track', () => {
   });
 
   it('caps the buffer', () => {
-    for (let i = 0; i < MAX_BUFFERED_EVENTS + 5; i++) track({ name: 'search', query: String(i), resultCount: 0 });
+    for (let i = 0; i < MAX_BUFFERED_EVENTS + 5; i++)
+      track({ name: 'search', query: String(i), resultCount: 0 });
     expect(window.cofresso?.events).toHaveLength(MAX_BUFFERED_EVENTS);
     expect((window.cofresso?.events[0].event as { query: string }).query).toBe('5');
   });
@@ -4025,6 +4720,7 @@ describe('track', () => {
 - [ ] **Step 3: Implement `track`**
 
 `src/lib/analytics/track.ts`:
+
 ```ts
 import type { AnalyticsEvent, TrackedEvent } from './events';
 
@@ -4056,6 +4752,7 @@ Run: `pnpm test:unit src/lib/analytics` → PASS.
 - [ ] **Step 4: Client components**
 
 `src/components/analytics/analytics-provider.tsx`:
+
 ```tsx
 'use client';
 
@@ -4073,6 +4770,7 @@ export function AnalyticsProvider() {
 ```
 
 `src/components/analytics/console-easter-egg.tsx`:
+
 ```tsx
 'use client';
 
@@ -4094,6 +4792,7 @@ export function ConsoleEasterEgg() {
 ```
 
 `src/components/analytics/third-party-scripts.tsx` (server component):
+
 ```tsx
 import Script from 'next/script';
 import { getServerEnv } from '@/lib/env';
@@ -4107,13 +4806,21 @@ export function ThirdPartyScripts() {
   const env = getServerEnv();
   if (!env.COFRAME_SITE_KEY) return null;
   const src = env.COFRAME_SCRIPT_URL ?? 'https://cdn.coframe.com/sdk.js';
-  return <Script id="coframe-sdk" src={src} data-site-key={env.COFRAME_SITE_KEY} strategy="afterInteractive" />;
+  return (
+    <Script
+      id="coframe-sdk"
+      src={src}
+      data-site-key={env.COFRAME_SITE_KEY}
+      strategy="afterInteractive"
+    />
+  );
 }
 ```
 
 - [ ] **Step 5: Easter egg route, humans.txt, robots, sitemap**
 
 `src/app/coffee/route.ts`:
+
 ```ts
 import { NextResponse } from 'next/server';
 import { siteConfig } from '@/lib/config';
@@ -4126,6 +4833,7 @@ export function GET() {
 ```
 
 `public/humans.txt`:
+
 ```
 /* TEAM */
 Roasters, developers and one very patient kettle.
@@ -4141,6 +4849,7 @@ Components: Next.js, React, Tailwind CSS, Drizzle ORM, Postgres
 ```
 
 `src/app/robots.ts`:
+
 ```ts
 import type { MetadataRoute } from 'next';
 import { getServerEnv } from '@/lib/env';
@@ -4157,6 +4866,7 @@ export default function robots(): MetadataRoute.Robots {
 ```
 
 `src/app/sitemap.ts` (initial version; Task 13 adds products and collections):
+
 ```ts
 import type { MetadataRoute } from 'next';
 import { getServerEnv } from '@/lib/env';
@@ -4166,24 +4876,29 @@ export const dynamic = 'force-dynamic';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getServerEnv().SITE_URL;
   const staticRoutes = ['', '/shop', '/about', '/faq', '/brew-guides', '/orders'];
-  return staticRoutes.map((path) => ({ url: `${base}${path}`, changeFrequency: 'weekly', priority: path === '' ? 1 : 0.7 }));
+  return staticRoutes.map((path) => ({
+    url: `${base}${path}`,
+    changeFrequency: 'weekly',
+    priority: path === '' ? 1 : 0.7,
+  }));
 }
 ```
 
 - [ ] **Step 6: Wire into the root layout**
 
 Edit `src/app/layout.tsx` body:
+
 ```tsx
 import { AnalyticsProvider } from '@/components/analytics/analytics-provider';
 import { ConsoleEasterEgg } from '@/components/analytics/console-easter-egg';
 import { ThirdPartyScripts } from '@/components/analytics/third-party-scripts';
 // ...
-      <body className="flex min-h-screen flex-col">
-        {children}
-        <AnalyticsProvider />
-        <ConsoleEasterEgg />
-        <ThirdPartyScripts />
-      </body>
+<body className="flex min-h-screen flex-col">
+  {children}
+  <AnalyticsProvider />
+  <ConsoleEasterEgg />
+  <ThirdPartyScripts />
+</body>;
 ```
 
 Run: `pnpm dev` then `curl -sI localhost:3000/coffee | head -3` → `HTTP/1.1 302` with `location: https://github.com/coframe/coffee`. `curl -s localhost:3000/robots.txt` shows the sitemap line. Stop the dev server.
@@ -4201,15 +4916,18 @@ git commit -m "feat: add typed analytics events, Coframe SDK slot, easter eggs, 
 ### Task 9: UI primitives
 
 **Files:**
+
 - Create: `src/components/ui/button.tsx`, `src/components/ui/input.tsx`, `src/components/ui/select.tsx`, `src/components/ui/badge.tsx`, `src/components/ui/price.tsx`, `src/components/ui/rating.tsx`, `src/components/ui/container.tsx`, `src/components/ui/section-heading.tsx`, `src/components/ui/sheet.tsx`, `src/components/ui/icons.tsx`, `src/components/ui/quantity-stepper.tsx`, `src/components/ui/skeleton.tsx`
 - Test: `src/components/ui/button.test.tsx`, `src/components/ui/price.test.tsx`
 
 **Interfaces:**
+
 - Produces: `Button`, `ButtonLink`, `buttonClasses({ variant, size })`; `Input`, `Label`, `Field`, `FieldError`; `Select`; `Badge`; `Price`; `Rating`; `Container`; `SectionHeading`; `Sheet` (client); icons `IconBag IconSearch IconMenu IconX IconMinus IconPlus IconStar IconArrowRight IconCheck IconLeaf`; `QuantityStepper` (client); `Skeleton`.
 
 - [ ] **Step 1: Failing component tests**
 
 `src/components/ui/button.test.tsx`:
+
 ```tsx
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
@@ -4227,7 +4945,11 @@ describe('Button', () => {
     expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true');
   });
   it('renders links with button styling', () => {
-    render(<ButtonLink href="/shop" variant="outline">Shop</ButtonLink>);
+    render(
+      <ButtonLink href="/shop" variant="outline">
+        Shop
+      </ButtonLink>,
+    );
     const link = screen.getByRole('link', { name: 'Shop' });
     expect(link).toHaveAttribute('href', '/shop');
     expect(link.className).toContain('border');
@@ -4236,6 +4958,7 @@ describe('Button', () => {
 ```
 
 `src/components/ui/price.test.tsx`:
+
 ```tsx
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
@@ -4258,6 +4981,7 @@ Run: `pnpm test:unit src/components/ui` → FAIL.
 - [ ] **Step 2: Button**
 
 `src/components/ui/button.tsx`:
+
 ```tsx
 import Link from 'next/link';
 import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from 'react';
@@ -4269,7 +4993,8 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 const variants: Record<ButtonVariant, string> = {
   primary: 'bg-espresso text-foam hover:bg-espresso-dark focus-visible:ring-espresso',
   secondary: 'bg-latte/20 text-espresso hover:bg-latte/30 focus-visible:ring-latte',
-  outline: 'border border-espresso/30 text-espresso hover:border-espresso hover:bg-espresso/5 focus-visible:ring-espresso',
+  outline:
+    'border border-espresso/30 text-espresso hover:border-espresso hover:bg-espresso/5 focus-visible:ring-espresso',
   ghost: 'text-espresso hover:bg-espresso/5 focus-visible:ring-espresso',
   copper: 'bg-copper text-foam hover:bg-copper-dark focus-visible:ring-copper',
 };
@@ -4299,7 +5024,15 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
-export function Button({ variant, size, className, loading = false, disabled, children, ...props }: ButtonProps) {
+export function Button({
+  variant,
+  size,
+  className,
+  loading = false,
+  disabled,
+  children,
+  ...props
+}: ButtonProps) {
   return (
     <button
       type={props.type ?? 'button'}
@@ -4332,7 +5065,12 @@ function Spinner() {
   return (
     <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" />
-      <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+      <path
+        d="M22 12a10 10 0 0 1-10 10"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -4341,12 +5079,15 @@ function Spinner() {
 - [ ] **Step 3: Form primitives**
 
 `src/components/ui/input.tsx`:
+
 ```tsx
 import type { InputHTMLAttributes, LabelHTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 export function Label({ className, ...props }: LabelHTMLAttributes<HTMLLabelElement>) {
-  return <label className={cn('mb-1.5 block text-sm font-medium text-espresso', className)} {...props} />;
+  return (
+    <label className={cn('text-espresso mb-1.5 block text-sm font-medium', className)} {...props} />
+  );
 }
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -4357,7 +5098,7 @@ export function Input({ className, invalid, ...props }: InputProps) {
   return (
     <input
       className={cn(
-        'h-11 w-full rounded-lg border bg-foam px-3 text-base text-espresso placeholder:text-latte focus:outline-none focus:ring-2 focus:ring-espresso/40',
+        'bg-foam text-espresso placeholder:text-latte focus:ring-espresso/40 h-11 w-full rounded-lg border px-3 text-base focus:ring-2 focus:outline-none',
         invalid ? 'border-red-500' : 'border-latte/50',
         className,
       )}
@@ -4391,7 +5132,7 @@ export function Field({ label, htmlFor, error, hint, children, className }: Fiel
     <div className={className}>
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
-      {hint && !message ? <p className="mt-1 text-xs text-latte">{hint}</p> : null}
+      {hint && !message ? <p className="text-latte mt-1 text-xs">{hint}</p> : null}
       <FieldError id={`${htmlFor}-error`}>{message}</FieldError>
     </div>
   );
@@ -4399,6 +5140,7 @@ export function Field({ label, htmlFor, error, hint, children, className }: Fiel
 ```
 
 `src/components/ui/select.tsx`:
+
 ```tsx
 import type { SelectHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
@@ -4408,15 +5150,24 @@ export function Select({ className, children, ...props }: SelectHTMLAttributes<H
     <div className="relative">
       <select
         className={cn(
-          'h-11 w-full appearance-none rounded-lg border border-latte/50 bg-foam px-3 pr-9 text-base text-espresso focus:outline-none focus:ring-2 focus:ring-espresso/40',
+          'border-latte/50 bg-foam text-espresso focus:ring-espresso/40 h-11 w-full appearance-none rounded-lg border px-3 pr-9 text-base focus:ring-2 focus:outline-none',
           className,
         )}
         {...props}
       >
         {children}
       </select>
-      <svg className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-latte" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z" clipRule="evenodd" />
+      <svg
+        className="text-latte pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fillRule="evenodd"
+          d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z"
+          clipRule="evenodd"
+        />
       </svg>
     </div>
   );
@@ -4426,6 +5177,7 @@ export function Select({ className, children, ...props }: SelectHTMLAttributes<H
 - [ ] **Step 4: Badge, Price, Rating, Container, SectionHeading, Skeleton, Icons**
 
 `src/components/ui/badge.tsx`:
+
 ```tsx
 import type { HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
@@ -4438,10 +5190,18 @@ const tones: Record<Tone, string> = {
   espresso: 'bg-espresso text-foam',
 };
 
-export function Badge({ tone = 'neutral', className, ...props }: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
+export function Badge({
+  tone = 'neutral',
+  className,
+  ...props
+}: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
   return (
     <span
-      className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium tracking-wide', tones[tone], className)}
+      className={cn(
+        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium tracking-wide',
+        tones[tone],
+        className,
+      )}
       {...props}
     />
   );
@@ -4449,6 +5209,7 @@ export function Badge({ tone = 'neutral', className, ...props }: HTMLAttributes<
 ```
 
 `src/components/ui/price.tsx`:
+
 ```tsx
 import { formatPrice } from '@/lib/pricing';
 import { cn } from '@/lib/utils';
@@ -4465,14 +5226,19 @@ export function Price({ cents, compareAtCents, className, suffix }: PriceProps) 
   return (
     <span className={cn('inline-flex items-baseline gap-2', className)}>
       <span className="font-medium tabular-nums">{formatPrice(cents)}</span>
-      {showCompare ? <span className="text-sm text-latte line-through tabular-nums">{formatPrice(compareAtCents)}</span> : null}
-      {suffix ? <span className="text-sm text-latte">{suffix}</span> : null}
+      {showCompare ? (
+        <span className="text-latte text-sm tabular-nums line-through">
+          {formatPrice(compareAtCents)}
+        </span>
+      ) : null}
+      {suffix ? <span className="text-latte text-sm">{suffix}</span> : null}
     </span>
   );
 }
 ```
 
 `src/components/ui/rating.tsx`:
+
 ```tsx
 import { cn } from '@/lib/utils';
 
@@ -4487,31 +5253,43 @@ export function Rating({ value, count, size = 'sm', className }: RatingProps) {
   const rounded = Math.round(value * 2) / 2;
   const dim = size === 'sm' ? 'size-3.5' : 'size-5';
   return (
-    <span className={cn('inline-flex items-center gap-1', className)} aria-label={`${value.toFixed(1)} out of 5 stars`}>
+    <span
+      className={cn('inline-flex items-center gap-1', className)}
+      aria-label={`${value.toFixed(1)} out of 5 stars`}
+    >
       <span className="flex" aria-hidden="true">
         {[1, 2, 3, 4, 5].map((i) => (
-          <svg key={i} viewBox="0 0 20 20" className={cn(dim, i <= rounded ? 'text-copper' : 'text-latte/40')} fill="currentColor">
+          <svg
+            key={i}
+            viewBox="0 0 20 20"
+            className={cn(dim, i <= rounded ? 'text-copper' : 'text-latte/40')}
+            fill="currentColor"
+          >
             <path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z" />
           </svg>
         ))}
       </span>
-      {typeof count === 'number' ? <span className="text-xs text-latte">({count})</span> : null}
+      {typeof count === 'number' ? <span className="text-latte text-xs">({count})</span> : null}
     </span>
   );
 }
 ```
 
 `src/components/ui/container.tsx`:
+
 ```tsx
 import type { HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 export function Container({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8', className)} {...props} />;
+  return (
+    <div className={cn('mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8', className)} {...props} />
+  );
 }
 ```
 
 `src/components/ui/section-heading.tsx`:
+
 ```tsx
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
@@ -4525,13 +5303,30 @@ interface SectionHeadingProps {
   className?: string;
 }
 
-export function SectionHeading({ eyebrow, title, description, action, align = 'left', className }: SectionHeadingProps) {
+export function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  action,
+  align = 'left',
+  className,
+}: SectionHeadingProps) {
   return (
-    <div className={cn('mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between', align === 'center' && 'text-center sm:flex-col sm:items-center', className)}>
+    <div
+      className={cn(
+        'mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between',
+        align === 'center' && 'text-center sm:flex-col sm:items-center',
+        className,
+      )}
+    >
       <div className="max-w-2xl">
-        {eyebrow ? <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-copper">{eyebrow}</p> : null}
+        {eyebrow ? (
+          <p className="text-copper mb-2 text-xs font-semibold tracking-[0.2em] uppercase">
+            {eyebrow}
+          </p>
+        ) : null}
         <h2 className="text-3xl leading-tight sm:text-4xl">{title}</h2>
-        {description ? <p className="mt-3 text-latte">{description}</p> : null}
+        {description ? <p className="text-latte mt-3">{description}</p> : null}
       </div>
       {action}
     </div>
@@ -4540,15 +5335,19 @@ export function SectionHeading({ eyebrow, title, description, action, align = 'l
 ```
 
 `src/components/ui/skeleton.tsx`:
+
 ```tsx
 import { cn } from '@/lib/utils';
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-lg bg-latte/20', className)} aria-hidden="true" />;
+  return (
+    <div className={cn('bg-latte/20 animate-pulse rounded-lg', className)} aria-hidden="true" />
+  );
 }
 ```
 
 `src/components/ui/icons.tsx`:
+
 ```tsx
 import type { SVGProps } from 'react';
 
@@ -4567,40 +5366,66 @@ const base = (props: IconProps) => ({
 });
 
 export const IconBag = (p: IconProps) => (
-  <svg {...base(p)}><path d="M6 8h12l-1 12H7L6 8z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /></svg>
+  <svg {...base(p)}>
+    <path d="M6 8h12l-1 12H7L6 8z" />
+    <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+  </svg>
 );
 export const IconSearch = (p: IconProps) => (
-  <svg {...base(p)}><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+  <svg {...base(p)}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
 );
 export const IconMenu = (p: IconProps) => (
-  <svg {...base(p)}><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+  <svg {...base(p)}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </svg>
 );
 export const IconX = (p: IconProps) => (
-  <svg {...base(p)}><path d="M6 6l12 12M18 6 6 18" /></svg>
+  <svg {...base(p)}>
+    <path d="M6 6l12 12M18 6 6 18" />
+  </svg>
 );
 export const IconMinus = (p: IconProps) => (
-  <svg {...base(p)}><path d="M5 12h14" /></svg>
+  <svg {...base(p)}>
+    <path d="M5 12h14" />
+  </svg>
 );
 export const IconPlus = (p: IconProps) => (
-  <svg {...base(p)}><path d="M12 5v14M5 12h14" /></svg>
+  <svg {...base(p)}>
+    <path d="M12 5v14M5 12h14" />
+  </svg>
 );
 export const IconArrowRight = (p: IconProps) => (
-  <svg {...base(p)}><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+  <svg {...base(p)}>
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
 );
 export const IconCheck = (p: IconProps) => (
-  <svg {...base(p)}><path d="m5 12 5 5L20 7" /></svg>
+  <svg {...base(p)}>
+    <path d="m5 12 5 5L20 7" />
+  </svg>
 );
 export const IconLeaf = (p: IconProps) => (
-  <svg {...base(p)}><path d="M5 19C5 9 11 4 20 4c0 9-5 15-15 15z" /><path d="M5 19c3-4 6-7 10-10" /></svg>
+  <svg {...base(p)}>
+    <path d="M5 19C5 9 11 4 20 4c0 9-5 15-15 15z" />
+    <path d="M5 19c3-4 6-7 10-10" />
+  </svg>
 );
 export const IconTruck = (p: IconProps) => (
-  <svg {...base(p)}><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z" /><circle cx="7" cy="18" r="1.5" /><circle cx="17" cy="18" r="1.5" /></svg>
+  <svg {...base(p)}>
+    <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z" />
+    <circle cx="7" cy="18" r="1.5" />
+    <circle cx="17" cy="18" r="1.5" />
+  </svg>
 );
 ```
 
 - [ ] **Step 5: Sheet and QuantityStepper (client)**
 
 `src/components/ui/sheet.tsx`:
+
 ```tsx
 'use client';
 
@@ -4618,7 +5443,15 @@ interface SheetProps {
   testId?: string;
 }
 
-export function Sheet({ open, onClose, title, side = 'right', children, footer, testId }: SheetProps) {
+export function Sheet({
+  open,
+  onClose,
+  title,
+  side = 'right',
+  children,
+  footer,
+  testId,
+}: SheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -4635,9 +5468,15 @@ export function Sheet({ open, onClose, title, side = 'right', children, footer, 
   }, [open, onClose]);
 
   return (
-    <div className={cn('fixed inset-0 z-50', open ? 'pointer-events-auto' : 'pointer-events-none')} aria-hidden={!open}>
+    <div
+      className={cn('fixed inset-0 z-50', open ? 'pointer-events-auto' : 'pointer-events-none')}
+      aria-hidden={!open}
+    >
       <div
-        className={cn('absolute inset-0 bg-espresso/40 transition-opacity duration-300', open ? 'opacity-100' : 'opacity-0')}
+        className={cn(
+          'bg-espresso/40 absolute inset-0 transition-opacity duration-300',
+          open ? 'opacity-100' : 'opacity-0',
+        )}
         onClick={onClose}
       />
       <div
@@ -4648,19 +5487,26 @@ export function Sheet({ open, onClose, title, side = 'right', children, footer, 
         aria-label={title}
         data-testid={testId}
         className={cn(
-          'absolute inset-y-0 flex w-full max-w-md flex-col bg-foam shadow-2xl transition-transform duration-300 focus:outline-none',
+          'bg-foam absolute inset-y-0 flex w-full max-w-md flex-col shadow-2xl transition-transform duration-300 focus:outline-none',
           side === 'right' ? 'right-0' : 'left-0',
           open ? 'translate-x-0' : side === 'right' ? 'translate-x-full' : '-translate-x-full',
         )}
       >
-        <header className="flex items-center justify-between border-b border-latte/30 px-5 py-4">
+        <header className="border-latte/30 flex items-center justify-between border-b px-5 py-4">
           <h2 className="text-xl">{title}</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="rounded-full p-2 hover:bg-espresso/5">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="hover:bg-espresso/5 rounded-full p-2"
+          >
             <IconX />
           </button>
         </header>
         <div className="flex-1 overflow-y-auto">{children}</div>
-        {footer ? <div className="border-t border-latte/30 bg-cream px-5 py-4">{footer}</div> : null}
+        {footer ? (
+          <div className="border-latte/30 bg-cream border-t px-5 py-4">{footer}</div>
+        ) : null}
       </div>
     </div>
   );
@@ -4668,6 +5514,7 @@ export function Sheet({ open, onClose, title, side = 'right', children, footer, 
 ```
 
 `src/components/ui/quantity-stepper.tsx`:
+
 ```tsx
 'use client';
 
@@ -4685,17 +5532,51 @@ interface QuantityStepperProps {
   className?: string;
 }
 
-export function QuantityStepper({ value, onChange, min = 1, max = 10, disabled, label = 'Quantity', size = 'md', className }: QuantityStepperProps) {
-  const btn = cn('flex items-center justify-center text-espresso disabled:opacity-40', size === 'sm' ? 'size-8' : 'size-10');
+export function QuantityStepper({
+  value,
+  onChange,
+  min = 1,
+  max = 10,
+  disabled,
+  label = 'Quantity',
+  size = 'md',
+  className,
+}: QuantityStepperProps) {
+  const btn = cn(
+    'flex items-center justify-center text-espresso disabled:opacity-40',
+    size === 'sm' ? 'size-8' : 'size-10',
+  );
   return (
-    <div className={cn('inline-flex items-center rounded-full border border-latte/50 bg-foam', className)} role="group" aria-label={label}>
-      <button type="button" className={btn} onClick={() => onChange(value - 1)} disabled={disabled || value <= min} aria-label="Decrease quantity">
+    <div
+      className={cn(
+        'border-latte/50 bg-foam inline-flex items-center rounded-full border',
+        className,
+      )}
+      role="group"
+      aria-label={label}
+    >
+      <button
+        type="button"
+        className={btn}
+        onClick={() => onChange(value - 1)}
+        disabled={disabled || value <= min}
+        aria-label="Decrease quantity"
+      >
         <IconMinus width={16} height={16} />
       </button>
-      <span className={cn('min-w-8 text-center tabular-nums', size === 'sm' ? 'text-sm' : 'text-base')} aria-live="polite">
+      <span
+        className={cn('min-w-8 text-center tabular-nums', size === 'sm' ? 'text-sm' : 'text-base')}
+        aria-live="polite"
+      >
         {value}
       </span>
-      <button type="button" className={btn} onClick={() => onChange(value + 1)} disabled={disabled || value >= max} aria-label="Increase quantity">
+      <button
+        type="button"
+        className={btn}
+        onClick={() => onChange(value + 1)}
+        disabled={disabled || value >= max}
+        aria-label="Increase quantity"
+      >
         <IconPlus width={16} height={16} />
       </button>
     </div>
@@ -4718,6 +5599,7 @@ git commit -m "feat: add UI primitives (button, form fields, badge, price, ratin
 ### Task 10: Layout shell, cart components, cart drawer and cart page
 
 **Files:**
+
 - Create: `src/lib/catalog/labels.ts`, `src/lib/catalog/labels.test.ts`
 - Create: `src/components/layout/logo.tsx`, `src/components/layout/header.tsx`, `src/components/layout/footer.tsx`, `src/components/layout/mobile-nav.tsx`, `src/components/layout/cart-button.tsx`, `src/components/layout/cart-drawer-context.tsx`, `src/components/layout/cart-drawer.tsx`, `src/components/layout/search-form.tsx`
 - Create: `src/components/cart/cart-line.tsx`, `src/components/cart/cart-summary.tsx`, `src/components/cart/promo-code-form.tsx`, `src/components/cart/free-shipping-bar.tsx`, `src/components/cart/cart-panel.tsx`, `src/components/cart/empty-cart.tsx`
@@ -4725,12 +5607,14 @@ git commit -m "feat: add UI primitives (button, form fields, badge, price, ratin
 - Modify: `src/app/layout.tsx`
 
 **Interfaces:**
+
 - Consumes: cart queries/actions (Task 6), UI primitives (Task 9), `siteConfig`, `track`.
 - Produces: `grindLabel(g)`, `roastLabel(r)`, `purchaseTypeLabel(p, weeks)`, `intervalLabel(weeks)`, `categoryLabel(c)`; `<Header />`, `<Footer />`, `<CartDrawer />` (server), `CartDrawerProvider`, `useCartDrawer(): { open: boolean; openDrawer(): void; closeDrawer(): void }`; `<CartPanel cart mode="drawer" | "page" />`; `<FreeShippingBar remainingCents unlocked />`; `<CartSummary totals discountCode discountMessage />`.
 
 - [ ] **Step 1: Labels with test**
 
 `src/lib/catalog/labels.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { grindLabel, intervalLabel, purchaseTypeLabel, roastLabel } from './labels';
@@ -4749,6 +5633,7 @@ describe('labels', () => {
 ```
 
 `src/lib/catalog/labels.ts`:
+
 ```ts
 import type { Grind, ProductCategory, PurchaseType, RoastLevel } from '@/lib/db/schema';
 
@@ -4767,10 +5652,20 @@ const roasts: Record<RoastLevel, string> = {
   dark: 'Dark',
 };
 
-const categories: Record<ProductCategory, string> = { coffee: 'Coffee', equipment: 'Equipment', merch: 'Merch' };
+const categories: Record<ProductCategory, string> = {
+  coffee: 'Coffee',
+  equipment: 'Equipment',
+  merch: 'Merch',
+};
 
-export const GRIND_OPTIONS = (Object.keys(grinds) as Grind[]).map((value) => ({ value, label: grinds[value] }));
-export const ROAST_OPTIONS = (Object.keys(roasts) as RoastLevel[]).map((value) => ({ value, label: roasts[value] }));
+export const GRIND_OPTIONS = (Object.keys(grinds) as Grind[]).map((value) => ({
+  value,
+  label: grinds[value],
+}));
+export const ROAST_OPTIONS = (Object.keys(roasts) as RoastLevel[]).map((value) => ({
+  value,
+  label: roasts[value],
+}));
 
 export function grindLabel(grind: Grind | null | undefined): string {
   return grind ? grinds[grind] : '';
@@ -4798,6 +5693,7 @@ Run: `pnpm test:unit src/lib/catalog` → PASS.
 - [ ] **Step 2: Cart drawer context, cart button, logo, search form, mobile nav**
 
 `src/components/layout/cart-drawer-context.tsx`:
+
 ```tsx
 'use client';
 
@@ -4827,6 +5723,7 @@ export function useCartDrawer(): CartDrawerState {
 ```
 
 `src/components/layout/cart-button.tsx`:
+
 ```tsx
 'use client';
 
@@ -4839,14 +5736,14 @@ export function CartButton({ count }: { count: number }) {
     <button
       type="button"
       onClick={openDrawer}
-      className="relative rounded-full p-2 text-espresso hover:bg-espresso/5"
+      className="text-espresso hover:bg-espresso/5 relative rounded-full p-2"
       aria-label={`Open cart, ${count} item${count === 1 ? '' : 's'}`}
       data-testid="cart-button"
     >
       <IconBag width={22} height={22} />
       {count > 0 ? (
         <span
-          className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-copper text-[11px] font-semibold text-foam"
+          className="bg-copper text-foam absolute -top-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full text-[11px] font-semibold"
           data-testid="cart-count"
         >
           {count}
@@ -4858,6 +5755,7 @@ export function CartButton({ count }: { count: number }) {
 ```
 
 `src/components/layout/logo.tsx`:
+
 ```tsx
 import Image from 'next/image';
 import Link from 'next/link';
@@ -4865,20 +5763,33 @@ import { cn } from '@/lib/utils';
 
 export function Logo({ className, wordmark = true }: { className?: string; wordmark?: boolean }) {
   return (
-    <Link href="/" className={cn('flex items-center gap-2.5', className)} aria-label="Cofresso home">
+    <Link
+      href="/"
+      className={cn('flex items-center gap-2.5', className)}
+      aria-label="Cofresso home"
+    >
       <Image src="/logo.png" alt="" width={36} height={36} priority className="size-9" />
-      {wordmark ? <span className="font-display text-2xl font-semibold tracking-tight">Cofresso</span> : null}
+      {wordmark ? (
+        <span className="font-display text-2xl font-semibold tracking-tight">Cofresso</span>
+      ) : null}
     </Link>
   );
 }
 ```
 
 `src/components/layout/search-form.tsx`:
+
 ```tsx
 import { IconSearch } from '@/components/ui/icons';
 import { cn } from '@/lib/utils';
 
-export function SearchForm({ className, defaultValue = '' }: { className?: string; defaultValue?: string }) {
+export function SearchForm({
+  className,
+  defaultValue = '',
+}: {
+  className?: string;
+  defaultValue?: string;
+}) {
   return (
     <form action="/search" method="get" role="search" className={cn('relative', className)}>
       <label htmlFor="site-search" className="sr-only">
@@ -4890,15 +5801,20 @@ export function SearchForm({ className, defaultValue = '' }: { className?: strin
         type="search"
         defaultValue={defaultValue}
         placeholder="Search coffee, gear…"
-        className="h-10 w-full rounded-full border border-latte/40 bg-foam pl-10 pr-4 text-sm placeholder:text-latte focus:outline-none focus:ring-2 focus:ring-espresso/30"
+        className="border-latte/40 bg-foam placeholder:text-latte focus:ring-espresso/30 h-10 w-full rounded-full border pr-4 pl-10 text-sm focus:ring-2 focus:outline-none"
       />
-      <IconSearch className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-latte" width={16} height={16} />
+      <IconSearch
+        className="text-latte pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2"
+        width={16}
+        height={16}
+      />
     </form>
   );
 }
 ```
 
 `src/components/layout/mobile-nav.tsx`:
+
 ```tsx
 'use client';
 
@@ -4913,7 +5829,12 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" className="rounded-full p-2 md:hidden" aria-label="Open menu" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className="rounded-full p-2 md:hidden"
+        aria-label="Open menu"
+        onClick={() => setOpen(true)}
+      >
         <IconMenu width={22} height={22} />
       </button>
       <Sheet open={open} onClose={() => setOpen(false)} title="Menu" side="left">
@@ -4921,14 +5842,24 @@ export function MobileNav() {
           <SearchForm />
           <nav className="flex flex-col gap-1">
             {siteConfig.nav.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-lg hover:bg-espresso/5">
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className="hover:bg-espresso/5 rounded-lg px-3 py-3 text-lg"
+              >
                 {item.label}
               </Link>
             ))}
           </nav>
-          <div className="flex flex-col gap-1 border-t border-latte/30 pt-4 text-sm text-latte">
+          <div className="border-latte/30 text-latte flex flex-col gap-1 border-t pt-4 text-sm">
             {siteConfig.footerLinks.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="px-3 py-2 hover:text-espresso">
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className="hover:text-espresso px-3 py-2"
+              >
                 {item.label}
               </Link>
             ))}
@@ -4943,6 +5874,7 @@ export function MobileNav() {
 - [ ] **Step 3: Header and footer (server components)**
 
 `src/components/layout/header.tsx`:
+
 ```tsx
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
@@ -4959,9 +5891,11 @@ export async function Header() {
   const count = cartId ? await getCartItemCount(cartId) : 0;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-latte/20 bg-cream/90 backdrop-blur">
-      <div className="bg-espresso text-center text-xs text-foam" data-testid="announcement-bar">
-        <Container className="py-2">Free shipping on orders over $45 · Subscribe &amp; save 15%</Container>
+    <header className="border-latte/20 bg-cream/90 sticky top-0 z-40 border-b backdrop-blur">
+      <div className="bg-espresso text-foam text-center text-xs" data-testid="announcement-bar">
+        <Container className="py-2">
+          Free shipping on orders over $45 · Subscribe &amp; save 15%
+        </Container>
       </div>
       <Container className="flex h-16 items-center justify-between gap-6">
         <div className="flex items-center gap-2">
@@ -4970,7 +5904,11 @@ export async function Header() {
         </div>
         <nav className="hidden items-center gap-6 md:flex" aria-label="Primary">
           {siteConfig.nav.map((item) => (
-            <Link key={item.href} href={item.href} className="text-sm font-medium text-espresso/80 transition-colors hover:text-espresso">
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-espresso/80 hover:text-espresso text-sm font-medium transition-colors"
+            >
               {item.label}
             </Link>
           ))}
@@ -4979,7 +5917,18 @@ export async function Header() {
           <SearchForm className="hidden w-56 lg:block" />
           <Link href="/search" className="rounded-full p-2 lg:hidden" aria-label="Search">
             <span className="sr-only">Search</span>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
           </Link>
           <CartButton count={count} />
         </div>
@@ -4990,6 +5939,7 @@ export async function Header() {
 ```
 
 `src/components/layout/footer.tsx`:
+
 ```tsx
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
@@ -4999,42 +5949,58 @@ import { Logo } from './logo';
 export function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="mt-24 border-t border-latte/20 bg-foam">
+    <footer className="border-latte/20 bg-foam mt-24 border-t">
       <Container className="grid gap-10 py-14 md:grid-cols-4">
         <div className="md:col-span-2">
           <Logo />
-          <p className="mt-4 max-w-sm text-sm text-latte">{siteConfig.description}</p>
+          <p className="text-latte mt-4 max-w-sm text-sm">{siteConfig.description}</p>
         </div>
         <div>
-          <h3 className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-latte">Shop</h3>
+          <h3 className="font-body text-latte text-xs font-semibold tracking-[0.2em] uppercase">
+            Shop
+          </h3>
           <ul className="mt-4 flex flex-col gap-2 text-sm">
             {siteConfig.nav.slice(0, 4).map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="hover:text-copper">{item.label}</Link>
+                <Link href={item.href} className="hover:text-copper">
+                  {item.label}
+                </Link>
               </li>
             ))}
           </ul>
         </div>
         <div>
-          <h3 className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-latte">Help</h3>
+          <h3 className="font-body text-latte text-xs font-semibold tracking-[0.2em] uppercase">
+            Help
+          </h3>
           <ul className="mt-4 flex flex-col gap-2 text-sm">
             {siteConfig.footerLinks.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="hover:text-copper">{item.label}</Link>
+                <Link href={item.href} className="hover:text-copper">
+                  {item.label}
+                </Link>
               </li>
             ))}
             <li>
-              <a href={`mailto:${siteConfig.supportEmail}`} className="hover:text-copper">{siteConfig.supportEmail}</a>
+              <a href={`mailto:${siteConfig.supportEmail}`} className="hover:text-copper">
+                {siteConfig.supportEmail}
+              </a>
             </li>
           </ul>
         </div>
       </Container>
-      <div className="border-t border-latte/20">
-        <Container className="flex flex-col items-center justify-between gap-2 py-5 text-xs text-latte sm:flex-row">
+      <div className="border-latte/20 border-t">
+        <Container className="text-latte flex flex-col items-center justify-between gap-2 py-5 text-xs sm:flex-row">
           <p>© {year} Cofresso Coffee Co. All rights reserved.</p>
           <p>
             Made with{' '}
-            <a href={siteConfig.easterEggUrl} className="hover:text-copper" title="The beans are open source" data-testid="easter-egg-link" rel="noopener">
+            <a
+              href={siteConfig.easterEggUrl}
+              className="hover:text-copper"
+              title="The beans are open source"
+              data-testid="easter-egg-link"
+              rel="noopener"
+            >
               ☕
             </a>{' '}
             in a very small roastery.
@@ -5049,26 +6015,50 @@ export function Footer() {
 - [ ] **Step 4: Cart components**
 
 `src/components/cart/free-shipping-bar.tsx`:
+
 ```tsx
 import { IconTruck } from '@/components/ui/icons';
 import { formatPrice } from '@/lib/pricing';
 
-export function FreeShippingBar({ remainingCents, unlocked, thresholdCents }: { remainingCents: number; unlocked: boolean; thresholdCents: number }) {
-  const progress = unlocked ? 100 : Math.min(100, Math.round(((thresholdCents - remainingCents) / thresholdCents) * 100));
+export function FreeShippingBar({
+  remainingCents,
+  unlocked,
+  thresholdCents,
+}: {
+  remainingCents: number;
+  unlocked: boolean;
+  thresholdCents: number;
+}) {
+  const progress = unlocked
+    ? 100
+    : Math.min(100, Math.round(((thresholdCents - remainingCents) / thresholdCents) * 100));
   return (
-    <div className="rounded-xl bg-cream p-4" data-testid="free-shipping-bar" data-unlocked={unlocked}>
+    <div
+      className="bg-cream rounded-xl p-4"
+      data-testid="free-shipping-bar"
+      data-unlocked={unlocked}
+    >
       <p className="flex items-center gap-2 text-sm">
         <IconTruck className="text-copper" />
         {unlocked ? (
-          <span className="font-medium text-leaf">You unlocked free shipping.</span>
+          <span className="text-leaf font-medium">You unlocked free shipping.</span>
         ) : (
           <span>
             Add <strong>{formatPrice(remainingCents)}</strong> more for free shipping.
           </span>
         )}
       </p>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-latte/30" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
-        <div className="h-full rounded-full bg-copper transition-all duration-500" style={{ width: `${progress}%` }} />
+      <div
+        className="bg-latte/30 mt-3 h-1.5 overflow-hidden rounded-full"
+        role="progressbar"
+        aria-valuenow={progress}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div
+          className="bg-copper h-full rounded-full transition-all duration-500"
+          style={{ width: `${progress}%` }}
+        />
       </div>
     </div>
   );
@@ -5076,6 +6066,7 @@ export function FreeShippingBar({ remainingCents, unlocked, thresholdCents }: { 
 ```
 
 `src/components/cart/cart-summary.tsx`:
+
 ```tsx
 import { formatPrice, type Totals } from '@/lib/pricing';
 
@@ -5091,7 +6082,9 @@ export function CartSummary({ totals, discountCode, compact = false }: CartSumma
     <dl className="flex flex-col gap-2" data-testid="cart-summary">
       <div className={row}>
         <dt>Subtotal</dt>
-        <dd className="tabular-nums" data-testid="summary-subtotal">{formatPrice(totals.subtotalCents)}</dd>
+        <dd className="tabular-nums" data-testid="summary-subtotal">
+          {formatPrice(totals.subtotalCents)}
+        </dd>
       </div>
       {totals.subscriptionSavingsCents > 0 ? (
         <div className={`${row} text-leaf`}>
@@ -5102,14 +6095,18 @@ export function CartSummary({ totals, discountCode, compact = false }: CartSumma
       {totals.discountCents > 0 ? (
         <div className={`${row} text-leaf`}>
           <dt>Discount{discountCode ? ` (${discountCode})` : ''}</dt>
-          <dd className="tabular-nums" data-testid="summary-discount">−{formatPrice(totals.discountCents)}</dd>
+          <dd className="tabular-nums" data-testid="summary-discount">
+            −{formatPrice(totals.discountCents)}
+          </dd>
         </div>
       ) : null}
       {!compact ? (
         <>
           <div className={row}>
             <dt>Shipping</dt>
-            <dd className="tabular-nums" data-testid="summary-shipping">{totals.shippingCents === 0 ? 'Free' : formatPrice(totals.shippingCents)}</dd>
+            <dd className="tabular-nums" data-testid="summary-shipping">
+              {totals.shippingCents === 0 ? 'Free' : formatPrice(totals.shippingCents)}
+            </dd>
           </div>
           <div className={row}>
             <dt>Estimated tax</dt>
@@ -5117,9 +6114,11 @@ export function CartSummary({ totals, discountCode, compact = false }: CartSumma
           </div>
         </>
       ) : null}
-      <div className="mt-1 flex items-center justify-between border-t border-latte/30 pt-3 text-base font-semibold">
+      <div className="border-latte/30 mt-1 flex items-center justify-between border-t pt-3 text-base font-semibold">
         <dt>{compact ? 'Estimated total' : 'Total'}</dt>
-        <dd className="tabular-nums" data-testid="summary-total">{formatPrice(totals.totalCents)}</dd>
+        <dd className="tabular-nums" data-testid="summary-total">
+          {formatPrice(totals.totalCents)}
+        </dd>
       </div>
     </dl>
   );
@@ -5127,6 +6126,7 @@ export function CartSummary({ totals, discountCode, compact = false }: CartSumma
 ```
 
 `src/components/cart/promo-code-form.tsx`:
+
 ```tsx
 'use client';
 
@@ -5146,16 +6146,30 @@ export function PromoCodeForm({ appliedCode, message }: PromoCodeFormProps) {
   const [removing, startRemove] = useTransition();
 
   useEffect(() => {
-    if (state) track({ name: 'apply_promo', code: state.ok ? state.data.code : 'unknown', success: state.ok });
+    if (state)
+      track({
+        name: 'apply_promo',
+        code: state.ok ? state.data.code : 'unknown',
+        success: state.ok,
+      });
   }, [state]);
 
   if (appliedCode) {
     return (
-      <div className="flex items-center justify-between rounded-lg border border-dashed border-leaf/60 bg-leaf/5 px-3 py-2 text-sm" data-testid="promo-applied">
+      <div
+        className="border-leaf/60 bg-leaf/5 flex items-center justify-between rounded-lg border border-dashed px-3 py-2 text-sm"
+        data-testid="promo-applied"
+      >
         <span>
-          Code <strong>{appliedCode}</strong> applied{message ? <span className="block text-xs text-copper-dark">{message}</span> : null}
+          Code <strong>{appliedCode}</strong> applied
+          {message ? <span className="text-copper-dark block text-xs">{message}</span> : null}
         </span>
-        <Button variant="ghost" size="sm" loading={removing} onClick={() => startRemove(async () => void (await removePromoAction()))}>
+        <Button
+          variant="ghost"
+          size="sm"
+          loading={removing}
+          onClick={() => startRemove(async () => void (await removePromoAction()))}
+        >
           Remove
         </Button>
       </div>
@@ -5165,18 +6179,29 @@ export function PromoCodeForm({ appliedCode, message }: PromoCodeFormProps) {
   return (
     <form action={formAction} className="flex flex-col gap-1" data-testid="promo-form">
       <div className="flex gap-2">
-        <Input name="code" placeholder="Promo code" aria-label="Promo code" autoComplete="off" className="h-10 uppercase" />
+        <Input
+          name="code"
+          placeholder="Promo code"
+          aria-label="Promo code"
+          autoComplete="off"
+          className="h-10 uppercase"
+        />
         <Button type="submit" variant="outline" size="sm" className="h-10" loading={pending}>
           Apply
         </Button>
       </div>
-      {state && !state.ok ? <p className="text-xs text-red-700" role="alert">{state.error}</p> : null}
+      {state && !state.ok ? (
+        <p className="text-xs text-red-700" role="alert">
+          {state.error}
+        </p>
+      ) : null}
     </form>
   );
 }
 ```
 
 `src/components/cart/cart-line.tsx`:
+
 ```tsx
 'use client';
 
@@ -5203,35 +6228,77 @@ export function CartLine({ line, compact = false }: { line: CartLineData; compac
 
   const remove = () =>
     start(async () => {
-      track({ name: 'remove_from_cart', item: { productId: line.product.id, slug: line.product.slug, name: line.product.name, variantId: line.variant.id, variantName: line.variant.name, priceCents: line.effectiveUnitPriceCents, quantity: line.quantity } });
+      track({
+        name: 'remove_from_cart',
+        item: {
+          productId: line.product.id,
+          slug: line.product.slug,
+          name: line.product.name,
+          variantId: line.variant.id,
+          variantName: line.variant.name,
+          priceCents: line.effectiveUnitPriceCents,
+          quantity: line.quantity,
+        },
+      });
       const result = await removeCartLineAction(line.id);
       if (!result.ok) setError(result.error);
     });
 
-  const details = [line.variant.name, grindLabel(line.grind), purchaseTypeLabel(line.purchaseType, line.subscriptionIntervalWeeks)].filter(Boolean);
+  const details = [
+    line.variant.name,
+    grindLabel(line.grind),
+    purchaseTypeLabel(line.purchaseType, line.subscriptionIntervalWeeks),
+  ].filter(Boolean);
 
   return (
     <li className="flex gap-4 py-4" data-testid="cart-line" data-line-id={line.id}>
-      <Link href={`/products/${line.product.slug}`} className="shrink-0 overflow-hidden rounded-lg bg-cream">
-        <Image src={line.product.imagePath} alt={line.product.name} width={compact ? 72 : 96} height={compact ? 90 : 120} unoptimized className="h-auto w-[72px] sm:w-24" />
+      <Link
+        href={`/products/${line.product.slug}`}
+        className="bg-cream shrink-0 overflow-hidden rounded-lg"
+      >
+        <Image
+          src={line.product.imagePath}
+          alt={line.product.name}
+          width={compact ? 72 : 96}
+          height={compact ? 90 : 120}
+          unoptimized
+          className="h-auto w-[72px] sm:w-24"
+        />
       </Link>
       <div className="flex flex-1 flex-col gap-1">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <Link href={`/products/${line.product.slug}`} className="font-medium hover:text-copper">
+            <Link href={`/products/${line.product.slug}`} className="hover:text-copper font-medium">
               {line.product.name}
             </Link>
-            <p className="text-xs text-latte">{details.join(' · ')}</p>
+            <p className="text-latte text-xs">{details.join(' · ')}</p>
           </div>
-          <p className="text-sm font-medium tabular-nums" data-testid="line-total">{formatPrice(line.lineTotalCents)}</p>
+          <p className="text-sm font-medium tabular-nums" data-testid="line-total">
+            {formatPrice(line.lineTotalCents)}
+          </p>
         </div>
         <div className="mt-1 flex items-center justify-between">
-          <QuantityStepper size="sm" value={line.quantity} onChange={update} disabled={pending} max={Math.min(10, line.variant.stockQuantity)} />
-          <button type="button" onClick={remove} disabled={pending} className="text-xs text-latte underline-offset-2 hover:text-espresso hover:underline">
+          <QuantityStepper
+            size="sm"
+            value={line.quantity}
+            onChange={update}
+            disabled={pending}
+            max={Math.min(10, line.variant.stockQuantity)}
+          />
+          <button
+            type="button"
+            onClick={remove}
+            disabled={pending}
+            className="text-latte hover:text-espresso text-xs underline-offset-2 hover:underline"
+          >
             Remove
           </button>
         </div>
-        {error ? <p className="text-xs text-red-700" role="alert">{error}</p> : null}
+        {error ? (
+          <p className="text-xs text-red-700" role="alert">
+            {error}
+          </p>
+        ) : null}
       </div>
     </li>
   );
@@ -5239,15 +6306,21 @@ export function CartLine({ line, compact = false }: { line: CartLineData; compac
 ```
 
 `src/components/cart/empty-cart.tsx`:
+
 ```tsx
 import { ButtonLink } from '@/components/ui/button';
 
 export function EmptyCart({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-4 px-6 py-16 text-center" data-testid="empty-cart">
+    <div
+      className="flex flex-col items-center gap-4 px-6 py-16 text-center"
+      data-testid="empty-cart"
+    >
       <p className="text-4xl">☕</p>
       <h3 className="text-2xl">Your cart is empty</h3>
-      <p className="max-w-xs text-sm text-latte">Fresh roasts ship within 48 hours of roasting. Find your next favorite.</p>
+      <p className="text-latte max-w-xs text-sm">
+        Fresh roasts ship within 48 hours of roasting. Find your next favorite.
+      </p>
       <ButtonLink href="/shop" onClick={onNavigate}>
         Shop coffee
       </ButtonLink>
@@ -5257,6 +6330,7 @@ export function EmptyCart({ onNavigate }: { onNavigate?: () => void }) {
 ```
 
 `src/components/cart/cart-panel.tsx`:
+
 ```tsx
 'use client';
 
@@ -5280,12 +6354,16 @@ export function CartPanel({ cart, mode, onNavigate }: CartPanelProps) {
   if (!cart || cart.lines.length === 0) return <EmptyCart onNavigate={onNavigate} />;
 
   const beginCheckout = () => {
-    track({ name: 'begin_checkout', valueCents: cart.totals.totalCents, itemCount: cart.totals.itemCount });
+    track({
+      name: 'begin_checkout',
+      valueCents: cart.totals.totalCents,
+      itemCount: cart.totals.itemCount,
+    });
     onNavigate?.();
   };
 
   const lines = (
-    <ul className="divide-y divide-latte/20" data-testid="cart-lines">
+    <ul className="divide-latte/20 divide-y" data-testid="cart-lines">
       {cart.lines.map((line) => (
         <CartLine key={line.id} line={line} compact={mode === 'drawer'} />
       ))}
@@ -5294,10 +6372,25 @@ export function CartPanel({ cart, mode, onNavigate }: CartPanelProps) {
 
   const aside = (
     <div className="flex flex-col gap-4">
-      <FreeShippingBar remainingCents={cart.totals.freeShippingRemainingCents} unlocked={cart.totals.freeShippingUnlocked} thresholdCents={siteConfig.pricing.freeShippingThresholdCents} />
+      <FreeShippingBar
+        remainingCents={cart.totals.freeShippingRemainingCents}
+        unlocked={cart.totals.freeShippingUnlocked}
+        thresholdCents={siteConfig.pricing.freeShippingThresholdCents}
+      />
       <PromoCodeForm appliedCode={cart.discountCode} message={cart.discountMessage} />
-      <CartSummary totals={cart.totals} discountCode={cart.discountCode} compact={mode === 'drawer'} />
-      <ButtonLink href="/checkout" size="lg" variant="copper" className="w-full" onClick={beginCheckout} data-testid="checkout-link">
+      <CartSummary
+        totals={cart.totals}
+        discountCode={cart.discountCode}
+        compact={mode === 'drawer'}
+      />
+      <ButtonLink
+        href="/checkout"
+        size="lg"
+        variant="copper"
+        className="w-full"
+        onClick={beginCheckout}
+        data-testid="checkout-link"
+      >
         Checkout
       </ButtonLink>
       {mode === 'drawer' ? (
@@ -5320,7 +6413,7 @@ export function CartPanel({ cart, mode, onNavigate }: CartPanelProps) {
   return (
     <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
       <div>{lines}</div>
-      <aside className="rounded-2xl bg-foam p-6 shadow-sm lg:sticky lg:top-28">{aside}</aside>
+      <aside className="bg-foam rounded-2xl p-6 shadow-sm lg:sticky lg:top-28">{aside}</aside>
     </div>
   );
 }
@@ -5329,6 +6422,7 @@ export function CartPanel({ cart, mode, onNavigate }: CartPanelProps) {
 - [ ] **Step 5: Cart drawer (server + client shell) and layout wiring**
 
 `src/components/layout/cart-drawer.tsx`:
+
 ```tsx
 import { readCartId } from '@/lib/cart/cookie';
 import { getCartView } from '@/lib/cart/queries';
@@ -5342,6 +6436,7 @@ export async function CartDrawer() {
 ```
 
 `src/components/layout/cart-drawer-shell.tsx`:
+
 ```tsx
 'use client';
 
@@ -5354,7 +6449,12 @@ export function CartDrawerShell({ cart }: { cart: CartView | null }) {
   const { open, closeDrawer } = useCartDrawer();
   const count = cart?.totals.itemCount ?? 0;
   return (
-    <Sheet open={open} onClose={closeDrawer} title={count ? `Your cart (${count})` : 'Your cart'} testId="cart-drawer">
+    <Sheet
+      open={open}
+      onClose={closeDrawer}
+      title={count ? `Your cart (${count})` : 'Your cart'}
+      testId="cart-drawer"
+    >
       <CartPanel cart={cart} mode="drawer" onNavigate={closeDrawer} />
     </Sheet>
   );
@@ -5362,6 +6462,7 @@ export function CartDrawerShell({ cart }: { cart: CartView | null }) {
 ```
 
 Update `src/app/layout.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { AnalyticsProvider } from '@/components/analytics/analytics-provider';
@@ -5382,7 +6483,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const base = getServerEnv().SITE_URL;
   return {
     metadataBase: new URL(base),
-    title: { default: `${siteConfig.name} — ${siteConfig.tagline}`, template: `%s · ${siteConfig.name}` },
+    title: {
+      default: `${siteConfig.name} — ${siteConfig.tagline}`,
+      template: `%s · ${siteConfig.name}`,
+    },
     description: siteConfig.description,
     openGraph: { type: 'website', siteName: siteConfig.name, images: ['/logo.png'] },
   };
@@ -5410,6 +6514,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 - [ ] **Step 6: Cart page**
 
 `src/app/(checkout)/cart/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { CartPanel } from '@/components/cart/cart-panel';
@@ -5427,20 +6532,30 @@ export default async function CartPage() {
     <Container className="py-12">
       <h1 className="mb-8 text-4xl">Your cart</h1>
       <CartPanel cart={cart} mode="page" />
-      <CartPageTracker valueCents={cart?.totals.totalCents ?? 0} itemCount={cart?.totals.itemCount ?? 0} />
+      <CartPageTracker
+        valueCents={cart?.totals.totalCents ?? 0}
+        itemCount={cart?.totals.itemCount ?? 0}
+      />
     </Container>
   );
 }
 ```
 
 `src/app/(checkout)/cart/tracker.tsx`:
+
 ```tsx
 'use client';
 
 import { useEffect } from 'react';
 import { track } from '@/lib/analytics/track';
 
-export function CartPageTracker({ valueCents, itemCount }: { valueCents: number; itemCount: number }) {
+export function CartPageTracker({
+  valueCents,
+  itemCount,
+}: {
+  valueCents: number;
+  itemCount: number;
+}) {
   useEffect(() => {
     track({ name: 'view_cart', valueCents, itemCount });
   }, [valueCents, itemCount]);
@@ -5465,10 +6580,12 @@ git commit -m "feat: add layout shell, cart drawer, cart components and cart pag
 ### Task 11: Product components and add-to-cart form
 
 **Files:**
+
 - Create: `src/lib/catalog/types.ts`, `src/components/product/product-card.tsx`, `src/components/product/product-grid.tsx`, `src/components/product/variant-selector.tsx`, `src/components/product/grind-selector.tsx`, `src/components/product/purchase-type-toggle.tsx`, `src/components/product/add-to-cart-form.tsx`
 - Test: `src/components/product/add-to-cart-form.test.tsx`
 
 **Interfaces:**
+
 - Produces:
   - `type ProductCardData = { product: Product; variants: ProductVariant[]; rating: { average: number; count: number } }`
   - `type ProductDetailData = ProductCardData & { collections: Collection[]; reviews: Review[] }`
@@ -5479,6 +6596,7 @@ git commit -m "feat: add layout shell, cart drawer, cart components and cart pag
 - [ ] **Step 1: Catalog view types**
 
 `src/lib/catalog/types.ts`:
+
 ```ts
 import type { Collection, Product, ProductVariant, Review } from '@/lib/db/schema';
 
@@ -5503,13 +6621,17 @@ export function lowestPriceCents(variants: ProductVariant[]): number {
 }
 
 export function defaultVariant(variants: ProductVariant[]): ProductVariant | undefined {
-  return [...variants].sort((a, b) => a.position - b.position).find((v) => v.stockQuantity > 0) ?? variants[0];
+  return (
+    [...variants].sort((a, b) => a.position - b.position).find((v) => v.stockQuantity > 0) ??
+    variants[0]
+  );
 }
 ```
 
 - [ ] **Step 2: Failing test for AddToCartForm**
 
 `src/components/product/add-to-cart-form.test.tsx`:
+
 ```tsx
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -5530,8 +6652,28 @@ const product = {
 } as Product;
 
 const variants: ProductVariant[] = [
-  { id: '11111111-1111-4111-8111-111111111111', productId: 'p1', sku: 'A', name: '12 oz', weightGrams: 340, priceCents: 1800, compareAtPriceCents: null, stockQuantity: 10, position: 0 },
-  { id: '22222222-2222-4222-8222-222222222222', productId: 'p1', sku: 'B', name: '2 lb', weightGrams: 907, priceCents: 4400, compareAtPriceCents: null, stockQuantity: 0, position: 1 },
+  {
+    id: '11111111-1111-4111-8111-111111111111',
+    productId: 'p1',
+    sku: 'A',
+    name: '12 oz',
+    weightGrams: 340,
+    priceCents: 1800,
+    compareAtPriceCents: null,
+    stockQuantity: 10,
+    position: 0,
+  },
+  {
+    id: '22222222-2222-4222-8222-222222222222',
+    productId: 'p1',
+    sku: 'B',
+    name: '2 lb',
+    weightGrams: 907,
+    priceCents: 4400,
+    compareAtPriceCents: null,
+    stockQuantity: 0,
+    position: 1,
+  },
 ];
 
 function renderForm() {
@@ -5569,6 +6711,7 @@ Run: `pnpm test:unit src/components/product` → FAIL.
 - [ ] **Step 3: Selectors**
 
 `src/components/product/variant-selector.tsx`:
+
 ```tsx
 'use client';
 
@@ -5603,12 +6746,16 @@ export function VariantSelector({ variants, value, onChange }: VariantSelectorPr
                 data-testid={`variant-${v.sku}`}
                 className={cn(
                   'flex min-w-24 flex-col items-start rounded-xl border px-4 py-2.5 text-left transition-colors',
-                  selected ? 'border-espresso bg-espresso text-foam' : 'border-latte/50 bg-foam hover:border-espresso',
-                  soldOut && 'cursor-not-allowed opacity-50 line-through',
+                  selected
+                    ? 'border-espresso bg-espresso text-foam'
+                    : 'border-latte/50 bg-foam hover:border-espresso',
+                  soldOut && 'cursor-not-allowed line-through opacity-50',
                 )}
               >
                 <span className="text-sm font-medium">{v.name}</span>
-                <span className={cn('text-xs', selected ? 'text-foam/80' : 'text-latte')}>{soldOut ? 'Sold out' : formatPrice(v.priceCents)}</span>
+                <span className={cn('text-xs', selected ? 'text-foam/80' : 'text-latte')}>
+                  {soldOut ? 'Sold out' : formatPrice(v.priceCents)}
+                </span>
               </button>
             );
           })}
@@ -5619,6 +6766,7 @@ export function VariantSelector({ variants, value, onChange }: VariantSelectorPr
 ```
 
 `src/components/product/grind-selector.tsx`:
+
 ```tsx
 'use client';
 
@@ -5627,24 +6775,37 @@ import { Select } from '@/components/ui/select';
 import { GRIND_OPTIONS } from '@/lib/catalog/labels';
 import type { Grind } from '@/lib/db/schema';
 
-export function GrindSelector({ value, onChange }: { value: Grind; onChange: (grind: Grind) => void }) {
+export function GrindSelector({
+  value,
+  onChange,
+}: {
+  value: Grind;
+  onChange: (grind: Grind) => void;
+}) {
   return (
     <div>
       <Label htmlFor="grind">Grind</Label>
-      <Select id="grind" name="grind" value={value} onChange={(e) => onChange(e.target.value as Grind)} data-testid="grind-select">
+      <Select
+        id="grind"
+        name="grind"
+        value={value}
+        onChange={(e) => onChange(e.target.value as Grind)}
+        data-testid="grind-select"
+      >
         {GRIND_OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
           </option>
         ))}
       </Select>
-      <p className="mt-1 text-xs text-latte">We grind to order. Whole bean stays fresh longest.</p>
+      <p className="text-latte mt-1 text-xs">We grind to order. Whole bean stays fresh longest.</p>
     </div>
   );
 }
 ```
 
 `src/components/product/purchase-type-toggle.tsx`:
+
 ```tsx
 'use client';
 
@@ -5663,20 +6824,28 @@ interface PurchaseTypeToggleProps {
   onChange: (next: { purchaseType: PurchaseType; interval: SubscriptionInterval }) => void;
 }
 
-export function PurchaseTypeToggle({ value, interval, oneTimeCents, subscriptionCents, onChange }: PurchaseTypeToggleProps) {
+export function PurchaseTypeToggle({
+  value,
+  interval,
+  oneTimeCents,
+  subscriptionCents,
+  onChange,
+}: PurchaseTypeToggleProps) {
   const option = (type: PurchaseType, title: string, price: number, hint: string) => {
     const selected = value === type;
     return (
       <label
         className={cn(
           'flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors',
-          selected ? 'border-copper bg-copper/5' : 'border-latte/50 bg-foam hover:border-espresso/50',
+          selected
+            ? 'border-copper bg-copper/5'
+            : 'border-latte/50 bg-foam hover:border-espresso/50',
         )}
       >
         <input
           type="radio"
           name="purchaseTypeChoice"
-          className="mt-1 accent-copper"
+          className="accent-copper mt-1"
           checked={selected}
           onChange={() => onChange({ purchaseType: type, interval })}
           aria-label={title}
@@ -5686,7 +6855,7 @@ export function PurchaseTypeToggle({ value, interval, oneTimeCents, subscription
             <span>{title}</span>
             <span className="tabular-nums">{formatPrice(price)}</span>
           </span>
-          <span className="text-xs text-latte">{hint}</span>
+          <span className="text-latte text-xs">{hint}</span>
         </span>
       </label>
     );
@@ -5696,12 +6865,22 @@ export function PurchaseTypeToggle({ value, interval, oneTimeCents, subscription
     <fieldset className="flex flex-col gap-2" data-testid="purchase-type">
       <legend className="mb-2 text-sm font-medium">Purchase</legend>
       {option('one_time', 'One-time purchase', oneTimeCents, 'Ships within 48 hours of roasting.')}
-      {option('subscription', `Subscribe & save ${siteConfig.pricing.subscriptionDiscountPercent}%`, subscriptionCents, 'Pause, skip or cancel anytime. Free shipping on every subscription order over $45.')}
+      {option(
+        'subscription',
+        `Subscribe & save ${siteConfig.pricing.subscriptionDiscountPercent}%`,
+        subscriptionCents,
+        'Pause, skip or cancel anytime. Free shipping on every subscription order over $45.',
+      )}
       {value === 'subscription' ? (
         <Select
           aria-label="Delivery interval"
           value={interval}
-          onChange={(e) => onChange({ purchaseType: 'subscription', interval: Number(e.target.value) as SubscriptionInterval })}
+          onChange={(e) =>
+            onChange({
+              purchaseType: 'subscription',
+              interval: Number(e.target.value) as SubscriptionInterval,
+            })
+          }
           data-testid="interval-select"
         >
           {siteConfig.subscriptionIntervals.map((weeks) => (
@@ -5719,6 +6898,7 @@ export function PurchaseTypeToggle({ value, interval, oneTimeCents, subscription
 - [ ] **Step 4: AddToCartForm**
 
 `src/components/product/add-to-cart-form.tsx`:
+
 ```tsx
 'use client';
 
@@ -5751,22 +6931,57 @@ export function AddToCartForm({ product, variants }: AddToCartFormProps) {
   const [state, formAction, pending] = useActionState(addToCartAction, null);
   const { openDrawer } = useCartDrawer();
 
-  const variant = useMemo(() => variants.find((v) => v.id === variantId) ?? initial, [variants, variantId, initial]);
-  const unitCents = variant ? effectiveUnitPriceCents({ unitPriceCents: variant.priceCents, quantity, purchaseType }) : 0;
-  const subscriptionCents = variant ? effectiveUnitPriceCents({ unitPriceCents: variant.priceCents, quantity: 1, purchaseType: 'subscription' }) : 0;
+  const variant = useMemo(
+    () => variants.find((v) => v.id === variantId) ?? initial,
+    [variants, variantId, initial],
+  );
+  const unitCents = variant
+    ? effectiveUnitPriceCents({ unitPriceCents: variant.priceCents, quantity, purchaseType })
+    : 0;
+  const subscriptionCents = variant
+    ? effectiveUnitPriceCents({
+        unitPriceCents: variant.priceCents,
+        quantity: 1,
+        purchaseType: 'subscription',
+      })
+    : 0;
   const isCoffee = product.category === 'coffee';
   const soldOut = !variant || variant.stockQuantity <= 0;
 
   useEffect(() => {
     if (variant) {
-      track({ name: 'select_variant', item: { productId: product.id, slug: product.slug, name: product.name, variantId: variant.id, variantName: variant.name, priceCents: unitCents, purchaseType } });
+      track({
+        name: 'select_variant',
+        item: {
+          productId: product.id,
+          slug: product.slug,
+          name: product.name,
+          variantId: variant.id,
+          variantName: variant.name,
+          priceCents: unitCents,
+          purchaseType,
+        },
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [variantId, purchaseType]);
 
   useEffect(() => {
     if (state?.ok && variant) {
-      track({ name: 'add_to_cart', cartItemCount: state.data.itemCount, item: { productId: product.id, slug: product.slug, name: product.name, variantId: variant.id, variantName: variant.name, priceCents: unitCents, quantity, purchaseType } });
+      track({
+        name: 'add_to_cart',
+        cartItemCount: state.data.itemCount,
+        item: {
+          productId: product.id,
+          slug: product.slug,
+          name: product.name,
+          variantId: variant.id,
+          variantName: variant.name,
+          priceCents: unitCents,
+          quantity,
+          purchaseType,
+        },
+      });
       openDrawer();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -5777,16 +6992,30 @@ export function AddToCartForm({ product, variants }: AddToCartFormProps) {
       <input type="hidden" name="variantId" value={variantId} />
       <input type="hidden" name="quantity" value={quantity} />
       <input type="hidden" name="purchaseType" value={purchaseType} />
-      <input type="hidden" name="subscriptionIntervalWeeks" value={purchaseType === 'subscription' ? interval : ''} />
+      <input
+        type="hidden"
+        name="subscriptionIntervalWeeks"
+        value={purchaseType === 'subscription' ? interval : ''}
+      />
       {isCoffee ? <input type="hidden" name="grind" value={grind} /> : null}
 
       <div className="flex items-baseline gap-3">
-        <span className="text-3xl font-medium tabular-nums" data-testid="selected-price">{formatPrice(unitCents)}</span>
-        {purchaseType === 'subscription' && variant ? <span className="text-sm text-latte line-through tabular-nums">{formatPrice(variant.priceCents)}</span> : null}
-        {variant?.weightGrams ? <span className="text-sm text-latte">{variant.weightGrams} g</span> : null}
+        <span className="text-3xl font-medium tabular-nums" data-testid="selected-price">
+          {formatPrice(unitCents)}
+        </span>
+        {purchaseType === 'subscription' && variant ? (
+          <span className="text-latte text-sm tabular-nums line-through">
+            {formatPrice(variant.priceCents)}
+          </span>
+        ) : null}
+        {variant?.weightGrams ? (
+          <span className="text-latte text-sm">{variant.weightGrams} g</span>
+        ) : null}
       </div>
 
-      {variants.length > 1 || variants[0]?.name ? <VariantSelector variants={variants} value={variantId} onChange={setVariantId} /> : null}
+      {variants.length > 1 || variants[0]?.name ? (
+        <VariantSelector variants={variants} value={variantId} onChange={setVariantId} />
+      ) : null}
       {isCoffee ? <GrindSelector value={grind} onChange={setGrind} /> : null}
       {isCoffee && variant ? (
         <PurchaseTypeToggle
@@ -5802,15 +7031,32 @@ export function AddToCartForm({ product, variants }: AddToCartFormProps) {
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
-        <QuantityStepper value={quantity} onChange={setQuantity} max={Math.min(10, variant?.stockQuantity ?? 1)} disabled={soldOut} />
-        <Button type="submit" size="lg" variant="copper" className="flex-1" loading={pending} disabled={soldOut} data-testid="add-to-cart">
+        <QuantityStepper
+          value={quantity}
+          onChange={setQuantity}
+          max={Math.min(10, variant?.stockQuantity ?? 1)}
+          disabled={soldOut}
+        />
+        <Button
+          type="submit"
+          size="lg"
+          variant="copper"
+          className="flex-1"
+          loading={pending}
+          disabled={soldOut}
+          data-testid="add-to-cart"
+        >
           {soldOut ? 'Sold out' : `Add to cart · ${formatPrice(unitCents * quantity)}`}
         </Button>
       </div>
 
-      {state && !state.ok ? <p className="text-sm text-red-700" role="alert">{state.error}</p> : null}
+      {state && !state.ok ? (
+        <p className="text-sm text-red-700" role="alert">
+          {state.error}
+        </p>
+      ) : null}
       {variant && variant.stockQuantity > 0 && variant.stockQuantity <= 10 ? (
-        <p className="text-xs text-copper-dark">Only {variant.stockQuantity} left at this size.</p>
+        <p className="text-copper-dark text-xs">Only {variant.stockQuantity} left at this size.</p>
       ) : null}
     </form>
   );
@@ -5822,6 +7068,7 @@ Run: `pnpm test:unit src/components/product` → PASS.
 - [ ] **Step 5: ProductCard and ProductGrid**
 
 `src/components/product/product-card.tsx`:
+
 ```tsx
 import Image from 'next/image';
 import Link from 'next/link';
@@ -5831,13 +7078,24 @@ import { Rating } from '@/components/ui/rating';
 import { roastLabel } from '@/lib/catalog/labels';
 import { lowestPriceCents, type ProductCardData } from '@/lib/catalog/types';
 
-export function ProductCard({ data, priority = false }: { data: ProductCardData; priority?: boolean }) {
+export function ProductCard({
+  data,
+  priority = false,
+}: {
+  data: ProductCardData;
+  priority?: boolean;
+}) {
   const { product, variants, rating } = data;
   const soldOut = variants.every((v) => v.stockQuantity <= 0);
-  const compareAt = variants.find((v) => v.compareAtPriceCents && v.compareAtPriceCents > v.priceCents)?.compareAtPriceCents ?? null;
+  const compareAt =
+    variants.find((v) => v.compareAtPriceCents && v.compareAtPriceCents > v.priceCents)
+      ?.compareAtPriceCents ?? null;
   return (
     <article className="group flex flex-col" data-testid="product-card" data-slug={product.slug}>
-      <Link href={`/products/${product.slug}`} className="relative block overflow-hidden rounded-2xl bg-foam">
+      <Link
+        href={`/products/${product.slug}`}
+        className="bg-foam relative block overflow-hidden rounded-2xl"
+      >
         <Image
           src={product.imagePath}
           alt={product.name}
@@ -5847,7 +7105,7 @@ export function ProductCard({ data, priority = false }: { data: ProductCardData;
           priority={priority}
           className="h-auto w-full transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <div className="absolute left-3 top-3 flex gap-2">
+        <div className="absolute top-3 left-3 flex gap-2">
           {product.roastLevel ? <Badge>{roastLabel(product.roastLevel)} roast</Badge> : null}
           {compareAt ? <Badge tone="copper">Sale</Badge> : null}
           {soldOut ? <Badge tone="espresso">Sold out</Badge> : null}
@@ -5860,11 +7118,20 @@ export function ProductCard({ data, priority = false }: { data: ProductCardData;
               {product.name}
             </Link>
           </h3>
-          <Price cents={lowestPriceCents(variants)} compareAtCents={compareAt} className="shrink-0 text-sm" suffix={variants.length > 1 ? '+' : undefined} />
+          <Price
+            cents={lowestPriceCents(variants)}
+            compareAtCents={compareAt}
+            className="shrink-0 text-sm"
+            suffix={variants.length > 1 ? '+' : undefined}
+          />
         </div>
-        <p className="text-sm text-latte">{product.origin ?? product.tagline}</p>
-        {product.tastingNotes.length ? <p className="text-xs text-espresso/70">{product.tastingNotes.join(' · ')}</p> : null}
-        {rating.count > 0 ? <Rating value={rating.average} count={rating.count} className="mt-1" /> : null}
+        <p className="text-latte text-sm">{product.origin ?? product.tagline}</p>
+        {product.tastingNotes.length ? (
+          <p className="text-espresso/70 text-xs">{product.tastingNotes.join(' · ')}</p>
+        ) : null}
+        {rating.count > 0 ? (
+          <Rating value={rating.average} count={rating.count} className="mt-1" />
+        ) : null}
       </div>
     </article>
   );
@@ -5872,6 +7139,7 @@ export function ProductCard({ data, priority = false }: { data: ProductCardData;
 ```
 
 `src/components/product/product-grid.tsx`:
+
 ```tsx
 import type { ProductCardData } from '@/lib/catalog/types';
 import { ProductCard } from './product-card';
@@ -5883,13 +7151,24 @@ interface ProductGridProps {
   emptyMessage?: string;
 }
 
-export function ProductGrid({ items, listId, emptyMessage = 'No products match those filters yet.' }: ProductGridProps) {
+export function ProductGrid({
+  items,
+  listId,
+  emptyMessage = 'No products match those filters yet.',
+}: ProductGridProps) {
   if (items.length === 0) {
-    return <p className="rounded-2xl bg-foam p-10 text-center text-latte" data-testid="empty-grid">{emptyMessage}</p>;
+    return (
+      <p className="bg-foam text-latte rounded-2xl p-10 text-center" data-testid="empty-grid">
+        {emptyMessage}
+      </p>
+    );
   }
   return (
     <>
-      <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 lg:grid-cols-4" data-testid="product-grid">
+      <div
+        className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 lg:grid-cols-4"
+        data-testid="product-grid"
+      >
         {items.map((item, i) => (
           <ProductCard key={item.product.id} data={item} priority={i < 4} />
         ))}
@@ -5901,6 +7180,7 @@ export function ProductGrid({ items, listId, emptyMessage = 'No products match t
 ```
 
 `src/components/product/product-list-tracker.tsx`:
+
 ```tsx
 'use client';
 
@@ -5908,12 +7188,23 @@ import { useEffect } from 'react';
 import { track } from '@/lib/analytics/track';
 import { lowestPriceCents, type ProductCardData } from '@/lib/catalog/types';
 
-export function ProductListTracker({ listId, items }: { listId: string; items: ProductCardData[] }) {
+export function ProductListTracker({
+  listId,
+  items,
+}: {
+  listId: string;
+  items: ProductCardData[];
+}) {
   useEffect(() => {
     track({
       name: 'view_item_list',
       listId,
-      items: items.map((i) => ({ productId: i.product.id, slug: i.product.slug, name: i.product.name, priceCents: lowestPriceCents(i.variants) })),
+      items: items.map((i) => ({
+        productId: i.product.id,
+        slug: i.product.slug,
+        name: i.product.name,
+        priceCents: lowestPriceCents(i.variants),
+      })),
     });
   }, [listId, items]);
   return null;
@@ -5933,11 +7224,13 @@ git commit -m "feat: add product card, grid and add-to-cart form with variant, g
 ### Task 12: Catalog queries, filter parsing and content modules
 
 **Files:**
+
 - Create: `src/lib/db/queries/catalog.ts`, `src/lib/db/queries/newsletter.ts`, `src/lib/shop/filters.ts`, `src/lib/shop/filters.test.ts`
 - Create: `src/content/brew-guides/index.ts`, `src/content/faq.ts`, `src/lib/content/brew-guides.ts`, `src/lib/content/faq.ts`
 - Test: `tests/integration/catalog.test.ts`, `tests/integration/newsletter.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `type ProductFilters = { collection?: string; roast?: RoastLevel; origin?: string; category?: ProductCategory; sort: ProductSort }`, `type ProductSort = 'featured' | 'price_asc' | 'price_desc' | 'newest'`, `SORT_OPTIONS`, `parseProductFilters(searchParams): ProductFilters`, `filtersToSearchParams(filters): URLSearchParams`
   - `listProducts(filters?, db?)`, `listFeaturedProducts(limit?, db?)`, `getProductBySlug(slug, db?)`, `listRelatedProducts(product, limit?, db?)`, `searchProducts(query, db?)`, `listCollections(db?)`, `getCollectionBySlug(slug, db?)`, `listOrigins(db?)`, `listRecentReviews(limit?, db?)`, `listProductSlugs(db?)`
@@ -5947,6 +7240,7 @@ git commit -m "feat: add product card, grid and add-to-cart form with variant, g
 - [ ] **Step 1: Filter parsing with tests**
 
 `src/lib/shop/filters.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { filtersToSearchParams, parseProductFilters } from './filters';
@@ -5956,7 +7250,15 @@ describe('parseProductFilters', () => {
     expect(parseProductFilters({})).toEqual({ sort: 'featured' });
   });
   it('accepts known values and drops unknown ones', () => {
-    expect(parseProductFilters({ collection: 'blends', roast: 'light', sort: 'price_asc', origin: 'Kenya', bogus: 'x' })).toEqual({
+    expect(
+      parseProductFilters({
+        collection: 'blends',
+        roast: 'light',
+        sort: 'price_asc',
+        origin: 'Kenya',
+        bogus: 'x',
+      }),
+    ).toEqual({
       collection: 'blends',
       roast: 'light',
       origin: 'Kenya',
@@ -5976,6 +7278,7 @@ describe('parseProductFilters', () => {
 ```
 
 `src/lib/shop/filters.ts`:
+
 ```ts
 import { z } from 'zod';
 import { productCategoryEnum, roastLevelEnum } from '@/lib/db/schema';
@@ -5992,11 +7295,20 @@ export type ProductSort = (typeof SORT_OPTIONS)[number]['value'];
 const first = (v: unknown) => (Array.isArray(v) ? v[0] : v);
 
 const schema = z.object({
-  collection: z.preprocess(first, z.string().regex(/^[a-z0-9-]+$/).optional()),
+  collection: z.preprocess(
+    first,
+    z
+      .string()
+      .regex(/^[a-z0-9-]+$/)
+      .optional(),
+  ),
   roast: z.preprocess(first, z.enum(roastLevelEnum.enumValues).optional()),
   origin: z.preprocess(first, z.string().trim().min(1).max(60).optional()),
   category: z.preprocess(first, z.enum(productCategoryEnum.enumValues).optional()),
-  sort: z.preprocess(first, z.enum(SORT_OPTIONS.map((o) => o.value) as [ProductSort, ...ProductSort[]]).optional()),
+  sort: z.preprocess(
+    first,
+    z.enum(SORT_OPTIONS.map((o) => o.value) as [ProductSort, ...ProductSort[]]).optional(),
+  ),
 });
 
 export type ProductFilters = {
@@ -6036,11 +7348,24 @@ Run: `pnpm test:unit src/lib/shop` → PASS.
 - [ ] **Step 2: Catalog queries**
 
 `src/lib/db/queries/catalog.ts`:
+
 ```ts
 import { and, asc, desc, eq, ilike, inArray, ne, or, sql } from 'drizzle-orm';
-import { lowestPriceCents, type ProductCardData, type ProductDetailData } from '@/lib/catalog/types';
+import {
+  lowestPriceCents,
+  type ProductCardData,
+  type ProductDetailData,
+} from '@/lib/catalog/types';
 import { getDb, type Db } from '@/lib/db/client';
-import { collections, productCollections, products, reviews, type Collection, type Product, type Review } from '@/lib/db/schema';
+import {
+  collections,
+  productCollections,
+  products,
+  reviews,
+  type Collection,
+  type Product,
+  type Review,
+} from '@/lib/db/schema';
 import type { ProductFilters } from '@/lib/shop/filters';
 
 type ProductWithRelations = Product & {
@@ -6060,20 +7385,32 @@ function toCard(p: ProductWithRelations): ProductCardData {
 }
 
 function sortCards(items: ProductCardData[], sort: ProductFilters['sort']): ProductCardData[] {
-  const byName = (a: ProductCardData, b: ProductCardData) => a.product.name.localeCompare(b.product.name);
+  const byName = (a: ProductCardData, b: ProductCardData) =>
+    a.product.name.localeCompare(b.product.name);
   switch (sort) {
     case 'price_asc':
-      return items.sort((a, b) => lowestPriceCents(a.variants) - lowestPriceCents(b.variants) || byName(a, b));
+      return items.sort(
+        (a, b) => lowestPriceCents(a.variants) - lowestPriceCents(b.variants) || byName(a, b),
+      );
     case 'price_desc':
-      return items.sort((a, b) => lowestPriceCents(b.variants) - lowestPriceCents(a.variants) || byName(a, b));
+      return items.sort(
+        (a, b) => lowestPriceCents(b.variants) - lowestPriceCents(a.variants) || byName(a, b),
+      );
     case 'newest':
-      return items.sort((a, b) => b.product.createdAt.getTime() - a.product.createdAt.getTime() || byName(a, b));
+      return items.sort(
+        (a, b) => b.product.createdAt.getTime() - a.product.createdAt.getTime() || byName(a, b),
+      );
     default:
-      return items.sort((a, b) => Number(b.product.featured) - Number(a.product.featured) || byName(a, b));
+      return items.sort(
+        (a, b) => Number(b.product.featured) - Number(a.product.featured) || byName(a, b),
+      );
   }
 }
 
-export async function listProducts(filters: ProductFilters = { sort: 'featured' }, db: Db = getDb()): Promise<ProductCardData[]> {
+export async function listProducts(
+  filters: ProductFilters = { sort: 'featured' },
+  db: Db = getDb(),
+): Promise<ProductCardData[]> {
   const conditions = [eq(products.active, true)];
   if (filters.roast) conditions.push(eq(products.roastLevel, filters.roast));
   if (filters.category) conditions.push(eq(products.category, filters.category));
@@ -6098,7 +7435,10 @@ export async function listProducts(filters: ProductFilters = { sort: 'featured' 
   return sortCards(rows.map(toCard), filters.sort);
 }
 
-export async function listFeaturedProducts(limit = 4, db: Db = getDb()): Promise<ProductCardData[]> {
+export async function listFeaturedProducts(
+  limit = 4,
+  db: Db = getDb(),
+): Promise<ProductCardData[]> {
   const rows = await db.query.products.findMany({
     where: and(eq(products.active, true), eq(products.featured, true)),
     with: { variants: true, reviews: { columns: { rating: true } } },
@@ -6108,13 +7448,19 @@ export async function listFeaturedProducts(limit = 4, db: Db = getDb()): Promise
   return rows.map(toCard);
 }
 
-export async function getProductBySlug(slug: string, db: Db = getDb()): Promise<ProductDetailData | null> {
+export async function getProductBySlug(
+  slug: string,
+  db: Db = getDb(),
+): Promise<ProductDetailData | null> {
   const row = await db.query.products.findFirst({
     where: and(eq(products.slug, slug), eq(products.active, true)),
     with: {
       variants: true,
       reviews: { orderBy: [desc(reviews.createdAt)] },
-      productCollections: { with: { collection: true }, orderBy: [asc(productCollections.position)] },
+      productCollections: {
+        with: { collection: true },
+        orderBy: [asc(productCollections.position)],
+      },
     },
   });
   if (!row) return null;
@@ -6123,9 +7469,17 @@ export async function getProductBySlug(slug: string, db: Db = getDb()): Promise<
   return { ...card, collections: pcs.map((pc) => pc.collection), reviews: fullReviews };
 }
 
-export async function listRelatedProducts(product: Product, limit = 4, db: Db = getDb()): Promise<ProductCardData[]> {
+export async function listRelatedProducts(
+  product: Product,
+  limit = 4,
+  db: Db = getDb(),
+): Promise<ProductCardData[]> {
   const rows = await db.query.products.findMany({
-    where: and(eq(products.active, true), ne(products.id, product.id), eq(products.category, product.category)),
+    where: and(
+      eq(products.active, true),
+      ne(products.id, product.id),
+      eq(products.category, product.category),
+    ),
     with: { variants: true, reviews: { columns: { rating: true } } },
     orderBy: [desc(products.featured), asc(products.name)],
     limit,
@@ -6158,7 +7512,10 @@ export async function listCollections(db: Db = getDb()): Promise<Collection[]> {
   return db.query.collections.findMany({ orderBy: [asc(collections.position)] });
 }
 
-export async function getCollectionBySlug(slug: string, db: Db = getDb()): Promise<Collection | null> {
+export async function getCollectionBySlug(
+  slug: string,
+  db: Db = getDb(),
+): Promise<Collection | null> {
   return (await db.query.collections.findFirst({ where: eq(collections.slug, slug) })) ?? null;
 }
 
@@ -6182,17 +7539,27 @@ export async function listRecentReviews(limit = 6, db: Db = getDb()): Promise<Re
   });
 }
 
-export async function listProductSlugs(db: Db = getDb()): Promise<Array<{ slug: string; createdAt: Date }>> {
-  return db.select({ slug: products.slug, createdAt: products.createdAt }).from(products).where(eq(products.active, true));
+export async function listProductSlugs(
+  db: Db = getDb(),
+): Promise<Array<{ slug: string; createdAt: Date }>> {
+  return db
+    .select({ slug: products.slug, createdAt: products.createdAt })
+    .from(products)
+    .where(eq(products.active, true));
 }
 ```
 
 `src/lib/db/queries/newsletter.ts`:
+
 ```ts
 import { getDb, type Db } from '@/lib/db/client';
 import { newsletterSubscribers } from '@/lib/db/schema';
 
-export async function subscribeToNewsletter(email: string, source: string, db: Db = getDb()): Promise<{ created: boolean }> {
+export async function subscribeToNewsletter(
+  email: string,
+  source: string,
+  db: Db = getDb(),
+): Promise<{ created: boolean }> {
   const rows = await db
     .insert(newsletterSubscribers)
     .values({ email: email.trim().toLowerCase(), source })
@@ -6205,6 +7572,7 @@ export async function subscribeToNewsletter(email: string, source: string, db: D
 - [ ] **Step 3: Integration tests**
 
 `tests/integration/catalog.test.ts`:
+
 ```ts
 import { afterAll, describe, expect, it } from 'vitest';
 import { lowestPriceCents } from '../../src/lib/catalog/types';
@@ -6261,18 +7629,31 @@ describe('catalog queries', () => {
     const p = await getProductBySlug('gooseneck-kettle', db);
     const related = await listRelatedProducts(p!.product, 3, db);
     expect(related).toHaveLength(3);
-    expect(related.every((r) => r.product.category !== 'coffee' && r.product.slug !== 'gooseneck-kettle')).toBe(true);
+    expect(
+      related.every(
+        (r) => r.product.category !== 'coffee' && r.product.slug !== 'gooseneck-kettle',
+      ),
+    ).toBe(true);
   });
 
   it('searches names, origins and tasting notes', async () => {
-    expect((await searchProducts('ethiopia', db)).map((i) => i.product.slug)).toContain('ethiopia-yirgacheffe');
-    expect((await searchProducts('jasmine', db)).map((i) => i.product.slug)).toContain('ethiopia-yirgacheffe');
+    expect((await searchProducts('ethiopia', db)).map((i) => i.product.slug)).toContain(
+      'ethiopia-yirgacheffe',
+    );
+    expect((await searchProducts('jasmine', db)).map((i) => i.product.slug)).toContain(
+      'ethiopia-yirgacheffe',
+    );
     expect(await searchProducts('   ', db)).toEqual([]);
     expect(await searchProducts('zzzz-nothing', db)).toEqual([]);
   });
 
   it('lists collections, origins, featured and recent reviews', async () => {
-    expect((await listCollections(db)).map((c) => c.slug)).toEqual(['single-origin', 'blends', 'decaf', 'equipment']);
+    expect((await listCollections(db)).map((c) => c.slug)).toEqual([
+      'single-origin',
+      'blends',
+      'decaf',
+      'equipment',
+    ]);
     expect((await getCollectionBySlug('blends', db))?.name).toBe('Blends');
     expect(await listOrigins(db)).toContain('Kenya');
     expect((await listFeaturedProducts(4, db)).length).toBe(4);
@@ -6284,6 +7665,7 @@ describe('catalog queries', () => {
 ```
 
 `tests/integration/newsletter.test.ts`:
+
 ```ts
 import { afterAll, describe, expect, it } from 'vitest';
 import { subscribeToNewsletter } from '../../src/lib/db/queries/newsletter';
@@ -6296,7 +7678,9 @@ describe('subscribeToNewsletter', () => {
   it('creates once and is a no-op on repeat', async () => {
     const email = `test-${Date.now()}@example.com`;
     expect(await subscribeToNewsletter(email, 'test', db)).toEqual({ created: true });
-    expect(await subscribeToNewsletter(email.toUpperCase(), 'test', db)).toEqual({ created: false });
+    expect(await subscribeToNewsletter(email.toUpperCase(), 'test', db)).toEqual({
+      created: false,
+    });
   });
 });
 ```
@@ -6306,6 +7690,7 @@ Run: `pnpm test:integration` → PASS.
 - [ ] **Step 4: Content modules**
 
 `src/content/brew-guides/index.ts`:
+
 ```ts
 export interface BrewGuide {
   slug: string;
@@ -6339,7 +7724,10 @@ export const brewGuides: BrewGuide[] = [
       'Pour to 350 g by 2:00. Give the dripper a gentle swirl to flatten the bed.',
       'Drawdown should finish between 3:00 and 3:30. Adjust grind finer if faster, coarser if slower.',
     ],
-    tips: ['Weigh everything. Ratio drift is the number one cause of inconsistent cups.', 'Ethiopian and Kenyan coffees shine here. Try the Yirgacheffe.'],
+    tips: [
+      'Weigh everything. Ratio drift is the number one cause of inconsistent cups.',
+      'Ethiopian and Kenyan coffees shine here. Try the Yirgacheffe.',
+    ],
     recommendedSlugs: ['ethiopia-yirgacheffe', 'kenya-nyeri', 'costa-rica-tarrazu'],
   },
   {
@@ -6358,7 +7746,10 @@ export const brewGuides: BrewGuide[] = [
       'Wait another 4 minutes without plunging. Fines settle and the cup gets cleaner.',
       'Press the plunger just below the surface and pour immediately.',
     ],
-    tips: ['Skip the hard plunge. Pressing to the bottom stirs up sediment.', 'Morning Frame and Sumatra Mandheling are built for this.'],
+    tips: [
+      'Skip the hard plunge. Pressing to the bottom stirs up sediment.',
+      'Morning Frame and Sumatra Mandheling are built for this.',
+    ],
     recommendedSlugs: ['morning-frame', 'sumatra-mandheling', 'brazil-cerrado'],
   },
   {
@@ -6377,7 +7768,10 @@ export const brewGuides: BrewGuide[] = [
       'Stop at 36 g of liquid in the cup. Note the time.',
       'Under 25 seconds and sour? Grind finer. Over 32 seconds and bitter? Grind coarser.',
     ],
-    tips: ['Change one variable at a time.', 'Dark Mode Espresso is designed for this ratio and will forgive a lot.'],
+    tips: [
+      'Change one variable at a time.',
+      'Dark Mode Espresso is designed for this ratio and will forgive a lot.',
+    ],
     recommendedSlugs: ['dark-mode-espresso', 'guatemala-antigua', 'costa-rica-tarrazu'],
   },
   {
@@ -6396,13 +7790,17 @@ export const brewGuides: BrewGuide[] = [
       'Strain through a paper filter or a fine sieve lined with a filter.',
       'Dilute with equal parts water or milk over ice. Keeps for 7 days refrigerated.',
     ],
-    tips: ['Hot Reload is blended specifically for this recipe.', 'Too strong? Dilute more. Too weak? Steep longer next time, not finer.'],
+    tips: [
+      'Hot Reload is blended specifically for this recipe.',
+      'Too strong? Dilute more. Too weak? Steep longer next time, not finer.',
+    ],
     recommendedSlugs: ['hot-reload-cold-brew', 'brazil-cerrado', 'peru-cajamarca'],
   },
 ];
 ```
 
 `src/content/faq.ts`:
+
 ```ts
 export interface FaqItem {
   question: string;
@@ -6410,17 +7808,46 @@ export interface FaqItem {
 }
 
 export const faqItems: FaqItem[] = [
-  { question: 'When do you roast and ship?', answer: 'We roast Monday through Thursday and ship every order within 48 hours of roasting. Most US orders arrive in 2 to 4 business days.' },
-  { question: 'How does Subscribe & Save work?', answer: 'Choose a delivery interval of 2, 4 or 6 weeks on any coffee and save 15% on every bag. You can pause, skip or cancel at any time from the link in your confirmation email.' },
-  { question: 'Do you offer free shipping?', answer: 'Yes. Orders over $45 after discounts ship free in the US. Everything else ships for a flat $6.' },
-  { question: 'Whole bean or ground?', answer: 'We recommend whole bean for freshness, but we will grind to order for drip, espresso, French press or pour over at no charge.' },
-  { question: 'How should I store my coffee?', answer: 'Keep the bag sealed in a cool, dark cupboard. Do not refrigerate. Coffee is best from 5 to 30 days after the roast date printed on the bag.' },
-  { question: 'Can I return coffee?', answer: 'If a bag is not right for you, email hello@cofresso.com within 30 days and we will replace it or refund you. Equipment can be returned unused within 30 days.' },
-  { question: 'Is this a real store?', answer: 'Cofresso is a fully working demo storefront used by Coframe to test tooling. Orders are simulated and no cards are ever charged.' },
+  {
+    question: 'When do you roast and ship?',
+    answer:
+      'We roast Monday through Thursday and ship every order within 48 hours of roasting. Most US orders arrive in 2 to 4 business days.',
+  },
+  {
+    question: 'How does Subscribe & Save work?',
+    answer:
+      'Choose a delivery interval of 2, 4 or 6 weeks on any coffee and save 15% on every bag. You can pause, skip or cancel at any time from the link in your confirmation email.',
+  },
+  {
+    question: 'Do you offer free shipping?',
+    answer:
+      'Yes. Orders over $45 after discounts ship free in the US. Everything else ships for a flat $6.',
+  },
+  {
+    question: 'Whole bean or ground?',
+    answer:
+      'We recommend whole bean for freshness, but we will grind to order for drip, espresso, French press or pour over at no charge.',
+  },
+  {
+    question: 'How should I store my coffee?',
+    answer:
+      'Keep the bag sealed in a cool, dark cupboard. Do not refrigerate. Coffee is best from 5 to 30 days after the roast date printed on the bag.',
+  },
+  {
+    question: 'Can I return coffee?',
+    answer:
+      'If a bag is not right for you, email hello@cofresso.com within 30 days and we will replace it or refund you. Equipment can be returned unused within 30 days.',
+  },
+  {
+    question: 'Is this a real store?',
+    answer:
+      'Cofresso is a fully working demo storefront used by Coframe to test tooling. Orders are simulated and no cards are ever charged.',
+  },
 ];
 ```
 
 `src/lib/content/brew-guides.ts`:
+
 ```ts
 import { brewGuides, type BrewGuide } from '@/content/brew-guides';
 
@@ -6433,6 +7860,7 @@ export function getBrewGuide(slug: string): BrewGuide | undefined {
 ```
 
 `src/lib/content/faq.ts`:
+
 ```ts
 export { faqItems, type FaqItem } from '@/content/faq';
 ```
@@ -6450,17 +7878,20 @@ git commit -m "feat: add catalog and newsletter queries, filter parsing and cont
 ### Task 13: Home page and marketing components
 
 **Files:**
+
 - Create: `src/components/marketing/hero.tsx`, `src/components/marketing/collection-grid.tsx`, `src/components/marketing/story.tsx`, `src/components/marketing/brew-guides-teaser.tsx`, `src/components/marketing/reviews-strip.tsx`, `src/components/marketing/newsletter-form.tsx`, `src/components/marketing/value-props.tsx`
 - Create: `src/app/(marketing)/page.tsx`, `src/app/(marketing)/actions.ts`
 - Delete: `src/app/page.tsx`
 
 **Interfaces:**
+
 - Consumes: catalog queries, `ProductGrid`, `subscribeToNewsletter`, `track`, `siteConfig`.
 - Produces: `subscribeNewsletterAction(prev, formData): Promise<ActionResult<{ created: boolean }>>`; `<NewsletterForm source />`.
 
 - [ ] **Step 1: Newsletter action and form**
 
 `src/app/(marketing)/actions.ts`:
+
 ```ts
 'use server';
 
@@ -6478,8 +7909,12 @@ export async function subscribeNewsletterAction(
   _prev: ActionResult<{ created: boolean }> | null,
   formData: FormData,
 ): Promise<ActionResult<{ created: boolean }>> {
-  const parsed = schema.safeParse({ email: formData.get('email'), source: formData.get('source') ?? 'site' });
-  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Enter a valid email address.');
+  const parsed = schema.safeParse({
+    email: formData.get('email'),
+    source: formData.get('source') ?? 'site',
+  });
+  if (!parsed.success)
+    return fail(parsed.error.issues[0]?.message ?? 'Enter a valid email address.');
   try {
     return ok(await subscribeToNewsletter(parsed.data.email, parsed.data.source));
   } catch (err) {
@@ -6490,6 +7925,7 @@ export async function subscribeNewsletterAction(
 ```
 
 `src/components/marketing/newsletter-form.tsx`:
+
 ```tsx
 'use client';
 
@@ -6508,20 +7944,41 @@ export function NewsletterForm({ source = 'home' }: { source?: string }) {
 
   if (state?.ok) {
     return (
-      <p className="rounded-xl bg-leaf/10 px-4 py-3 text-sm text-leaf" role="status" data-testid="newsletter-success">
-        {state.data.created ? 'You are on the list. First roast notes land next week.' : 'You were already on the list. We like your enthusiasm.'}
+      <p
+        className="bg-leaf/10 text-leaf rounded-xl px-4 py-3 text-sm"
+        role="status"
+        data-testid="newsletter-success"
+      >
+        {state.data.created
+          ? 'You are on the list. First roast notes land next week.'
+          : 'You were already on the list. We like your enthusiasm.'}
       </p>
     );
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-2 sm:flex-row" data-testid="newsletter-form">
+    <form
+      action={formAction}
+      className="flex flex-col gap-2 sm:flex-row"
+      data-testid="newsletter-form"
+    >
       <input type="hidden" name="source" value={source} />
-      <Input type="email" name="email" required placeholder="you@example.com" aria-label="Email address" className="sm:max-w-xs" />
+      <Input
+        type="email"
+        name="email"
+        required
+        placeholder="you@example.com"
+        aria-label="Email address"
+        className="sm:max-w-xs"
+      />
       <Button type="submit" variant="copper" loading={pending}>
         Get roast notes
       </Button>
-      {state && !state.ok ? <p className="text-sm text-red-700 sm:self-center" role="alert">{state.error}</p> : null}
+      {state && !state.ok ? (
+        <p className="text-sm text-red-700 sm:self-center" role="alert">
+          {state.error}
+        </p>
+      ) : null}
     </form>
   );
 }
@@ -6530,6 +7987,7 @@ export function NewsletterForm({ source = 'home' }: { source?: string }) {
 - [ ] **Step 2: Marketing components**
 
 `src/components/marketing/hero.tsx`:
+
 ```tsx
 import Image from 'next/image';
 import { ButtonLink } from '@/components/ui/button';
@@ -6539,29 +7997,49 @@ import type { ProductCardData } from '@/lib/catalog/types';
 export function Hero({ featured }: { featured: ProductCardData[] }) {
   const [a, b, c] = featured;
   return (
-    <section className="relative overflow-hidden bg-espresso text-foam" data-testid="hero">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(200,118,58,0.35),_transparent_55%)]" aria-hidden="true" />
+    <section className="bg-espresso text-foam relative overflow-hidden" data-testid="hero">
+      <div
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(200,118,58,0.35),_transparent_55%)]"
+        aria-hidden="true"
+      />
       <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-2 lg:py-28">
         <div>
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-copper">Small-batch specialty coffee</p>
+          <p className="text-copper mb-4 text-xs font-semibold tracking-[0.25em] uppercase">
+            Small-batch specialty coffee
+          </p>
           <h1 className="text-5xl leading-[1.05] sm:text-6xl lg:text-7xl">
-            Coffee, <em className="font-light italic text-latte-light">framed</em> right.
+            Coffee, <em className="text-latte-light font-light italic">framed</em> right.
           </h1>
-          <p className="mt-6 max-w-lg text-lg text-foam/80">
-            Roasted to order, shipped within 48 hours, and dialed in for the way you actually brew. Subscribe and save 15% on every bag.
+          <p className="text-foam/80 mt-6 max-w-lg text-lg">
+            Roasted to order, shipped within 48 hours, and dialed in for the way you actually brew.
+            Subscribe and save 15% on every bag.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <ButtonLink href="/shop" size="lg" variant="copper" data-testid="hero-cta">
               Shop coffee
             </ButtonLink>
-            <ButtonLink href="/brew-guides" size="lg" variant="outline" className="border-foam/40 text-foam hover:bg-foam/10 hover:border-foam">
+            <ButtonLink
+              href="/brew-guides"
+              size="lg"
+              variant="outline"
+              className="border-foam/40 text-foam hover:bg-foam/10 hover:border-foam"
+            >
               Find your brew
             </ButtonLink>
           </div>
-          <dl className="mt-10 grid grid-cols-3 gap-6 border-t border-foam/15 pt-6 text-sm">
-            <div><dt className="text-foam/60">Roast to ship</dt><dd className="text-lg font-medium">48 hours</dd></div>
-            <div><dt className="text-foam/60">Origins</dt><dd className="text-lg font-medium">9 countries</dd></div>
-            <div><dt className="text-foam/60">Free shipping</dt><dd className="text-lg font-medium">over $45</dd></div>
+          <dl className="border-foam/15 mt-10 grid grid-cols-3 gap-6 border-t pt-6 text-sm">
+            <div>
+              <dt className="text-foam/60">Roast to ship</dt>
+              <dd className="text-lg font-medium">48 hours</dd>
+            </div>
+            <div>
+              <dt className="text-foam/60">Origins</dt>
+              <dd className="text-lg font-medium">9 countries</dd>
+            </div>
+            <div>
+              <dt className="text-foam/60">Free shipping</dt>
+              <dd className="text-lg font-medium">over $45</dd>
+            </div>
           </dl>
         </div>
         <div className="relative mx-auto grid w-full max-w-md grid-cols-3 items-end gap-3">
@@ -6585,26 +8063,41 @@ export function Hero({ featured }: { featured: ProductCardData[] }) {
 ```
 
 `src/components/marketing/value-props.tsx`:
+
 ```tsx
 import { Container } from '@/components/ui/container';
 import { IconCheck, IconLeaf, IconTruck } from '@/components/ui/icons';
 
 const props = [
-  { icon: IconTruck, title: 'Roasted, then shipped', body: 'Every bag leaves within 48 hours of roasting with the roast date printed on it.' },
-  { icon: IconLeaf, title: 'Traceable to the farm', body: 'Producer, altitude and process on every single origin. No mystery blends.' },
-  { icon: IconCheck, title: 'Ground to order', body: 'Whole bean, drip, espresso, French press or pour over. Same price.' },
+  {
+    icon: IconTruck,
+    title: 'Roasted, then shipped',
+    body: 'Every bag leaves within 48 hours of roasting with the roast date printed on it.',
+  },
+  {
+    icon: IconLeaf,
+    title: 'Traceable to the farm',
+    body: 'Producer, altitude and process on every single origin. No mystery blends.',
+  },
+  {
+    icon: IconCheck,
+    title: 'Ground to order',
+    body: 'Whole bean, drip, espresso, French press or pour over. Same price.',
+  },
 ];
 
 export function ValueProps() {
   return (
-    <section className="border-b border-latte/20 bg-foam">
+    <section className="border-latte/20 bg-foam border-b">
       <Container className="grid gap-8 py-10 sm:grid-cols-3">
         {props.map(({ icon: Icon, title, body }) => (
           <div key={title} className="flex gap-4">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-copper/10 text-copper"><Icon /></span>
+            <span className="bg-copper/10 text-copper flex size-10 shrink-0 items-center justify-center rounded-full">
+              <Icon />
+            </span>
             <div>
               <h3 className="font-body text-sm font-semibold">{title}</h3>
-              <p className="mt-1 text-sm text-latte">{body}</p>
+              <p className="text-latte mt-1 text-sm">{body}</p>
             </div>
           </div>
         ))}
@@ -6615,6 +8108,7 @@ export function ValueProps() {
 ```
 
 `src/components/marketing/collection-grid.tsx`:
+
 ```tsx
 import Link from 'next/link';
 import { IconArrowRight } from '@/components/ui/icons';
@@ -6636,12 +8130,19 @@ export function CollectionGrid({ collections }: { collections: Collection[] }) {
           href={`/collections/${c.slug}`}
           className={`group flex min-h-44 flex-col justify-between rounded-2xl bg-gradient-to-br p-6 transition-shadow hover:shadow-lg ${art[c.slug] ?? 'from-latte/30 to-cream'}`}
         >
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-espresso/60">Collection</span>
+          <span className="text-espresso/60 text-xs font-semibold tracking-[0.2em] uppercase">
+            Collection
+          </span>
           <span>
-            <span className="block font-display text-2xl">{c.name}</span>
-            <span className="mt-1 block text-sm text-espresso/70">{c.description}</span>
-            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-copper-dark">
-              Browse <IconArrowRight width={16} height={16} className="transition-transform group-hover:translate-x-1" />
+            <span className="font-display block text-2xl">{c.name}</span>
+            <span className="text-espresso/70 mt-1 block text-sm">{c.description}</span>
+            <span className="text-copper-dark mt-3 inline-flex items-center gap-1 text-sm font-medium">
+              Browse{' '}
+              <IconArrowRight
+                width={16}
+                height={16}
+                className="transition-transform group-hover:translate-x-1"
+              />
             </span>
           </span>
         </Link>
@@ -6652,27 +8153,45 @@ export function CollectionGrid({ collections }: { collections: Collection[] }) {
 ```
 
 `src/components/marketing/story.tsx`:
+
 ```tsx
 import Image from 'next/image';
 import { ButtonLink } from '@/components/ui/button';
 
 export function Story() {
   return (
-    <section className="grid items-center gap-10 rounded-3xl bg-espresso p-8 text-foam sm:p-12 lg:grid-cols-2" data-testid="story">
+    <section
+      className="bg-espresso text-foam grid items-center gap-10 rounded-3xl p-8 sm:p-12 lg:grid-cols-2"
+      data-testid="story"
+    >
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-copper">Our story</p>
-        <h2 className="text-3xl sm:text-4xl">We started with a spreadsheet and a popcorn popper.</h2>
-        <p className="mt-5 text-foam/80">
-          Cofresso began as an engineering team's obsession with getting the office coffee right. We logged every roast, every ratio and
-          every brew until the numbers turned into something we were proud to drink. Now we roast for a few thousand people who care as
-          much as we do.
+        <p className="text-copper mb-3 text-xs font-semibold tracking-[0.25em] uppercase">
+          Our story
         </p>
-        <ButtonLink href="/about" variant="outline" className="mt-8 border-foam/40 text-foam hover:border-foam hover:bg-foam/10">
+        <h2 className="text-3xl sm:text-4xl">
+          We started with a spreadsheet and a popcorn popper.
+        </h2>
+        <p className="text-foam/80 mt-5">
+          Cofresso began as an engineering team's obsession with getting the office coffee right. We
+          logged every roast, every ratio and every brew until the numbers turned into something we
+          were proud to drink. Now we roast for a few thousand people who care as much as we do.
+        </p>
+        <ButtonLink
+          href="/about"
+          variant="outline"
+          className="border-foam/40 text-foam hover:border-foam hover:bg-foam/10 mt-8"
+        >
           Read more
         </ButtonLink>
       </div>
       <div className="flex justify-center">
-        <Image src="/logo.png" alt="Cofresso double-bean mark" width={260} height={260} className="drop-shadow-2xl" />
+        <Image
+          src="/logo.png"
+          alt="Cofresso double-bean mark"
+          width={260}
+          height={260}
+          className="drop-shadow-2xl"
+        />
       </div>
     </section>
   );
@@ -6680,6 +8199,7 @@ export function Story() {
 ```
 
 `src/components/marketing/brew-guides-teaser.tsx`:
+
 ```tsx
 import Link from 'next/link';
 import { IconArrowRight } from '@/components/ui/icons';
@@ -6689,15 +8209,24 @@ export function BrewGuidesTeaser() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="brew-guides-teaser">
       {brewGuides.map((g) => (
-        <Link key={g.slug} href={`/brew-guides/${g.slug}`} className="group rounded-2xl border border-latte/30 bg-foam p-6 transition-colors hover:border-copper">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-latte">{g.method}</p>
+        <Link
+          key={g.slug}
+          href={`/brew-guides/${g.slug}`}
+          className="group border-latte/30 bg-foam hover:border-copper rounded-2xl border p-6 transition-colors"
+        >
+          <p className="text-latte text-xs font-semibold tracking-[0.2em] uppercase">{g.method}</p>
           <h3 className="mt-2 text-xl">{g.title}</h3>
-          <p className="mt-2 text-sm text-latte">{g.summary}</p>
-          <p className="mt-4 text-sm text-espresso/70">
+          <p className="text-latte mt-2 text-sm">{g.summary}</p>
+          <p className="text-espresso/70 mt-4 text-sm">
             {g.ratio.split(' (')[0]} · {g.totalTime}
           </p>
-          <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-copper-dark">
-            Read guide <IconArrowRight width={16} height={16} className="transition-transform group-hover:translate-x-1" />
+          <span className="text-copper-dark mt-4 inline-flex items-center gap-1 text-sm font-medium">
+            Read guide{' '}
+            <IconArrowRight
+              width={16}
+              height={16}
+              className="transition-transform group-hover:translate-x-1"
+            />
           </span>
         </Link>
       ))}
@@ -6707,6 +8236,7 @@ export function BrewGuidesTeaser() {
 ```
 
 `src/components/marketing/reviews-strip.tsx`:
+
 ```tsx
 import Link from 'next/link';
 import { Rating } from '@/components/ui/rating';
@@ -6716,13 +8246,16 @@ export function ReviewsStrip({ reviews }: { reviews: RecentReview[] }) {
   return (
     <div className="grid gap-4 md:grid-cols-3" data-testid="reviews-strip">
       {reviews.map((r) => (
-        <figure key={r.id} className="flex flex-col gap-3 rounded-2xl bg-foam p-6">
+        <figure key={r.id} className="bg-foam flex flex-col gap-3 rounded-2xl p-6">
           <Rating value={r.rating} />
           <blockquote className="text-sm leading-relaxed">“{r.body}”</blockquote>
-          <figcaption className="mt-auto text-xs text-latte">
+          <figcaption className="text-latte mt-auto text-xs">
             {r.authorName}
             {r.verified ? ' · Verified buyer' : ''} · on{' '}
-            <Link href={`/products/${r.product.slug}`} className="text-espresso underline-offset-2 hover:underline">
+            <Link
+              href={`/products/${r.product.slug}`}
+              className="text-espresso underline-offset-2 hover:underline"
+            >
               {r.product.name}
             </Link>
           </figcaption>
@@ -6736,6 +8269,7 @@ export function ReviewsStrip({ reviews }: { reviews: RecentReview[] }) {
 - [ ] **Step 3: Home page**
 
 Delete `src/app/page.tsx`, then create `src/app/(marketing)/page.tsx`:
+
 ```tsx
 import { BrewGuidesTeaser } from '@/components/marketing/brew-guides-teaser';
 import { CollectionGrid } from '@/components/marketing/collection-grid';
@@ -6751,7 +8285,11 @@ import { SectionHeading } from '@/components/ui/section-heading';
 import { listCollections, listFeaturedProducts, listRecentReviews } from '@/lib/db/queries/catalog';
 
 export default async function HomePage() {
-  const [featured, collections, reviews] = await Promise.all([listFeaturedProducts(4), listCollections(), listRecentReviews(3)]);
+  const [featured, collections, reviews] = await Promise.all([
+    listFeaturedProducts(4),
+    listCollections(),
+    listRecentReviews(3),
+  ]);
 
   return (
     <>
@@ -6759,7 +8297,16 @@ export default async function HomePage() {
       <ValueProps />
 
       <Container className="py-20">
-        <SectionHeading eyebrow="Featured" title="This week on the bar" description="The coffees our roasters keep reaching for." action={<ButtonLink href="/shop" variant="outline">Shop all</ButtonLink>} />
+        <SectionHeading
+          eyebrow="Featured"
+          title="This week on the bar"
+          description="The coffees our roasters keep reaching for."
+          action={
+            <ButtonLink href="/shop" variant="outline">
+              Shop all
+            </ButtonLink>
+          }
+        />
         <ProductGrid items={featured} listId="home_featured" />
       </Container>
 
@@ -6773,7 +8320,11 @@ export default async function HomePage() {
       </Container>
 
       <Container className="pb-20">
-        <SectionHeading eyebrow="Brew guides" title="Brew it like we do" description="Ratios, grind sizes and timings for every brewer in the cupboard." />
+        <SectionHeading
+          eyebrow="Brew guides"
+          title="Brew it like we do"
+          description="Ratios, grind sizes and timings for every brewer in the cupboard."
+        />
         <BrewGuidesTeaser />
       </Container>
 
@@ -6785,9 +8336,13 @@ export default async function HomePage() {
       <section id="newsletter" className="bg-copper/10">
         <Container className="grid items-center gap-8 py-16 lg:grid-cols-2">
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-copper">Roast notes</p>
+            <p className="text-copper mb-2 text-xs font-semibold tracking-[0.2em] uppercase">
+              Roast notes
+            </p>
             <h2 className="text-3xl sm:text-4xl">New coffees, first.</h2>
-            <p className="mt-3 text-latte">One email when a new lot lands. No drip campaigns, pun intended.</p>
+            <p className="text-latte mt-3">
+              One email when a new lot lands. No drip campaigns, pun intended.
+            </p>
           </div>
           <NewsletterForm source="home" />
         </Container>
@@ -6814,16 +8369,19 @@ git commit -m "feat: add home page with hero, featured products, collections, st
 ### Task 14: Shop, collection and search pages
 
 **Files:**
+
 - Create: `src/components/product/shop-filters.tsx`, `src/app/(shop)/shop/page.tsx`, `src/app/(shop)/collections/[slug]/page.tsx`, `src/app/(shop)/search/page.tsx`, `src/app/(shop)/search/search-tracker.tsx`
 - Modify: `src/app/sitemap.ts`
 
 **Interfaces:**
+
 - Consumes: `listProducts`, `listCollections`, `listOrigins`, `getCollectionBySlug`, `searchProducts`, `parseProductFilters`, `ProductGrid`.
 - Produces: routes `/shop`, `/collections/[slug]`, `/search`.
 
 - [ ] **Step 1: Filters component (client, URL-driven)**
 
 `src/components/product/shop-filters.tsx`:
+
 ```tsx
 'use client';
 
@@ -6842,64 +8400,115 @@ interface ShopFiltersProps {
   lockCollection?: boolean;
 }
 
-export function ShopFilters({ filters, collections, origins, resultCount, lockCollection = false }: ShopFiltersProps) {
+export function ShopFilters({
+  filters,
+  collections,
+  origins,
+  resultCount,
+  lockCollection = false,
+}: ShopFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [pending, start] = useTransition();
 
   const update = (patch: Partial<ProductFilters>) => {
     const next = { ...filters, ...patch } as ProductFilters;
-    for (const key of Object.keys(next) as (keyof ProductFilters)[]) if (next[key] === undefined || next[key] === '') delete next[key];
+    for (const key of Object.keys(next) as (keyof ProductFilters)[])
+      if (next[key] === undefined || next[key] === '') delete next[key];
     if (!next.sort) next.sort = 'featured';
     const qs = filtersToSearchParams(next).toString();
     start(() => router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false }));
   };
 
-  const hasFilters = Boolean(filters.roast || filters.origin || (!lockCollection && filters.collection));
+  const hasFilters = Boolean(
+    filters.roast || filters.origin || (!lockCollection && filters.collection),
+  );
 
   return (
-    <div className="mb-8 flex flex-col gap-4 rounded-2xl bg-foam p-4 sm:flex-row sm:flex-wrap sm:items-end" data-testid="shop-filters" aria-busy={pending}>
+    <div
+      className="bg-foam mb-8 flex flex-col gap-4 rounded-2xl p-4 sm:flex-row sm:flex-wrap sm:items-end"
+      data-testid="shop-filters"
+      aria-busy={pending}
+    >
       {!lockCollection ? (
-        <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-latte">
+        <label className="text-latte flex flex-1 flex-col gap-1 text-xs font-medium">
           Collection
-          <Select value={filters.collection ?? ''} onChange={(e) => update({ collection: e.target.value || undefined })} data-testid="filter-collection">
+          <Select
+            value={filters.collection ?? ''}
+            onChange={(e) => update({ collection: e.target.value || undefined })}
+            data-testid="filter-collection"
+          >
             <option value="">All</option>
             {collections.map((c) => (
-              <option key={c.slug} value={c.slug}>{c.name}</option>
+              <option key={c.slug} value={c.slug}>
+                {c.name}
+              </option>
             ))}
           </Select>
         </label>
       ) : null}
-      <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-latte">
+      <label className="text-latte flex flex-1 flex-col gap-1 text-xs font-medium">
         Roast
-        <Select value={filters.roast ?? ''} onChange={(e) => update({ roast: (e.target.value || undefined) as ProductFilters['roast'] })} data-testid="filter-roast">
+        <Select
+          value={filters.roast ?? ''}
+          onChange={(e) =>
+            update({ roast: (e.target.value || undefined) as ProductFilters['roast'] })
+          }
+          data-testid="filter-roast"
+        >
           <option value="">Any</option>
           {ROAST_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
           ))}
         </Select>
       </label>
-      <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-latte">
+      <label className="text-latte flex flex-1 flex-col gap-1 text-xs font-medium">
         Origin
-        <Select value={filters.origin ?? ''} onChange={(e) => update({ origin: e.target.value || undefined })} data-testid="filter-origin">
+        <Select
+          value={filters.origin ?? ''}
+          onChange={(e) => update({ origin: e.target.value || undefined })}
+          data-testid="filter-origin"
+        >
           <option value="">Any</option>
           {origins.map((o) => (
-            <option key={o} value={o}>{o}</option>
+            <option key={o} value={o}>
+              {o}
+            </option>
           ))}
         </Select>
       </label>
-      <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-latte">
+      <label className="text-latte flex flex-1 flex-col gap-1 text-xs font-medium">
         Sort
-        <Select value={filters.sort} onChange={(e) => update({ sort: e.target.value as ProductFilters['sort'] })} data-testid="filter-sort">
+        <Select
+          value={filters.sort}
+          onChange={(e) => update({ sort: e.target.value as ProductFilters['sort'] })}
+          data-testid="filter-sort"
+        >
           {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
           ))}
         </Select>
       </label>
-      <div className="flex items-center justify-between gap-4 text-sm text-latte sm:ml-auto">
-        <span data-testid="result-count">{resultCount} {resultCount === 1 ? 'product' : 'products'}</span>
+      <div className="text-latte flex items-center justify-between gap-4 text-sm sm:ml-auto">
+        <span data-testid="result-count">
+          {resultCount} {resultCount === 1 ? 'product' : 'products'}
+        </span>
         {hasFilters ? (
-          <button type="button" className="underline-offset-2 hover:text-espresso hover:underline" onClick={() => update({ roast: undefined, origin: undefined, collection: lockCollection ? filters.collection : undefined })}>
+          <button
+            type="button"
+            className="hover:text-espresso underline-offset-2 hover:underline"
+            onClick={() =>
+              update({
+                roast: undefined,
+                origin: undefined,
+                collection: lockCollection ? filters.collection : undefined,
+              })
+            }
+          >
             Clear
           </button>
         ) : null}
@@ -6912,6 +8521,7 @@ export function ShopFilters({ filters, collections, origins, resultCount, lockCo
 - [ ] **Step 2: Shop page**
 
 `src/app/(shop)/shop/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { ProductGrid } from '@/components/product/product-grid';
@@ -6920,19 +8530,35 @@ import { Container } from '@/components/ui/container';
 import { listCollections, listOrigins, listProducts } from '@/lib/db/queries/catalog';
 import { parseProductFilters, type RawSearchParams } from '@/lib/shop/filters';
 
-export const metadata: Metadata = { title: 'Shop', description: 'Single origins, blends, decaf and the gear to brew them.' };
+export const metadata: Metadata = {
+  title: 'Shop',
+  description: 'Single origins, blends, decaf and the gear to brew them.',
+};
 
-export default async function ShopPage({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
+export default async function ShopPage({
+  searchParams,
+}: {
+  searchParams: Promise<RawSearchParams>;
+}) {
   const filters = parseProductFilters(await searchParams);
-  const [items, collections, origins] = await Promise.all([listProducts(filters), listCollections(), listOrigins()]);
+  const [items, collections, origins] = await Promise.all([
+    listProducts(filters),
+    listCollections(),
+    listOrigins(),
+  ]);
 
   return (
     <Container className="py-12">
       <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-copper">Shop</p>
+        <p className="text-copper mb-2 text-xs font-semibold tracking-[0.2em] uppercase">Shop</p>
         <h1 className="text-4xl sm:text-5xl">All coffee &amp; gear</h1>
       </div>
-      <ShopFilters filters={filters} collections={collections} origins={origins} resultCount={items.length} />
+      <ShopFilters
+        filters={filters}
+        collections={collections}
+        origins={origins}
+        resultCount={items.length}
+      />
       <ProductGrid items={items} listId="shop" />
     </Container>
   );
@@ -6942,20 +8568,28 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 - [ ] **Step 3: Collection page**
 
 `src/app/(shop)/collections/[slug]/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ProductGrid } from '@/components/product/product-grid';
 import { ShopFilters } from '@/components/product/shop-filters';
 import { Container } from '@/components/ui/container';
-import { getCollectionBySlug, listCollections, listOrigins, listProducts } from '@/lib/db/queries/catalog';
+import {
+  getCollectionBySlug,
+  listCollections,
+  listOrigins,
+  listProducts,
+} from '@/lib/db/queries/catalog';
 import { parseProductFilters, type RawSearchParams } from '@/lib/shop/filters';
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<RawSearchParams> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const collection = await getCollectionBySlug((await params).slug);
-  return collection ? { title: collection.name, description: collection.description } : { title: 'Collection' };
+  return collection
+    ? { title: collection.name, description: collection.description }
+    : { title: 'Collection' };
 }
 
 export default async function CollectionPage({ params, searchParams }: Props) {
@@ -6964,16 +8598,30 @@ export default async function CollectionPage({ params, searchParams }: Props) {
   if (!collection) notFound();
 
   const filters = { ...parseProductFilters(await searchParams), collection: slug };
-  const [items, collections, origins] = await Promise.all([listProducts(filters), listCollections(), listOrigins()]);
+  const [items, collections, origins] = await Promise.all([
+    listProducts(filters),
+    listCollections(),
+    listOrigins(),
+  ]);
 
   return (
     <Container className="py-12">
       <div className="mb-8 max-w-2xl">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-copper">Collection</p>
-        <h1 className="text-4xl sm:text-5xl" data-testid="collection-title">{collection.name}</h1>
-        <p className="mt-3 text-latte">{collection.description}</p>
+        <p className="text-copper mb-2 text-xs font-semibold tracking-[0.2em] uppercase">
+          Collection
+        </p>
+        <h1 className="text-4xl sm:text-5xl" data-testid="collection-title">
+          {collection.name}
+        </h1>
+        <p className="text-latte mt-3">{collection.description}</p>
       </div>
-      <ShopFilters filters={filters} collections={collections} origins={origins} resultCount={items.length} lockCollection />
+      <ShopFilters
+        filters={filters}
+        collections={collections}
+        origins={origins}
+        resultCount={items.length}
+        lockCollection
+      />
       <ProductGrid items={items} listId={`collection_${slug}`} />
     </Container>
   );
@@ -6983,6 +8631,7 @@ export default async function CollectionPage({ params, searchParams }: Props) {
 - [ ] **Step 4: Search page**
 
 `src/app/(shop)/search/search-tracker.tsx`:
+
 ```tsx
 'use client';
 
@@ -6998,6 +8647,7 @@ export function SearchTracker({ query, resultCount }: { query: string; resultCou
 ```
 
 `src/app/(shop)/search/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { SearchForm } from '@/components/layout/search-form';
@@ -7008,20 +8658,34 @@ import { SearchTracker } from './search-tracker';
 
 export const metadata: Metadata = { title: 'Search' };
 
-export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string | string[] }> }) {
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string | string[] }>;
+}) {
   const raw = (await searchParams).q;
-  const query = (Array.isArray(raw) ? raw[0] : raw ?? '').slice(0, 80);
+  const query = (Array.isArray(raw) ? raw[0] : (raw ?? '')).slice(0, 80);
   const items = query ? await searchProducts(query) : [];
 
   return (
     <Container className="py-12">
       <div className="mb-8 max-w-xl">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-copper">Search</p>
+        <p className="text-copper mb-2 text-xs font-semibold tracking-[0.2em] uppercase">Search</p>
         <h1 className="text-4xl">{query ? <>Results for “{query}”</> : 'Search the shop'}</h1>
         <SearchForm className="mt-6" defaultValue={query} />
-        {query ? <p className="mt-3 text-sm text-latte" data-testid="search-count">{items.length} {items.length === 1 ? 'result' : 'results'}</p> : null}
+        {query ? (
+          <p className="text-latte mt-3 text-sm" data-testid="search-count">
+            {items.length} {items.length === 1 ? 'result' : 'results'}
+          </p>
+        ) : null}
       </div>
-      {query ? <ProductGrid items={items} listId="search" emptyMessage="Nothing matched. Try an origin like “Ethiopia” or a note like “chocolate”." /> : null}
+      {query ? (
+        <ProductGrid
+          items={items}
+          listId="search"
+          emptyMessage="Nothing matched. Try an origin like “Ethiopia” or a note like “chocolate”."
+        />
+      ) : null}
       <SearchTracker query={query} resultCount={items.length} />
     </Container>
   );
@@ -7031,6 +8695,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 - [ ] **Step 5: Sitemap with catalog routes**
 
 Replace `src/app/sitemap.ts`:
+
 ```ts
 import type { MetadataRoute } from 'next';
 import { brewGuides } from '@/lib/content/brew-guides';
@@ -7049,9 +8714,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
   return [
     ...staticRoutes,
-    ...collections.map((c) => ({ url: `${base}/collections/${c.slug}`, changeFrequency: 'weekly' as const, priority: 0.8 })),
-    ...products.map((p) => ({ url: `${base}/products/${p.slug}`, lastModified: p.createdAt, changeFrequency: 'weekly' as const, priority: 0.9 })),
-    ...brewGuides.map((g) => ({ url: `${base}/brew-guides/${g.slug}`, changeFrequency: 'monthly' as const, priority: 0.5 })),
+    ...collections.map((c) => ({
+      url: `${base}/collections/${c.slug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    })),
+    ...products.map((p) => ({
+      url: `${base}/products/${p.slug}`,
+      lastModified: p.createdAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    })),
+    ...brewGuides.map((g) => ({
+      url: `${base}/brew-guides/${g.slug}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.5,
+    })),
   ];
 }
 ```
@@ -7071,14 +8749,17 @@ git commit -m "feat: add shop, collection and search pages with URL-driven filte
 ### Task 15: Product detail page
 
 **Files:**
+
 - Create: `src/app/(shop)/products/[slug]/page.tsx`, `src/app/(shop)/products/[slug]/view-item-tracker.tsx`, `src/components/product/product-details.tsx`, `src/components/product/review-list.tsx`
 
 **Interfaces:**
+
 - Consumes: `getProductBySlug`, `listRelatedProducts`, `AddToCartForm`, `ProductGrid`, `Rating`, `Badge`, labels.
 
 - [ ] **Step 1: Details and reviews components**
 
 `src/components/product/product-details.tsx`:
+
 ```tsx
 import { roastLabel } from '@/lib/catalog/labels';
 import type { Product } from '@/lib/db/schema';
@@ -7095,10 +8776,13 @@ export function ProductDetails({ product }: { product: Product }) {
   const visible = rows.filter(([, v]) => v);
   if (visible.length === 0) return null;
   return (
-    <dl className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-2xl bg-foam p-6 text-sm sm:grid-cols-3" data-testid="product-details">
+    <dl
+      className="bg-foam grid grid-cols-2 gap-x-6 gap-y-3 rounded-2xl p-6 text-sm sm:grid-cols-3"
+      data-testid="product-details"
+    >
       {visible.map(([k, v]) => (
         <div key={k}>
-          <dt className="text-xs uppercase tracking-wide text-latte">{k}</dt>
+          <dt className="text-latte text-xs tracking-wide uppercase">{k}</dt>
           <dd className="mt-0.5 font-medium">{v}</dd>
         </div>
       ))}
@@ -7108,45 +8792,62 @@ export function ProductDetails({ product }: { product: Product }) {
 ```
 
 `src/components/product/review-list.tsx`:
+
 ```tsx
 import { Rating } from '@/components/ui/rating';
 import type { Review } from '@/lib/db/schema';
 
-const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+const dateFormat = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
 
 export function ReviewList({ reviews, average }: { reviews: Review[]; average: number }) {
   if (reviews.length === 0) {
-    return <p className="text-sm text-latte">No reviews yet. Be the first when you get your bag.</p>;
+    return (
+      <p className="text-latte text-sm">No reviews yet. Be the first when you get your bag.</p>
+    );
   }
-  const distribution = [5, 4, 3, 2, 1].map((star) => ({ star, count: reviews.filter((r) => r.rating === star).length }));
+  const distribution = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: reviews.filter((r) => r.rating === star).length,
+  }));
   return (
     <div className="grid gap-10 lg:grid-cols-[280px_1fr]" data-testid="reviews">
-      <div className="rounded-2xl bg-foam p-6">
+      <div className="bg-foam rounded-2xl p-6">
         <p className="font-display text-5xl">{average.toFixed(1)}</p>
         <Rating value={average} size="md" className="mt-1" />
-        <p className="mt-1 text-sm text-latte">Based on {reviews.length} review{reviews.length === 1 ? '' : 's'}</p>
+        <p className="text-latte mt-1 text-sm">
+          Based on {reviews.length} review{reviews.length === 1 ? '' : 's'}
+        </p>
         <ul className="mt-5 flex flex-col gap-1.5">
           {distribution.map(({ star, count }) => (
             <li key={star} className="flex items-center gap-2 text-xs">
               <span className="w-6 tabular-nums">{star}★</span>
-              <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-latte/20">
-                <span className="block h-full bg-copper" style={{ width: `${(count / reviews.length) * 100}%` }} />
+              <span className="bg-latte/20 h-1.5 flex-1 overflow-hidden rounded-full">
+                <span
+                  className="bg-copper block h-full"
+                  style={{ width: `${(count / reviews.length) * 100}%` }}
+                />
               </span>
-              <span className="w-4 text-right tabular-nums text-latte">{count}</span>
+              <span className="text-latte w-4 text-right tabular-nums">{count}</span>
             </li>
           ))}
         </ul>
       </div>
-      <ul className="divide-y divide-latte/20">
+      <ul className="divide-latte/20 divide-y">
         {reviews.map((r) => (
           <li key={r.id} className="py-5">
             <div className="flex items-center justify-between gap-3">
               <Rating value={r.rating} />
-              <time dateTime={r.createdAt.toISOString()} className="text-xs text-latte">{dateFormat.format(r.createdAt)}</time>
+              <time dateTime={r.createdAt.toISOString()} className="text-latte text-xs">
+                {dateFormat.format(r.createdAt)}
+              </time>
             </div>
-            <h3 className="mt-2 font-body text-base font-semibold">{r.title}</h3>
+            <h3 className="font-body mt-2 text-base font-semibold">{r.title}</h3>
             <p className="mt-1 text-sm leading-relaxed">{r.body}</p>
-            <p className="mt-2 text-xs text-latte">
+            <p className="text-latte mt-2 text-xs">
               {r.authorName}
               {r.verified ? ' · Verified buyer' : ''}
             </p>
@@ -7161,6 +8862,7 @@ export function ReviewList({ reviews, average }: { reviews: Review[]; average: n
 - [ ] **Step 2: Tracker and page**
 
 `src/app/(shop)/products/[slug]/view-item-tracker.tsx`:
+
 ```tsx
 'use client';
 
@@ -7177,6 +8879,7 @@ export function ViewItemTracker({ item }: { item: AnalyticsItem }) {
 ```
 
 `src/app/(shop)/products/[slug]/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -7204,7 +8907,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: data.product.name,
     description: data.product.tagline,
-    openGraph: { title: data.product.name, description: data.product.tagline, images: [data.product.imagePath] },
+    openGraph: {
+      title: data.product.name,
+      description: data.product.tagline,
+      images: [data.product.imagePath],
+    },
   };
 }
 
@@ -7230,19 +8937,33 @@ export default async function ProductPage({ params }: Props) {
       lowPrice: (lowestPriceCents(variants) / 100).toFixed(2),
       highPrice: (Math.max(...variants.map((v) => v.priceCents)) / 100).toFixed(2),
       offerCount: variants.length,
-      availability: variants.some((v) => v.stockQuantity > 0) ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      availability: variants.some((v) => v.stockQuantity > 0)
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
     },
-    ...(rating.count ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: rating.average, reviewCount: rating.count } } : {}),
+    ...(rating.count
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: rating.average,
+            reviewCount: rating.count,
+          },
+        }
+      : {}),
   };
 
   return (
     <Container className="py-10">
-      <nav aria-label="Breadcrumb" className="mb-6 text-sm text-latte">
-        <Link href="/shop" className="hover:text-espresso">Shop</Link>
+      <nav aria-label="Breadcrumb" className="text-latte mb-6 text-sm">
+        <Link href="/shop" className="hover:text-espresso">
+          Shop
+        </Link>
         {collections[0] ? (
           <>
             <span className="mx-2">/</span>
-            <Link href={`/collections/${collections[0].slug}`} className="hover:text-espresso">{collections[0].name}</Link>
+            <Link href={`/collections/${collections[0].slug}`} className="hover:text-espresso">
+              {collections[0].name}
+            </Link>
           </>
         ) : null}
         <span className="mx-2">/</span>
@@ -7250,9 +8971,17 @@ export default async function ProductPage({ params }: Props) {
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-        <div className="relative overflow-hidden rounded-3xl bg-foam">
-          <Image src={product.imagePath} alt={product.name} width={600} height={750} unoptimized priority className="h-auto w-full" />
-          <div className="absolute left-4 top-4 flex gap-2">
+        <div className="bg-foam relative overflow-hidden rounded-3xl">
+          <Image
+            src={product.imagePath}
+            alt={product.name}
+            width={600}
+            height={750}
+            unoptimized
+            priority
+            className="h-auto w-full"
+          />
+          <div className="absolute top-4 left-4 flex gap-2">
             {product.roastLevel ? <Badge>{roastLabel(product.roastLevel)} roast</Badge> : null}
             {product.featured ? <Badge tone="copper">Staff pick</Badge> : null}
           </div>
@@ -7260,9 +8989,13 @@ export default async function ProductPage({ params }: Props) {
 
         <div className="flex flex-col gap-8">
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-copper">{product.origin ?? categoryLabel(product.category)}</p>
-            <h1 className="text-4xl leading-tight sm:text-5xl" data-testid="product-title">{product.name}</h1>
-            <p className="mt-3 text-lg text-latte">{product.tagline}</p>
+            <p className="text-copper mb-2 text-xs font-semibold tracking-[0.2em] uppercase">
+              {product.origin ?? categoryLabel(product.category)}
+            </p>
+            <h1 className="text-4xl leading-tight sm:text-5xl" data-testid="product-title">
+              {product.name}
+            </h1>
+            <p className="text-latte mt-3 text-lg">{product.tagline}</p>
             {rating.count > 0 ? (
               <a href="#reviews" className="mt-3 inline-flex">
                 <Rating value={rating.average} count={rating.count} size="md" />
@@ -7271,7 +9004,11 @@ export default async function ProductPage({ params }: Props) {
             {product.tastingNotes.length ? (
               <ul className="mt-4 flex flex-wrap gap-2" aria-label="Tasting notes">
                 {product.tastingNotes.map((n) => (
-                  <li key={n}><Badge tone="neutral" className="capitalize">{n}</Badge></li>
+                  <li key={n}>
+                    <Badge tone="neutral" className="capitalize">
+                      {n}
+                    </Badge>
+                  </li>
                 ))}
               </ul>
             ) : null}
@@ -7281,7 +9018,7 @@ export default async function ProductPage({ params }: Props) {
 
           <ProductDetails product={product} />
 
-          <div className="prose prose-sm max-w-none text-espresso/90">
+          <div className="prose prose-sm text-espresso/90 max-w-none">
             <p>{product.description}</p>
           </div>
         </div>
@@ -7299,8 +9036,18 @@ export default async function ProductPage({ params }: Props) {
         </section>
       ) : null}
 
-      <ViewItemTracker item={{ productId: product.id, slug: product.slug, name: product.name, priceCents: lowestPriceCents(variants) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <ViewItemTracker
+        item={{
+          productId: product.id,
+          slug: product.slug,
+          name: product.name,
+          priceCents: lowestPriceCents(variants),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </Container>
   );
 }
@@ -7321,20 +9068,27 @@ git commit -m "feat: add product detail page with add-to-cart, details, reviews,
 ### Task 16: Checkout, confirmation and order lookup
 
 **Files:**
+
 - Create: `src/app/(checkout)/checkout/page.tsx`, `src/app/(checkout)/checkout/actions.ts`, `src/app/(checkout)/checkout/success/[orderNumber]/page.tsx`
 - Create: `src/components/checkout/checkout-form.tsx`, `src/components/checkout/order-summary.tsx`, `src/components/checkout/order-details.tsx`, `src/components/checkout/track-purchase.tsx`, `src/components/checkout/card-number-input.tsx`
 - Create: `src/app/(checkout)/orders/page.tsx`, `src/app/(checkout)/orders/actions.ts`, `src/app/(checkout)/orders/[orderNumber]/page.tsx`
 - Modify: `src/lib/checkout/queries.ts` (add `findLookupToken`)
 
 **Interfaces:**
+
 - Consumes: `placeOrder`, `checkoutSchema` + step schemas, `getCartView`, `readCartId`, `getOrderForConfirmation`, `CartSummary`, `TEST_CARDS`.
 - Produces: `placeOrderAction(prev, formData): Promise<CheckoutActionState>` where `type CheckoutActionState = { error: string; code?: PlaceOrderFailure; fieldErrors?: FieldErrors } | null`; `lookupOrderAction(prev, formData): Promise<ActionResult>`; `findLookupToken(orderNumber, email, db?): Promise<string | null>`; `<OrderDetails order />`.
 
 - [ ] **Step 1: Add `findLookupToken` to `src/lib/checkout/queries.ts`**
 
 Append:
+
 ```ts
-export async function findLookupToken(orderNumber: string, email: string, db: Db = getDb()): Promise<string | null> {
+export async function findLookupToken(
+  orderNumber: string,
+  email: string,
+  db: Db = getDb(),
+): Promise<string | null> {
   const order = await db.query.orders.findFirst({
     where: eq(orders.orderNumber, normalizeOrderNumber(orderNumber)),
     columns: { email: true, lookupToken: true },
@@ -7347,6 +9101,7 @@ export async function findLookupToken(orderNumber: string, email: string, db: Db
 - [ ] **Step 2: Checkout action**
 
 `src/app/(checkout)/checkout/actions.ts`:
+
 ```ts
 'use server';
 
@@ -7356,12 +9111,22 @@ import { readCartId } from '@/lib/cart/cookie';
 import { placeOrder, type PlaceOrderFailure } from '@/lib/checkout/place-order';
 import { checkoutSchema } from '@/lib/checkout/schemas';
 
-export type CheckoutActionState = { error: string; code?: PlaceOrderFailure; fieldErrors?: FieldErrors } | null;
+export type CheckoutActionState = {
+  error: string;
+  code?: PlaceOrderFailure;
+  fieldErrors?: FieldErrors;
+} | null;
 
-export async function placeOrderAction(_prev: CheckoutActionState, formData: FormData): Promise<CheckoutActionState> {
+export async function placeOrderAction(
+  _prev: CheckoutActionState,
+  formData: FormData,
+): Promise<CheckoutActionState> {
   const parsed = checkoutSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
-    return { error: 'Please fix the highlighted fields.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      error: 'Please fix the highlighted fields.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   const cartId = await readCartId();
   if (!cartId) return { error: 'Your cart has expired. Add your items again.', code: 'empty_cart' };
@@ -7376,6 +9141,7 @@ export async function placeOrderAction(_prev: CheckoutActionState, formData: For
 - [ ] **Step 3: Card number input and checkout form**
 
 `src/components/checkout/card-number-input.tsx`:
+
 ```tsx
 'use client';
 
@@ -7383,10 +9149,15 @@ import { useState } from 'react';
 import { Input, type InputProps } from '@/components/ui/input';
 
 function groupDigits(value: string) {
-  return value.replace(/\D/g, '').slice(0, 19).replace(/(\d{4})(?=\d)/g, '$1 ');
+  return value
+    .replace(/\D/g, '')
+    .slice(0, 19)
+    .replace(/(\d{4})(?=\d)/g, '$1 ');
 }
 
-export function CardNumberInput(props: Omit<InputProps, 'value' | 'onChange'> & { defaultValue?: string }) {
+export function CardNumberInput(
+  props: Omit<InputProps, 'value' | 'onChange'> & { defaultValue?: string },
+) {
   const [value, setValue] = useState(props.defaultValue ?? '');
   return (
     <Input
@@ -7402,6 +9173,7 @@ export function CardNumberInput(props: Omit<InputProps, 'value' | 'onChange'> & 
 ```
 
 `src/components/checkout/checkout-form.tsx`:
+
 ```tsx
 'use client';
 
@@ -7419,14 +9191,22 @@ import { CardNumberInput } from './card-number-input';
 
 type Step = 'contact' | 'shipping' | 'payment' | 'review';
 const steps: Step[] = ['contact', 'shipping', 'payment', 'review'];
-const titles: Record<Step, string> = { contact: 'Contact', shipping: 'Shipping address', payment: 'Payment', review: 'Review & place order' };
+const titles: Record<Step, string> = {
+  contact: 'Contact',
+  shipping: 'Shipping address',
+  payment: 'Payment',
+  review: 'Review & place order',
+};
 
 type Errors = Record<string, string[] | undefined>;
 
 export function CheckoutForm({ cart, idempotencyKey }: { cart: CartView; idempotencyKey: string }) {
   const [step, setStep] = useState<Step>('contact');
   const [errors, setErrors] = useState<Errors>({});
-  const [state, formAction, pending] = useActionState<CheckoutActionState, FormData>(placeOrderAction, null);
+  const [state, formAction, pending] = useActionState<CheckoutActionState, FormData>(
+    placeOrderAction,
+    null,
+  );
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -7445,7 +9225,14 @@ export function CheckoutForm({ cart, idempotencyKey }: { cart: CartView; idempot
   const fieldError = (name: string) => errors[name]?.[0];
 
   const validate = (current: Step): boolean => {
-    const schema = current === 'contact' ? contactSchema : current === 'shipping' ? shippingSchema : current === 'payment' ? paymentSchema : null;
+    const schema =
+      current === 'contact'
+        ? contactSchema
+        : current === 'shipping'
+          ? shippingSchema
+          : current === 'payment'
+            ? paymentSchema
+            : null;
     if (!schema) return true;
     const result = schema.safeParse(values());
     if (!result.success) {
@@ -7459,7 +9246,8 @@ export function CheckoutForm({ cart, idempotencyKey }: { cart: CartView; idempot
   const next = () => {
     if (!validate(step)) return;
     const idx = steps.indexOf(step);
-    if (step === 'shipping') track({ name: 'add_shipping_info', valueCents: cart.totals.totalCents });
+    if (step === 'shipping')
+      track({ name: 'add_shipping_info', valueCents: cart.totals.totalCents });
     if (step === 'payment') track({ name: 'add_payment_info', valueCents: cart.totals.totalCents });
     setStep(steps[Math.min(idx + 1, steps.length - 1)]);
   };
@@ -7474,14 +9262,38 @@ export function CheckoutForm({ cart, idempotencyKey }: { cart: CartView; idempot
     const currentIdx = steps.indexOf(step);
     const done = idx < currentIdx;
     return (
-      <section className={cn('rounded-2xl border bg-foam p-6', step === name ? 'border-espresso/40' : 'border-latte/30')} data-testid={`step-${name}`} aria-current={step === name ? 'step' : undefined}>
+      <section
+        className={cn(
+          'bg-foam rounded-2xl border p-6',
+          step === name ? 'border-espresso/40' : 'border-latte/30',
+        )}
+        data-testid={`step-${name}`}
+        aria-current={step === name ? 'step' : undefined}
+      >
         <header className="flex items-center justify-between">
           <h2 className="flex items-center gap-3 text-xl">
-            <span className={cn('flex size-7 items-center justify-center rounded-full text-xs font-semibold', done ? 'bg-leaf text-foam' : step === name ? 'bg-espresso text-foam' : 'bg-latte/30 text-espresso')}>{done ? '✓' : idx + 1}</span>
+            <span
+              className={cn(
+                'flex size-7 items-center justify-center rounded-full text-xs font-semibold',
+                done
+                  ? 'bg-leaf text-foam'
+                  : step === name
+                    ? 'bg-espresso text-foam'
+                    : 'bg-latte/30 text-espresso',
+              )}
+            >
+              {done ? '✓' : idx + 1}
+            </span>
             {titles[name]}
           </h2>
           {done ? (
-            <button type="button" className="text-sm text-latte underline-offset-2 hover:underline" onClick={() => setStep(name)}>Edit</button>
+            <button
+              type="button"
+              className="text-latte text-sm underline-offset-2 hover:underline"
+              onClick={() => setStep(name)}
+            >
+              Edit
+            </button>
           ) : null}
         </header>
         {/* Inputs stay mounted (hidden) so one form submission carries every field. */}
@@ -7491,16 +9303,40 @@ export function CheckoutForm({ cart, idempotencyKey }: { cart: CartView; idempot
   };
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-4" data-testid="checkout-form" noValidate>
+    <form
+      ref={formRef}
+      action={formAction}
+      className="flex flex-col gap-4"
+      data-testid="checkout-form"
+      noValidate
+    >
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
 
       {section(
         'contact',
         <>
-          <Field label="Email" htmlFor="email" error={fieldError('email')} hint="Order confirmation goes here.">
-            <Input id="email" name="email" type="email" autoComplete="email" invalid={Boolean(fieldError('email'))} />
+          <Field
+            label="Email"
+            htmlFor="email"
+            error={fieldError('email')}
+            hint="Order confirmation goes here."
+          >
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              invalid={Boolean(fieldError('email'))}
+            />
           </Field>
-          <Button type="button" onClick={next} className="self-start" data-testid="continue-contact">Continue to shipping</Button>
+          <Button
+            type="button"
+            onClick={next}
+            className="self-start"
+            data-testid="continue-contact"
+          >
+            Continue to shipping
+          </Button>
         </>,
       )}
 
@@ -7508,23 +9344,52 @@ export function CheckoutForm({ cart, idempotencyKey }: { cart: CartView; idempot
         'shipping',
         <>
           <Field label="Full name" htmlFor="shippingName" error={fieldError('shippingName')}>
-            <Input id="shippingName" name="shippingName" autoComplete="name" invalid={Boolean(fieldError('shippingName'))} />
+            <Input
+              id="shippingName"
+              name="shippingName"
+              autoComplete="name"
+              invalid={Boolean(fieldError('shippingName'))}
+            />
           </Field>
           <Field label="Address" htmlFor="address1" error={fieldError('address1')}>
-            <Input id="address1" name="address1" autoComplete="address-line1" invalid={Boolean(fieldError('address1'))} />
+            <Input
+              id="address1"
+              name="address1"
+              autoComplete="address-line1"
+              invalid={Boolean(fieldError('address1'))}
+            />
           </Field>
-          <Field label="Apartment, suite, etc. (optional)" htmlFor="address2" error={fieldError('address2')}>
+          <Field
+            label="Apartment, suite, etc. (optional)"
+            htmlFor="address2"
+            error={fieldError('address2')}
+          >
             <Input id="address2" name="address2" autoComplete="address-line2" />
           </Field>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="City" htmlFor="city" error={fieldError('city')}>
-              <Input id="city" name="city" autoComplete="address-level2" invalid={Boolean(fieldError('city'))} />
+              <Input
+                id="city"
+                name="city"
+                autoComplete="address-level2"
+                invalid={Boolean(fieldError('city'))}
+              />
             </Field>
             <Field label="State" htmlFor="state" error={fieldError('state')}>
-              <Input id="state" name="state" autoComplete="address-level1" invalid={Boolean(fieldError('state'))} />
+              <Input
+                id="state"
+                name="state"
+                autoComplete="address-level1"
+                invalid={Boolean(fieldError('state'))}
+              />
             </Field>
             <Field label="ZIP / Postal code" htmlFor="postalCode" error={fieldError('postalCode')}>
-              <Input id="postalCode" name="postalCode" autoComplete="postal-code" invalid={Boolean(fieldError('postalCode'))} />
+              <Input
+                id="postalCode"
+                name="postalCode"
+                autoComplete="postal-code"
+                invalid={Boolean(fieldError('postalCode'))}
+              />
             </Field>
           </div>
           <Field label="Country" htmlFor="country" error={fieldError('country')}>
@@ -7533,58 +9398,118 @@ export function CheckoutForm({ cart, idempotencyKey }: { cart: CartView; idempot
               <option value="CA">Canada</option>
             </Select>
           </Field>
-          <Button type="button" onClick={next} className="self-start" data-testid="continue-shipping">Continue to payment</Button>
+          <Button
+            type="button"
+            onClick={next}
+            className="self-start"
+            data-testid="continue-shipping"
+          >
+            Continue to payment
+          </Button>
         </>,
       )}
 
       {section(
         'payment',
         <>
-          <div className="rounded-xl bg-cream px-4 py-3 text-xs text-espresso/80" data-testid="demo-notice">
-            <strong>Demo store.</strong> No real charges. Use <code className="rounded bg-foam px-1">4242 4242 4242 4242</code> to succeed or{' '}
-            <code className="rounded bg-foam px-1">{TEST_CARDS.declined.replace(/(\d{4})(?=\d)/g, '$1 ')}</code> to see a decline.
+          <div
+            className="bg-cream text-espresso/80 rounded-xl px-4 py-3 text-xs"
+            data-testid="demo-notice"
+          >
+            <strong>Demo store.</strong> No real charges. Use{' '}
+            <code className="bg-foam rounded px-1">4242 4242 4242 4242</code> to succeed or{' '}
+            <code className="bg-foam rounded px-1">
+              {TEST_CARDS.declined.replace(/(\d{4})(?=\d)/g, '$1 ')}
+            </code>{' '}
+            to see a decline.
           </div>
           <Field label="Card number" htmlFor="cardNumber" error={fieldError('cardNumber')}>
-            <CardNumberInput id="cardNumber" name="cardNumber" invalid={Boolean(fieldError('cardNumber'))} />
+            <CardNumberInput
+              id="cardNumber"
+              name="cardNumber"
+              invalid={Boolean(fieldError('cardNumber'))}
+            />
           </Field>
           <Field label="Name on card" htmlFor="cardName" error={fieldError('cardName')}>
-            <Input id="cardName" name="cardName" autoComplete="cc-name" invalid={Boolean(fieldError('cardName'))} />
+            <Input
+              id="cardName"
+              name="cardName"
+              autoComplete="cc-name"
+              invalid={Boolean(fieldError('cardName'))}
+            />
           </Field>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Expiry month" htmlFor="expMonth" error={fieldError('expMonth')}>
               <Select id="expMonth" name="expMonth" defaultValue="12" autoComplete="cc-exp-month">
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                  <option key={m} value={m}>{String(m).padStart(2, '0')}</option>
+                  <option key={m} value={m}>
+                    {String(m).padStart(2, '0')}
+                  </option>
                 ))}
               </Select>
             </Field>
             <Field label="Expiry year" htmlFor="expYear" error={fieldError('expYear')}>
-              <Select id="expYear" name="expYear" defaultValue={String(years[3])} autoComplete="cc-exp-year">
+              <Select
+                id="expYear"
+                name="expYear"
+                defaultValue={String(years[3])}
+                autoComplete="cc-exp-year"
+              >
                 {years.map((y) => (
-                  <option key={y} value={y}>{y}</option>
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
                 ))}
               </Select>
             </Field>
             <Field label="CVC" htmlFor="cvc" error={fieldError('cvc')}>
-              <Input id="cvc" name="cvc" inputMode="numeric" autoComplete="cc-csc" maxLength={4} invalid={Boolean(fieldError('cvc'))} />
+              <Input
+                id="cvc"
+                name="cvc"
+                inputMode="numeric"
+                autoComplete="cc-csc"
+                maxLength={4}
+                invalid={Boolean(fieldError('cvc'))}
+              />
             </Field>
           </div>
-          <Button type="button" onClick={next} className="self-start" data-testid="continue-payment">Review order</Button>
+          <Button
+            type="button"
+            onClick={next}
+            className="self-start"
+            data-testid="continue-payment"
+          >
+            Review order
+          </Button>
         </>,
       )}
 
       {section(
         'review',
         <>
-          <p className="text-sm text-latte">Double-check the summary on the right. Placing the order authorizes the simulated payment.</p>
-          <Button type="submit" size="lg" variant="copper" loading={pending} className="self-start" data-testid="place-order">
+          <p className="text-latte text-sm">
+            Double-check the summary on the right. Placing the order authorizes the simulated
+            payment.
+          </p>
+          <Button
+            type="submit"
+            size="lg"
+            variant="copper"
+            loading={pending}
+            className="self-start"
+            data-testid="place-order"
+          >
             Place order
           </Button>
         </>,
       )}
 
       {state?.error ? (
-        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" data-testid="checkout-error">
+        <p
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          data-testid="checkout-error"
+        >
           {state.error}
         </p>
       ) : null}
@@ -7596,6 +9521,7 @@ export function CheckoutForm({ cart, idempotencyKey }: { cart: CartView; idempot
 - [ ] **Step 4: Order summary, order details, purchase tracker**
 
 `src/components/checkout/order-summary.tsx`:
+
 ```tsx
 import Image from 'next/image';
 import { CartSummary } from '@/components/cart/cart-summary';
@@ -7605,24 +9531,44 @@ import { formatPrice } from '@/lib/pricing';
 
 export function OrderSummary({ cart }: { cart: CartView }) {
   return (
-    <aside className="rounded-2xl bg-foam p-6 shadow-sm lg:sticky lg:top-28" data-testid="order-summary">
+    <aside
+      className="bg-foam rounded-2xl p-6 shadow-sm lg:sticky lg:top-28"
+      data-testid="order-summary"
+    >
       <h2 className="text-xl">Order summary</h2>
-      <ul className="mt-4 divide-y divide-latte/20">
+      <ul className="divide-latte/20 mt-4 divide-y">
         {cart.lines.map((line) => (
           <li key={line.id} className="flex items-center gap-3 py-3">
-            <span className="relative shrink-0 overflow-hidden rounded-lg bg-cream">
-              <Image src={line.product.imagePath} alt="" width={56} height={70} unoptimized className="h-auto w-14" />
-              <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-espresso text-[10px] font-semibold text-foam">{line.quantity}</span>
+            <span className="bg-cream relative shrink-0 overflow-hidden rounded-lg">
+              <Image
+                src={line.product.imagePath}
+                alt=""
+                width={56}
+                height={70}
+                unoptimized
+                className="h-auto w-14"
+              />
+              <span className="bg-espresso text-foam absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full text-[10px] font-semibold">
+                {line.quantity}
+              </span>
             </span>
             <span className="flex-1 text-sm">
               <span className="block font-medium">{line.product.name}</span>
-              <span className="block text-xs text-latte">{[line.variant.name, grindLabel(line.grind), purchaseTypeLabel(line.purchaseType, line.subscriptionIntervalWeeks)].filter(Boolean).join(' · ')}</span>
+              <span className="text-latte block text-xs">
+                {[
+                  line.variant.name,
+                  grindLabel(line.grind),
+                  purchaseTypeLabel(line.purchaseType, line.subscriptionIntervalWeeks),
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
             </span>
             <span className="text-sm tabular-nums">{formatPrice(line.lineTotalCents)}</span>
           </li>
         ))}
       </ul>
-      <div className="mt-4 border-t border-latte/20 pt-4">
+      <div className="border-latte/20 mt-4 border-t pt-4">
         <CartSummary totals={cart.totals} discountCode={cart.discountCode} />
       </div>
     </aside>
@@ -7631,6 +9577,7 @@ export function OrderSummary({ cart }: { cart: CartView }) {
 ```
 
 `src/components/checkout/order-details.tsx`:
+
 ```tsx
 import Image from 'next/image';
 import Link from 'next/link';
@@ -7646,25 +9593,53 @@ export function OrderDetails({ order }: { order: OrderView }) {
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_360px]" data-testid="order-details">
       <div className="flex flex-col gap-6">
-        <div className="rounded-2xl bg-foam p-6">
+        <div className="bg-foam rounded-2xl p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wide text-latte">Order number</p>
-              <p className="font-display text-3xl" data-testid="order-number">{order.orderNumber}</p>
+              <p className="text-latte text-xs tracking-wide uppercase">Order number</p>
+              <p className="font-display text-3xl" data-testid="order-number">
+                {order.orderNumber}
+              </p>
             </div>
-            <Badge tone={order.status === 'paid' ? 'leaf' : 'neutral'} className="capitalize">{order.status}</Badge>
+            <Badge tone={order.status === 'paid' ? 'leaf' : 'neutral'} className="capitalize">
+              {order.status}
+            </Badge>
           </div>
-          <p className="mt-2 text-sm text-latte">Placed {dateFormat.format(order.createdAt)} · Confirmation sent to {order.email}</p>
+          <p className="text-latte mt-2 text-sm">
+            Placed {dateFormat.format(order.createdAt)} · Confirmation sent to {order.email}
+          </p>
         </div>
 
-        <ul className="divide-y divide-latte/20 rounded-2xl bg-foam px-6">
+        <ul className="divide-latte/20 bg-foam divide-y rounded-2xl px-6">
           {order.items.map((item) => (
             <li key={item.id} className="flex items-center gap-4 py-4">
-              <Image src={item.imagePath} alt="" width={64} height={80} unoptimized className="h-auto w-16 rounded-lg bg-cream" />
+              <Image
+                src={item.imagePath}
+                alt=""
+                width={64}
+                height={80}
+                unoptimized
+                className="bg-cream h-auto w-16 rounded-lg"
+              />
               <div className="flex-1 text-sm">
-                <Link href={`/products/${item.productSlug}`} className="font-medium hover:text-copper">{item.productName}</Link>
-                <p className="text-xs text-latte">{[item.variantName, grindLabel(item.grind), purchaseTypeLabel(item.purchaseType, item.subscriptionIntervalWeeks)].filter(Boolean).join(' · ')}</p>
-                <p className="text-xs text-latte">Qty {item.quantity} × {formatPrice(item.unitPriceCents)}</p>
+                <Link
+                  href={`/products/${item.productSlug}`}
+                  className="hover:text-copper font-medium"
+                >
+                  {item.productName}
+                </Link>
+                <p className="text-latte text-xs">
+                  {[
+                    item.variantName,
+                    grindLabel(item.grind),
+                    purchaseTypeLabel(item.purchaseType, item.subscriptionIntervalWeeks),
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+                <p className="text-latte text-xs">
+                  Qty {item.quantity} × {formatPrice(item.unitPriceCents)}
+                </p>
               </div>
               <p className="text-sm tabular-nums">{formatPrice(item.lineTotalCents)}</p>
             </li>
@@ -7673,25 +9648,56 @@ export function OrderDetails({ order }: { order: OrderView }) {
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="rounded-2xl bg-foam p-6">
+        <div className="bg-foam rounded-2xl p-6">
           <h2 className="text-lg">Ship to</h2>
-          <address className="mt-2 text-sm not-italic leading-relaxed">
-            {order.shipping.name}<br />
-            {order.shipping.address1}<br />
-            {order.shipping.address2 ? <>{order.shipping.address2}<br /></> : null}
-            {order.shipping.city}, {order.shipping.state} {order.shipping.postalCode}<br />
+          <address className="mt-2 text-sm leading-relaxed not-italic">
+            {order.shipping.name}
+            <br />
+            {order.shipping.address1}
+            <br />
+            {order.shipping.address2 ? (
+              <>
+                {order.shipping.address2}
+                <br />
+              </>
+            ) : null}
+            {order.shipping.city}, {order.shipping.state} {order.shipping.postalCode}
+            <br />
             {order.shipping.country}
           </address>
         </div>
-        <div className="rounded-2xl bg-foam p-6">
+        <div className="bg-foam rounded-2xl p-6">
           <h2 className="text-lg">Payment</h2>
-          <p className="mt-2 text-sm">{order.cardLast4 ? `Card ending in ${order.cardLast4}` : 'Simulated payment'}</p>
+          <p className="mt-2 text-sm">
+            {order.cardLast4 ? `Card ending in ${order.cardLast4}` : 'Simulated payment'}
+          </p>
           <dl className="mt-4 flex flex-col gap-2 text-sm">
-            <div className="flex justify-between"><dt>Subtotal</dt><dd className="tabular-nums">{formatPrice(t.subtotalCents)}</dd></div>
-            {t.discountCents > 0 ? <div className="flex justify-between text-leaf"><dt>Discount{order.discountCode ? ` (${order.discountCode})` : ''}</dt><dd className="tabular-nums">−{formatPrice(t.discountCents)}</dd></div> : null}
-            <div className="flex justify-between"><dt>Shipping</dt><dd className="tabular-nums">{t.shippingCents === 0 ? 'Free' : formatPrice(t.shippingCents)}</dd></div>
-            <div className="flex justify-between"><dt>Tax</dt><dd className="tabular-nums">{formatPrice(t.taxCents)}</dd></div>
-            <div className="flex justify-between border-t border-latte/30 pt-2 text-base font-semibold"><dt>Total</dt><dd className="tabular-nums" data-testid="order-total">{formatPrice(t.totalCents)}</dd></div>
+            <div className="flex justify-between">
+              <dt>Subtotal</dt>
+              <dd className="tabular-nums">{formatPrice(t.subtotalCents)}</dd>
+            </div>
+            {t.discountCents > 0 ? (
+              <div className="text-leaf flex justify-between">
+                <dt>Discount{order.discountCode ? ` (${order.discountCode})` : ''}</dt>
+                <dd className="tabular-nums">−{formatPrice(t.discountCents)}</dd>
+              </div>
+            ) : null}
+            <div className="flex justify-between">
+              <dt>Shipping</dt>
+              <dd className="tabular-nums">
+                {t.shippingCents === 0 ? 'Free' : formatPrice(t.shippingCents)}
+              </dd>
+            </div>
+            <div className="flex justify-between">
+              <dt>Tax</dt>
+              <dd className="tabular-nums">{formatPrice(t.taxCents)}</dd>
+            </div>
+            <div className="border-latte/30 flex justify-between border-t pt-2 text-base font-semibold">
+              <dt>Total</dt>
+              <dd className="tabular-nums" data-testid="order-total">
+                {formatPrice(t.totalCents)}
+              </dd>
+            </div>
           </dl>
         </div>
       </div>
@@ -7701,6 +9707,7 @@ export function OrderDetails({ order }: { order: OrderView }) {
 ```
 
 `src/components/checkout/track-purchase.tsx`:
+
 ```tsx
 'use client';
 
@@ -7737,6 +9744,7 @@ export function TrackPurchase({ order }: { order: OrderView }) {
 - [ ] **Step 5: Checkout page and success page**
 
 `src/app/(checkout)/checkout/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
@@ -7767,6 +9775,7 @@ export default async function CheckoutPage() {
 ```
 
 `src/app/(checkout)/checkout/success/[orderNumber]/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -7788,14 +9797,21 @@ export default async function SuccessPage({ params, searchParams }: Props) {
   return (
     <Container className="py-12">
       <div className="mb-10 max-w-2xl">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-leaf">Order confirmed</p>
-        <h1 className="text-4xl sm:text-5xl" data-testid="success-title">Thank you, {order.shipping.name.split(' ')[0]}.</h1>
-        <p className="mt-3 text-latte">
-          We roast your coffee next and ship within 48 hours. Keep this link to check on your order any time, or look it up with your order number and email.
+        <p className="text-leaf mb-2 text-xs font-semibold tracking-[0.2em] uppercase">
+          Order confirmed
+        </p>
+        <h1 className="text-4xl sm:text-5xl" data-testid="success-title">
+          Thank you, {order.shipping.name.split(' ')[0]}.
+        </h1>
+        <p className="text-latte mt-3">
+          We roast your coffee next and ship within 48 hours. Keep this link to check on your order
+          any time, or look it up with your order number and email.
         </p>
         <div className="mt-6 flex gap-3">
           <ButtonLink href="/shop">Continue shopping</ButtonLink>
-          <ButtonLink href="/brew-guides" variant="outline">Brew guides</ButtonLink>
+          <ButtonLink href="/brew-guides" variant="outline">
+            Brew guides
+          </ButtonLink>
         </div>
       </div>
       <OrderDetails order={order} />
@@ -7808,6 +9824,7 @@ export default async function SuccessPage({ params, searchParams }: Props) {
 - [ ] **Step 6: Order lookup**
 
 `src/app/(checkout)/orders/actions.ts`:
+
 ```ts
 'use server';
 
@@ -7822,9 +9839,16 @@ const schema = z.object({
   email: z.string().trim().toLowerCase().email('Enter the email used at checkout.'),
 });
 
-export async function lookupOrderAction(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  const parsed = schema.safeParse({ orderNumber: formData.get('orderNumber'), email: formData.get('email') });
-  if (!parsed.success) return fail('Check the order number and email.', parsed.error.flatten().fieldErrors);
+export async function lookupOrderAction(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const parsed = schema.safeParse({
+    orderNumber: formData.get('orderNumber'),
+    email: formData.get('email'),
+  });
+  if (!parsed.success)
+    return fail('Check the order number and email.', parsed.error.flatten().fieldErrors);
   const token = await findLookupToken(parsed.data.orderNumber, parsed.data.email);
   if (!token) return fail('We could not find an order with that number and email.');
   redirect(`/orders/${normalizeOrderNumber(parsed.data.orderNumber)}?t=${token}`);
@@ -7832,6 +9856,7 @@ export async function lookupOrderAction(_prev: ActionResult | null, formData: Fo
 ```
 
 `src/app/(checkout)/orders/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { Container } from '@/components/ui/container';
@@ -7843,9 +9868,11 @@ export default function OrdersPage() {
   return (
     <Container className="py-12">
       <div className="max-w-md">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-copper">Orders</p>
+        <p className="text-copper mb-2 text-xs font-semibold tracking-[0.2em] uppercase">Orders</p>
         <h1 className="text-4xl">Track an order</h1>
-        <p className="mt-3 text-latte">Enter your order number and the email you used at checkout.</p>
+        <p className="text-latte mt-3">
+          Enter your order number and the email you used at checkout.
+        </p>
         <LookupForm />
       </div>
     </Container>
@@ -7854,6 +9881,7 @@ export default function OrdersPage() {
 ```
 
 `src/app/(checkout)/orders/lookup-form.tsx`:
+
 ```tsx
 'use client';
 
@@ -7864,7 +9892,7 @@ import { lookupOrderAction } from './actions';
 
 export function LookupForm() {
   const [state, formAction, pending] = useActionState(lookupOrderAction, null);
-  const errors = state && !state.ok ? state.fieldErrors ?? {} : {};
+  const errors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
   return (
     <form action={formAction} className="mt-8 flex flex-col gap-4" data-testid="lookup-form">
       <Field label="Order number" htmlFor="orderNumber" error={errors.orderNumber}>
@@ -7873,14 +9901,21 @@ export function LookupForm() {
       <Field label="Email" htmlFor="email" error={errors.email}>
         <Input id="email" name="email" type="email" autoComplete="email" />
       </Field>
-      <Button type="submit" loading={pending} className="self-start">Find my order</Button>
-      {state && !state.ok ? <p role="alert" className="text-sm text-red-700" data-testid="lookup-error">{state.error}</p> : null}
+      <Button type="submit" loading={pending} className="self-start">
+        Find my order
+      </Button>
+      {state && !state.ok ? (
+        <p role="alert" className="text-sm text-red-700" data-testid="lookup-error">
+          {state.error}
+        </p>
+      ) : null}
     </form>
   );
 }
 ```
 
 `src/app/(checkout)/orders/[orderNumber]/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -7901,10 +9936,14 @@ export default async function OrderPage({ params, searchParams }: Props) {
     <Container className="py-12">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-copper">Orders</p>
+          <p className="text-copper mb-2 text-xs font-semibold tracking-[0.2em] uppercase">
+            Orders
+          </p>
           <h1 className="text-4xl">Your order</h1>
         </div>
-        <ButtonLink href="/orders" variant="outline">Look up another</ButtonLink>
+        <ButtonLink href="/orders" variant="outline">
+          Look up another
+        </ButtonLink>
       </div>
       <OrderDetails order={order} />
     </Container>
@@ -7929,14 +9968,17 @@ git commit -m "feat: add checkout flow, order confirmation and guest order looku
 ### Task 17: Content pages: about, FAQ, brew guides
 
 **Files:**
+
 - Create: `src/app/(marketing)/about/page.tsx`, `src/app/(marketing)/faq/page.tsx`, `src/app/(marketing)/brew-guides/page.tsx`, `src/app/(marketing)/brew-guides/[slug]/page.tsx`
 
 **Interfaces:**
+
 - Consumes: `brewGuides`, `getBrewGuide`, `faqItems`, `listProducts` (for recommended coffees), `ProductGrid`, `Container`, `SectionHeading`, `NewsletterForm`.
 
 - [ ] **Step 1: About**
 
 `src/app/(marketing)/about/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -7944,36 +9986,52 @@ import { NewsletterForm } from '@/components/marketing/newsletter-form';
 import { ButtonLink } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 
-export const metadata: Metadata = { title: 'Our story', description: 'How an engineering team’s coffee obsession became Cofresso.' };
+export const metadata: Metadata = {
+  title: 'Our story',
+  description: 'How an engineering team’s coffee obsession became Cofresso.',
+};
 
 export default function AboutPage() {
   return (
     <Container className="py-16">
       <div className="grid items-center gap-12 lg:grid-cols-2">
         <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-copper">Our story</p>
+          <p className="text-copper mb-3 text-xs font-semibold tracking-[0.25em] uppercase">
+            Our story
+          </p>
           <h1 className="text-4xl leading-tight sm:text-5xl">Precision is a form of care.</h1>
-          <div className="mt-6 flex flex-col gap-4 text-lg text-espresso/85">
+          <div className="text-espresso/85 mt-6 flex flex-col gap-4 text-lg">
             <p>
-              Cofresso started in 2021 as a spreadsheet. A few engineers at a software company were tired of bad office coffee and decided to
-              treat it like any other system: measure everything, change one variable at a time, keep what works.
+              Cofresso started in 2021 as a spreadsheet. A few engineers at a software company were
+              tired of bad office coffee and decided to treat it like any other system: measure
+              everything, change one variable at a time, keep what works.
             </p>
             <p>
-              Two years and one very tired popcorn popper later we bought a real roaster, moved into a small unit on the edge of town and
-              started shipping bags to friends. The spreadsheet is still around. It now has 4,000 rows.
+              Two years and one very tired popcorn popper later we bought a real roaster, moved into
+              a small unit on the edge of town and started shipping bags to friends. The spreadsheet
+              is still around. It now has 4,000 rows.
             </p>
             <p>
-              We buy coffee from producers we can name, roast in batches small enough to taste every one, and ship within 48 hours. If a bag is
-              not right, we replace it. That is the whole business model.
+              We buy coffee from producers we can name, roast in batches small enough to taste every
+              one, and ship within 48 hours. If a bag is not right, we replace it. That is the whole
+              business model.
             </p>
           </div>
           <div className="mt-8 flex gap-3">
             <ButtonLink href="/shop">Shop the coffee</ButtonLink>
-            <ButtonLink href="/brew-guides" variant="outline">How we brew</ButtonLink>
+            <ButtonLink href="/brew-guides" variant="outline">
+              How we brew
+            </ButtonLink>
           </div>
         </div>
-        <div className="flex justify-center rounded-3xl bg-espresso p-12">
-          <Image src="/logo.png" alt="Cofresso double-bean mark" width={320} height={320} className="drop-shadow-2xl" />
+        <div className="bg-espresso flex justify-center rounded-3xl p-12">
+          <Image
+            src="/logo.png"
+            alt="Cofresso double-bean mark"
+            width={320}
+            height={320}
+            className="drop-shadow-2xl"
+          />
         </div>
       </div>
 
@@ -7983,16 +10041,16 @@ export default function AboutPage() {
           ['48h', 'from roaster to shipping label'],
           ['4,000+', 'logged brews in the spreadsheet'],
         ].map(([n, label]) => (
-          <div key={label} className="rounded-2xl bg-foam p-8">
+          <div key={label} className="bg-foam rounded-2xl p-8">
             <p className="font-display text-5xl">{n}</p>
-            <p className="mt-2 text-sm text-latte">{label}</p>
+            <p className="text-latte mt-2 text-sm">{label}</p>
           </div>
         ))}
       </section>
 
-      <section className="mt-24 rounded-3xl bg-copper/10 p-8 sm:p-12">
+      <section className="bg-copper/10 mt-24 rounded-3xl p-8 sm:p-12">
         <h2 className="text-3xl">Get roast notes</h2>
-        <p className="mt-2 text-latte">One email when a new lot lands.</p>
+        <p className="text-latte mt-2">One email when a new lot lands.</p>
         <div className="mt-6 max-w-lg">
           <NewsletterForm source="about" />
         </div>
@@ -8005,37 +10063,53 @@ export default function AboutPage() {
 - [ ] **Step 2: FAQ**
 
 `src/app/(marketing)/faq/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { Container } from '@/components/ui/container';
 import { faqItems } from '@/lib/content/faq';
 
-export const metadata: Metadata = { title: 'FAQ', description: 'Shipping, subscriptions, grind and storage questions answered.' };
+export const metadata: Metadata = {
+  title: 'FAQ',
+  description: 'Shipping, subscriptions, grind and storage questions answered.',
+};
 
 export default function FaqPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqItems.map((f) => ({ '@type': 'Question', name: f.question, acceptedAnswer: { '@type': 'Answer', text: f.answer } })),
+    mainEntity: faqItems.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
   };
   return (
     <Container className="py-16">
       <div className="max-w-2xl">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-copper">Help</p>
+        <p className="text-copper mb-3 text-xs font-semibold tracking-[0.25em] uppercase">Help</p>
         <h1 className="text-4xl sm:text-5xl">Frequently asked questions</h1>
-        <div className="mt-10 divide-y divide-latte/30 rounded-2xl bg-foam px-6" data-testid="faq">
+        <div className="divide-latte/30 bg-foam mt-10 divide-y rounded-2xl px-6" data-testid="faq">
           {faqItems.map((item) => (
             <details key={item.question} className="group py-5">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                 {item.question}
-                <span className="text-latte transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+                <span
+                  className="text-latte transition-transform group-open:rotate-45"
+                  aria-hidden="true"
+                >
+                  +
+                </span>
               </summary>
-              <p className="mt-3 text-sm leading-relaxed text-espresso/85">{item.answer}</p>
+              <p className="text-espresso/85 mt-3 text-sm leading-relaxed">{item.answer}</p>
             </details>
           ))}
         </div>
       </div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </Container>
   );
 }
@@ -8044,20 +10118,30 @@ export default function FaqPage() {
 - [ ] **Step 3: Brew guides index and detail**
 
 `src/app/(marketing)/brew-guides/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import { BrewGuidesTeaser } from '@/components/marketing/brew-guides-teaser';
 import { Container } from '@/components/ui/container';
 
-export const metadata: Metadata = { title: 'Brew guides', description: 'Ratios, grind sizes and timings for pour over, French press, espresso and cold brew.' };
+export const metadata: Metadata = {
+  title: 'Brew guides',
+  description:
+    'Ratios, grind sizes and timings for pour over, French press, espresso and cold brew.',
+};
 
 export default function BrewGuidesPage() {
   return (
     <Container className="py-16">
       <div className="mb-10 max-w-2xl">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-copper">Brew guides</p>
+        <p className="text-copper mb-3 text-xs font-semibold tracking-[0.25em] uppercase">
+          Brew guides
+        </p>
         <h1 className="text-4xl sm:text-5xl">Brew it like we do</h1>
-        <p className="mt-3 text-latte">Every recipe below is the one we use on our own bar. Weigh your coffee, weigh your water, and adjust one thing at a time.</p>
+        <p className="text-latte mt-3">
+          Every recipe below is the one we use on our own bar. Weigh your coffee, weigh your water,
+          and adjust one thing at a time.
+        </p>
       </div>
       <BrewGuidesTeaser />
     </Container>
@@ -8066,6 +10150,7 @@ export default function BrewGuidesPage() {
 ```
 
 `src/app/(marketing)/brew-guides/[slug]/page.tsx`:
+
 ```tsx
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -8089,60 +10174,88 @@ export default async function BrewGuidePage({ params }: Props) {
   if (!guide) notFound();
 
   const all = await listProducts({ category: 'coffee', sort: 'featured' });
-  const recommended = guide.recommendedSlugs.map((s) => all.find((p) => p.product.slug === s)).filter((p): p is NonNullable<typeof p> => Boolean(p));
+  const recommended = guide.recommendedSlugs
+    .map((s) => all.find((p) => p.product.slug === s))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
   return (
     <Container className="py-16">
-      <nav aria-label="Breadcrumb" className="mb-6 text-sm text-latte">
-        <Link href="/brew-guides" className="hover:text-espresso">Brew guides</Link>
+      <nav aria-label="Breadcrumb" className="text-latte mb-6 text-sm">
+        <Link href="/brew-guides" className="hover:text-espresso">
+          Brew guides
+        </Link>
         <span className="mx-2">/</span>
         <span className="text-espresso">{guide.title}</span>
       </nav>
       <div className="grid gap-12 lg:grid-cols-[1fr_320px]">
         <article>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-copper">{guide.method}</p>
-          <h1 className="text-4xl sm:text-5xl" data-testid="guide-title">{guide.title}</h1>
-          <p className="mt-4 text-lg text-latte">{guide.summary}</p>
+          <p className="text-copper mb-3 text-xs font-semibold tracking-[0.25em] uppercase">
+            {guide.method}
+          </p>
+          <h1 className="text-4xl sm:text-5xl" data-testid="guide-title">
+            {guide.title}
+          </h1>
+          <p className="text-latte mt-4 text-lg">{guide.summary}</p>
           <ol className="mt-10 flex flex-col gap-5">
             {guide.steps.map((step, i) => (
               <li key={i} className="flex gap-4">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-espresso text-sm font-semibold text-foam">{i + 1}</span>
+                <span className="bg-espresso text-foam flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
+                  {i + 1}
+                </span>
                 <p className="pt-1 leading-relaxed">{step}</p>
               </li>
             ))}
           </ol>
-          <div className="mt-10 rounded-2xl bg-copper/10 p-6">
-            <h2 className="font-body text-sm font-semibold uppercase tracking-wide text-copper-dark">Tips from the bar</h2>
+          <div className="bg-copper/10 mt-10 rounded-2xl p-6">
+            <h2 className="font-body text-copper-dark text-sm font-semibold tracking-wide uppercase">
+              Tips from the bar
+            </h2>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">
-              {guide.tips.map((t) => <li key={t}>{t}</li>)}
+              {guide.tips.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
             </ul>
           </div>
         </article>
         <aside className="lg:sticky lg:top-28 lg:self-start">
-          <dl className="rounded-2xl bg-foam p-6 text-sm">
+          <dl className="bg-foam rounded-2xl p-6 text-sm">
             {[
               ['Ratio', guide.ratio],
               ['Grind', guide.grind],
               ['Water', `${guide.waterTempC}°C`],
               ['Time', guide.totalTime],
             ].map(([k, v]) => (
-              <div key={k} className="flex justify-between gap-4 border-b border-latte/20 py-3 last:border-0">
+              <div
+                key={k}
+                className="border-latte/20 flex justify-between gap-4 border-b py-3 last:border-0"
+              >
                 <dt className="text-latte">{k}</dt>
                 <dd className="text-right font-medium">{v}</dd>
               </div>
             ))}
           </dl>
           <div className="mt-6 flex flex-col gap-1 text-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-latte">Other guides</p>
-            {brewGuides.filter((g) => g.slug !== guide.slug).map((g) => (
-              <Link key={g.slug} href={`/brew-guides/${g.slug}`} className="py-1 hover:text-copper">{g.title}</Link>
-            ))}
+            <p className="text-latte text-xs font-semibold tracking-wide uppercase">Other guides</p>
+            {brewGuides
+              .filter((g) => g.slug !== guide.slug)
+              .map((g) => (
+                <Link
+                  key={g.slug}
+                  href={`/brew-guides/${g.slug}`}
+                  className="hover:text-copper py-1"
+                >
+                  {g.title}
+                </Link>
+              ))}
           </div>
         </aside>
       </div>
       {recommended.length ? (
         <section className="mt-20">
-          <SectionHeading eyebrow="Recommended" title={`Coffees we brew as ${guide.method.toLowerCase()}`} />
+          <SectionHeading
+            eyebrow="Recommended"
+            title={`Coffees we brew as ${guide.method.toLowerCase()}`}
+          />
           <ProductGrid items={recommended} listId={`guide_${guide.slug}`} />
         </section>
       ) : null}
@@ -8166,6 +10279,7 @@ git commit -m "feat: add about, FAQ and brew guide pages"
 ### Task 18: Error boundaries, not-found, loading states and database-aware health check
 
 **Files:**
+
 - Create: `src/app/error.tsx`, `src/app/not-found.tsx`, `src/app/(shop)/shop/loading.tsx`, `src/app/(shop)/products/[slug]/loading.tsx`, `src/app/(marketing)/loading.tsx`
 - Modify: `src/app/api/health/route.ts`
 - Test: `tests/integration/health.test.ts`
@@ -8173,6 +10287,7 @@ git commit -m "feat: add about, FAQ and brew guide pages"
 - [ ] **Step 1: Boundaries**
 
 `src/app/error.tsx`:
+
 ```tsx
 'use client';
 
@@ -8180,7 +10295,13 @@ import { useEffect } from 'react';
 import { Button, ButtonLink } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 
-export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function ErrorPage({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -8188,11 +10309,15 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
     <Container className="flex flex-col items-center gap-4 py-32 text-center">
       <p className="text-5xl">☕</p>
       <h1 className="text-4xl">Something spilled.</h1>
-      <p className="max-w-md text-latte">We hit an unexpected error. Try again, or head back to the shop while we mop up.</p>
-      {error.digest ? <p className="text-xs text-latte">Reference: {error.digest}</p> : null}
+      <p className="text-latte max-w-md">
+        We hit an unexpected error. Try again, or head back to the shop while we mop up.
+      </p>
+      {error.digest ? <p className="text-latte text-xs">Reference: {error.digest}</p> : null}
       <div className="mt-4 flex gap-3">
         <Button onClick={reset}>Try again</Button>
-        <ButtonLink href="/shop" variant="outline">Back to shop</ButtonLink>
+        <ButtonLink href="/shop" variant="outline">
+          Back to shop
+        </ButtonLink>
       </div>
     </Container>
   );
@@ -8200,19 +10325,27 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
 ```
 
 `src/app/not-found.tsx`:
+
 ```tsx
 import { ButtonLink } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 
 export default function NotFound() {
   return (
-    <Container className="flex flex-col items-center gap-4 py-32 text-center" data-testid="not-found">
-      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-copper">404</p>
+    <Container
+      className="flex flex-col items-center gap-4 py-32 text-center"
+      data-testid="not-found"
+    >
+      <p className="text-copper text-xs font-semibold tracking-[0.25em] uppercase">404</p>
       <h1 className="text-4xl sm:text-5xl">That page has been decaffeinated.</h1>
-      <p className="max-w-md text-latte">We could not find what you were looking for. It may have sold out, moved, or never existed.</p>
+      <p className="text-latte max-w-md">
+        We could not find what you were looking for. It may have sold out, moved, or never existed.
+      </p>
       <div className="mt-4 flex gap-3">
         <ButtonLink href="/shop">Shop coffee</ButtonLink>
-        <ButtonLink href="/" variant="outline">Home</ButtonLink>
+        <ButtonLink href="/" variant="outline">
+          Home
+        </ButtonLink>
       </div>
     </Container>
   );
@@ -8220,6 +10353,7 @@ export default function NotFound() {
 ```
 
 `src/app/(shop)/shop/loading.tsx`:
+
 ```tsx
 import { Container } from '@/components/ui/container';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8245,6 +10379,7 @@ export default function ShopLoading() {
 ```
 
 `src/app/(shop)/products/[slug]/loading.tsx`:
+
 ```tsx
 import { Container } from '@/components/ui/container';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8270,6 +10405,7 @@ export default function ProductLoading() {
 ```
 
 `src/app/(marketing)/loading.tsx`:
+
 ```tsx
 import { Container } from '@/components/ui/container';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8288,6 +10424,7 @@ export default function MarketingLoading() {
 - [ ] **Step 2: Health check with DB probe**
 
 Replace `src/app/api/health/route.ts`:
+
 ```ts
 import { sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
@@ -8315,14 +10452,19 @@ export async function GET(request: Request) {
     commit: process.env.GIT_SHA ?? 'dev',
     timestamp: new Date().toISOString(),
   };
-  if (db !== 'up') logger.warn('health check degraded', { ...body, ...traceFields(request.headers) });
-  return NextResponse.json(body, { status: db === 'up' ? 200 : 503, headers: { 'Cache-Control': 'no-store' } });
+  if (db !== 'up')
+    logger.warn('health check degraded', { ...body, ...traceFields(request.headers) });
+  return NextResponse.json(body, {
+    status: db === 'up' ? 200 : 503,
+    headers: { 'Cache-Control': 'no-store' },
+  });
 }
 ```
 
 Confirm `tsconfig.json` has `"resolveJsonModule": true` (create-next-app sets it).
 
 `tests/integration/health.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import './helpers';
@@ -8354,6 +10496,7 @@ git commit -m "feat: add error, not-found and loading boundaries and a db-aware 
 ### Task 19: Playwright end-to-end suite
 
 **Files:**
+
 - Create: `playwright.config.ts`, `tests/e2e/global-setup.ts`, `tests/e2e/helpers.ts`, `tests/e2e/home.spec.ts`, `tests/e2e/shop.spec.ts`, `tests/e2e/product-cart.spec.ts`, `tests/e2e/checkout.spec.ts`, `tests/e2e/misc.spec.ts`
 
 - [ ] **Step 1: Install and configure**
@@ -8364,6 +10507,7 @@ pnpm exec playwright install chromium
 ```
 
 `playwright.config.ts`:
+
 ```ts
 import { defineConfig, devices } from '@playwright/test';
 import { config } from 'dotenv';
@@ -8372,7 +10516,8 @@ config({ path: ['.env.local', '.env'] });
 
 const PORT = Number(process.env.PORT ?? 3100);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
-const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL ?? 'postgres://cofresso:cofresso@localhost:5432/cofresso_test';
+const TEST_DATABASE_URL =
+  process.env.TEST_DATABASE_URL ?? 'postgres://cofresso:cofresso@localhost:5432/cofresso_test';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -8380,7 +10525,9 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 2 : 0,
-  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list'], ['html', { open: 'never' }]],
+  reporter: process.env.CI
+    ? [['github'], ['html', { open: 'never' }]]
+    : [['list'], ['html', { open: 'never' }]],
   timeout: 30_000,
   use: {
     baseURL,
@@ -8401,6 +10548,7 @@ export default defineConfig({
 ```
 
 `tests/e2e/global-setup.ts`:
+
 ```ts
 import setupDatabase from '../integration/global-setup';
 
@@ -8410,10 +10558,15 @@ export default async function globalSetup() {
 ```
 
 `tests/e2e/helpers.ts`:
+
 ```ts
 import { expect, type Page } from '@playwright/test';
 
-export async function addToCart(page: Page, slug: string, options: { size?: string; subscription?: boolean } = {}) {
+export async function addToCart(
+  page: Page,
+  slug: string,
+  options: { size?: string; subscription?: boolean } = {},
+) {
   await page.goto(`/products/${slug}`);
   if (options.size) await page.getByRole('radio', { name: new RegExp(options.size) }).click();
   if (options.subscription) await page.getByRole('radio', { name: /subscribe/i }).click();
@@ -8434,6 +10587,7 @@ export const TEST_CARD_DECLINED = '4000 0000 0000 0002';
 - [ ] **Step 2: Specs**
 
 `tests/e2e/home.spec.ts`:
+
 ```ts
 import { expect, test } from '@playwright/test';
 
@@ -8449,7 +10603,10 @@ test.describe('home', () => {
 
   test('footer carries the easter egg', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByTestId('easter-egg-link')).toHaveAttribute('href', 'https://github.com/coframe/coffee');
+    await expect(page.getByTestId('easter-egg-link')).toHaveAttribute(
+      'href',
+      'https://github.com/coframe/coffee',
+    );
   });
 
   test('newsletter signup succeeds', async ({ page }) => {
@@ -8463,6 +10620,7 @@ test.describe('home', () => {
 ```
 
 `tests/e2e/shop.spec.ts`:
+
 ```ts
 import { expect, test } from '@playwright/test';
 
@@ -8480,7 +10638,10 @@ test.describe('shop', () => {
     await page.getByTestId('filter-roast').selectOption('');
     await page.getByTestId('filter-sort').selectOption('price_asc');
     await expect(page).toHaveURL(/sort=price_asc/);
-    await expect(page.getByTestId('product-card').first()).toHaveAttribute('data-slug', 'paper-filters');
+    await expect(page.getByTestId('product-card').first()).toHaveAttribute(
+      'data-slug',
+      'paper-filters',
+    );
   });
 
   test('collection pages and search work', async ({ page }) => {
@@ -8490,7 +10651,10 @@ test.describe('shop', () => {
 
     await page.goto('/search?q=ethiopia');
     await expect(page.getByTestId('search-count')).toContainText('1 result');
-    await expect(page.getByTestId('product-card')).toHaveAttribute('data-slug', 'ethiopia-yirgacheffe');
+    await expect(page.getByTestId('product-card')).toHaveAttribute(
+      'data-slug',
+      'ethiopia-yirgacheffe',
+    );
 
     await page.goto('/search?q=zzzz');
     await expect(page.getByTestId('empty-grid')).toBeVisible();
@@ -8499,12 +10663,15 @@ test.describe('shop', () => {
 ```
 
 `tests/e2e/product-cart.spec.ts`:
+
 ```ts
 import { expect, test } from '@playwright/test';
 import { addToCart, closeDrawer } from './helpers';
 
 test.describe('product and cart', () => {
-  test('variant and subscription change the price, add to cart opens the drawer', async ({ page }) => {
+  test('variant and subscription change the price, add to cart opens the drawer', async ({
+    page,
+  }) => {
     await page.goto('/products/morning-frame');
     await expect(page.getByTestId('product-title')).toHaveText('Morning Frame');
     await expect(page.getByTestId('selected-price')).toHaveText('$18.00');
@@ -8515,7 +10682,9 @@ test.describe('product and cart', () => {
     await page.getByTestId('add-to-cart').click();
     await expect(page.getByTestId('cart-drawer')).toBeVisible();
     await expect(page.getByTestId('cart-count')).toHaveText('1');
-    await expect(page.getByTestId('cart-drawer').getByTestId('cart-line')).toContainText('Subscription');
+    await expect(page.getByTestId('cart-drawer').getByTestId('cart-line')).toContainText(
+      'Subscription',
+    );
   });
 
   test('promo codes and the free shipping bar', async ({ page }) => {
@@ -8547,6 +10716,7 @@ test.describe('product and cart', () => {
 ```
 
 `tests/e2e/checkout.spec.ts`:
+
 ```ts
 import { expect, test, type Page } from '@playwright/test';
 import { addToCart, closeDrawer, TEST_CARD_DECLINED, TEST_CARD_OK } from './helpers';
@@ -8615,6 +10785,7 @@ test.describe('checkout', () => {
 The `$48.60` total is Brew Scale $45.00 → free shipping (threshold met) → tax 8% = $3.60.
 
 `tests/e2e/misc.spec.ts`:
+
 ```ts
 import { expect, test } from '@playwright/test';
 
@@ -8654,6 +10825,7 @@ test.describe('misc', () => {
 pnpm build
 pnpm test:e2e
 ```
+
 Expected: all specs pass. Fix any selector mismatches in the components (prefer adding `data-testid`s over loosening assertions).
 
 - [ ] **Step 4: Commit**
@@ -8669,6 +10841,7 @@ git commit -m "test: add Playwright end-to-end suite covering browse, cart, chec
 ### Task 20: Docker image
 
 **Files:**
+
 - Create: `Dockerfile`, `.dockerignore`
 
 - [ ] **Step 1: Dockerfile**
@@ -8718,6 +10891,7 @@ CMD ["node", "server.js"]
 Replace `PNPM_VERSION=10` with the major.minor.patch from `package.json`'s `packageManager`.
 
 `.dockerignore`:
+
 ```
 .git
 .github
@@ -8745,6 +10919,7 @@ docker run --rm -d --name cofresso-local -p 8080:8080 -e DATABASE_URL=postgres:/
 sleep 3; curl -s localhost:8080/api/health; curl -s -o /dev/null -w "%{http_code}\n" localhost:8080/products/morning-frame
 docker stop cofresso-local
 ```
+
 Expected: health `status: ok, db: up, commit: <sha>`; product page 200. Image size under 300 MB (`docker images cofresso-web:local`).
 
 - [ ] **Step 3: Commit**
@@ -8759,11 +10934,12 @@ git commit -m "build: add multi-stage Dockerfile with bundled db CLI"
 ### Task 21: Repository documentation
 
 **Files:**
+
 - Create: `README.md` (replace), `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `docs/architecture.md`
 
 - [ ] **Step 1: README**
 
-```markdown
+````markdown
 # Cofresso
 
 Specialty coffee storefront. Production-grade Next.js codebase used by [Coframe](https://coframe.com) as a sandbox for coding-agent and web-optimization tooling. Live at [cofresso.com](https://cofresso.com).
@@ -8781,22 +10957,23 @@ docker compose up -d          # Postgres 16 on :5432 (+ cofresso_test database)
 pnpm db:migrate && pnpm db:seed
 pnpm dev                      # http://localhost:3000
 ```
+````
 
 ## Scripts
 
-| Script | What it does |
-| --- | --- |
-| `pnpm dev` / `build` / `start` | Next.js |
-| `pnpm lint` / `lint:fix` / `format` | ESLint + Prettier |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm test:unit` | Vitest unit + component tests (`src/**/*.test.ts(x)`) |
-| `pnpm test:integration` | Vitest against Postgres (`tests/integration`, uses `TEST_DATABASE_URL`) |
-| `pnpm test:e2e` | Playwright against a built app (`pnpm build` first) |
-| `pnpm db:generate` | Generate a migration from schema changes |
+| Script                                     | What it does                                                                            |
+| ------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `pnpm dev` / `build` / `start`             | Next.js                                                                                 |
+| `pnpm lint` / `lint:fix` / `format`        | ESLint + Prettier                                                                       |
+| `pnpm typecheck`                           | `tsc --noEmit`                                                                          |
+| `pnpm test:unit`                           | Vitest unit + component tests (`src/**/*.test.ts(x)`)                                   |
+| `pnpm test:integration`                    | Vitest against Postgres (`tests/integration`, uses `TEST_DATABASE_URL`)                 |
+| `pnpm test:e2e`                            | Playwright against a built app (`pnpm build` first)                                     |
+| `pnpm db:generate`                         | Generate a migration from schema changes                                                |
 | `pnpm db:migrate` / `db:seed` / `db:reset` | Apply migrations / upsert catalog / drop + migrate + seed (needs `ALLOW_DB_RESET=true`) |
-| `pnpm db:studio` | Drizzle Studio |
-| `pnpm art:generate` | Regenerate product SVGs from seed data |
-| `pnpm build:db` | Bundle the db CLI for the Docker image |
+| `pnpm db:studio`                           | Drizzle Studio                                                                          |
+| `pnpm art:generate`                        | Regenerate product SVGs from seed data                                                  |
+| `pnpm build:db`                            | Bundle the db CLI for the Docker image                                                  |
 
 ## Project layout
 
@@ -8813,7 +10990,8 @@ The payment provider is simulated. `4242 4242 4242 4242` succeeds; `4000 0000 00
 ---
 
 The beans are open source: <https://github.com/coframe/coffee>
-```
+
+````
 
 - [ ] **Step 2: AGENTS.md and CLAUDE.md**
 
@@ -8869,9 +11047,10 @@ Cofresso is an ecommerce storefront for a fictional coffee roaster. It is a real
 ## Deployment model
 
 PRs deploy a zero-traffic revision to the `cofresso-web-preview` Cloud Run service (URL in the PR comment). Merges to `main` migrate and deploy `cofresso-web`. See `docs/runbooks`.
-```
+````
 
 `CLAUDE.md`:
+
 ```markdown
 @AGENTS.md
 ```
@@ -8879,6 +11058,7 @@ PRs deploy a zero-traffic revision to the `cofresso-web-preview` Cloud Run servi
 - [ ] **Step 3: CONTRIBUTING, SECURITY, architecture**
 
 `CONTRIBUTING.md`:
+
 ```markdown
 # Contributing
 
@@ -8891,6 +11071,7 @@ Schema changes need a generated migration (`pnpm db:generate`) in the same PR. I
 ```
 
 `SECURITY.md`:
+
 ```markdown
 # Security
 
@@ -8900,6 +11081,7 @@ Scope: this repository, cofresso.com and its preview deployments.
 ```
 
 `docs/architecture.md`:
+
 ```markdown
 # Architecture
 
@@ -8923,10 +11105,10 @@ Every page is server-rendered on request. Reads use Drizzle queries in `src/lib/
 
 ## Environments
 
-| | Service | Database | Trigger |
-| --- | --- | --- | --- |
-| Preview | `cofresso-web-preview` (tagged, zero-traffic revisions) | `cofresso_preview` | Pull request |
-| Production | `cofresso-web` | `cofresso` | Merge to `main` |
+|            | Service                                                 | Database           | Trigger         |
+| ---------- | ------------------------------------------------------- | ------------------ | --------------- |
+| Preview    | `cofresso-web-preview` (tagged, zero-traffic revisions) | `cofresso_preview` | Pull request    |
+| Production | `cofresso-web`                                          | `cofresso`         | Merge to `main` |
 
 Migrations run as Cloud Run jobs (`cofresso-migrate`, `cofresso-migrate-preview`) using the same image before each deploy, followed by the idempotent seed.
 

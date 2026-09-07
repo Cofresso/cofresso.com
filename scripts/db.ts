@@ -4,31 +4,33 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import path from 'node:path';
 import { createIsolatedDb } from '../src/lib/db/client';
 import { runSeed } from '../src/lib/db/seed';
+import { resolveDbTarget } from '../src/lib/db/target';
 
 config({ path: ['.env.local', '.env'] });
 
-type Command = 'migrate' | 'seed' | 'reset';
+/**
+ * `deploy` = migrate then seed in one process. Cloud Run jobs get it as their baked-in
+ * `args` so CI never has to pass `--args` to `gcloud run jobs execute` (which is broken in
+ * gcloud 548.x: it sends an unknown `priorityTier` field and fails client-side).
+ */
+const COMMANDS = ['migrate', 'seed', 'reset', 'deploy'] as const;
+type Command = (typeof COMMANDS)[number];
 
-function connectionString(): string {
-  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
-  const { DB_USER, DB_PASSWORD, DB_NAME, DB_HOST, DB_PORT = '5432', DB_SOCKET_DIR } = process.env;
-  if (DB_USER && DB_PASSWORD && DB_NAME) {
-    const creds = `${encodeURIComponent(DB_USER)}:${encodeURIComponent(DB_PASSWORD)}`;
-    if (DB_SOCKET_DIR)
-      return `postgres://${creds}@/${DB_NAME}?host=${encodeURIComponent(DB_SOCKET_DIR)}`;
-    if (DB_HOST) return `postgres://${creds}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
-  }
-  throw new Error('No database configuration found (DATABASE_URL or DB_* variables).');
+const MIGRATING: readonly Command[] = ['migrate', 'reset', 'deploy'];
+const SEEDING: readonly Command[] = ['seed', 'reset', 'deploy'];
+
+function isCommand(value: string | undefined): value is Command {
+  return COMMANDS.includes(value as Command);
 }
 
 async function main() {
-  const command = process.argv[2] as Command | undefined;
-  if (!command || !['migrate', 'seed', 'reset'].includes(command)) {
-    console.error('Usage: db <migrate|seed|reset>');
+  const command = process.argv[2];
+  if (!isCommand(command)) {
+    console.error(`Usage: db <${COMMANDS.join('|')}>`);
     process.exit(2);
   }
 
-  const { db, close } = createIsolatedDb(connectionString());
+  const { db, close } = createIsolatedDb(resolveDbTarget(process.env));
   const migrationsFolder = path.resolve(process.cwd(), 'drizzle');
 
   try {
@@ -42,13 +44,13 @@ async function main() {
       await db.execute(sql`CREATE SCHEMA public`);
     }
 
-    if (command === 'migrate' || command === 'reset') {
+    if (MIGRATING.includes(command)) {
       console.log(`Applying migrations from ${migrationsFolder}...`);
       await migrate(db, { migrationsFolder });
       console.log('Migrations applied.');
     }
 
-    if (command === 'seed' || command === 'reset') {
+    if (SEEDING.includes(command)) {
       console.log('Seeding...');
       const summary = await runSeed(db);
       console.log('Seed complete:', JSON.stringify(summary));

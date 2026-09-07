@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { fail, ok, type ActionResult } from '@/lib/action-result';
 import { getDb } from '@/lib/db/client';
+import { describeDbError } from '@/lib/db/errors';
 import { logger } from '@/lib/logger';
 import { readCartId, writeCartId } from './cookie';
 import {
@@ -21,9 +22,11 @@ function revalidateCart() {
   revalidatePath('/', 'layout');
 }
 
-function handleError<T>(err: unknown, fallback: string): ActionResult<T> {
+function handleError<T>(err: unknown, fallback: string, cartId?: string): ActionResult<T> {
   if (err instanceof CartMutationError) return fail(err.message);
-  logger.error('cart action failed', { err });
+  // Never log the raw error: drizzle embeds the statement and every bound param (cart ids,
+  // line ids, discount codes) in `error.message`.
+  logger.error('cart action failed', { ...describeDbError(err), cartId });
   return fail(fallback);
 }
 
@@ -60,7 +63,7 @@ export async function updateCartLineAction(
     revalidateCart();
     return ok(undefined);
   } catch (err) {
-    return handleError(err, 'Could not update your cart.');
+    return handleError(err, 'Could not update your cart.', cartId);
   }
 }
 
@@ -72,7 +75,7 @@ export async function removeCartLineAction(lineId: string): Promise<ActionResult
     revalidateCart();
     return ok(undefined);
   } catch (err) {
-    return handleError(err, 'Could not update your cart.');
+    return handleError(err, 'Could not update your cart.', cartId);
   }
 }
 
@@ -89,7 +92,7 @@ export async function applyPromoAction(
     revalidateCart();
     return ok({ code });
   } catch (err) {
-    return handleError(err, 'Could not apply that code.');
+    return handleError(err, 'Could not apply that code.', cartId);
   }
 }
 
@@ -101,6 +104,6 @@ export async function removePromoAction(): Promise<ActionResult> {
     revalidateCart();
     return ok(undefined);
   } catch (err) {
-    return handleError(err, 'Could not remove that code.');
+    return handleError(err, 'Could not remove that code.', cartId);
   }
 }

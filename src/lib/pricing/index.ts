@@ -30,7 +30,7 @@ export function computeDiscountCents(rule: DiscountRule | null, subtotalCents: n
   if (!rule) return 0;
   switch (rule.kind) {
     case 'percent':
-      return Math.min(subtotalCents, Math.round((subtotalCents * rule.value) / 100));
+      return Math.min(subtotalCents, Math.round((subtotalCents * Math.max(0, rule.value)) / 100));
     case 'fixed':
       return Math.min(subtotalCents, Math.max(0, rule.value));
     case 'free_shipping':
