@@ -14,6 +14,11 @@ interface SheetProps {
   testId?: string;
 }
 
+/**
+ * Render this at layout level. Ancestors with `backdrop-filter`, `transform` or
+ * `filter` become the containing block for the fixed wrapper (this is why the
+ * mobile nav's sheet lives outside the header).
+ */
 export function Sheet({
   open,
   onClose,
@@ -29,20 +34,27 @@ export function Sheet({
   // of the sheet disappearing (via `invisible` + unmounted children) the instant `open`
   // flips to false.
   const [rendered, setRendered] = useState(open);
-  // Tracks the previous `open` value so the transition to `rendered = true` on opening can
-  // happen synchronously during render (React's documented pattern for adjusting state in
-  // response to a prop/state change) rather than one tick late from inside an effect.
-  const [wasOpen, setWasOpen] = useState(open);
-  if (open !== wasOpen) {
-    setWasOpen(open);
-    if (open) setRendered(true);
-  }
+  // Invariant: an open sheet is always rendered. Adjusting state during render (React's
+  // documented pattern) means opening starts the transition in the same commit as `open`
+  // flips true, so the slide-in transition has something to animate from. Doing this from
+  // an effect instead would let the browser paint one frame with `open` true (transform
+  // already at its target) while the wrapper is still `invisible`, so the panel would pop
+  // in rather than slide. This can never fire on mount: `useState(open)` already starts
+  // `rendered` equal to `open`, so `open && !rendered` is false on the first render.
+  if (open && !rendered) setRendered(true);
 
   useEffect(() => {
-    if (open) return;
+    // Only while actually closing. Scheduling this whenever `open` is false would leave a
+    // stray timer behind on mount (this was the original bug: `open` starts false, so a
+    // bare `if (open) return;` scheduled a same-value `setRendered(false)` 300ms after
+    // hydration; React bails out of that no-op update but leaves it enqueued, and replaying
+    // it later clobbered the render-phase `setRendered(true)` above). Guarding on `rendered`
+    // too means this only runs while we're actually mid-close, so nothing is ever scheduled
+    // on mount or while open.
+    if (open || !rendered) return;
     const timeout = setTimeout(() => setRendered(false), 300);
     return () => clearTimeout(timeout);
-  }, [open]);
+  }, [open, rendered]);
 
   useEffect(() => {
     if (!open) return;
