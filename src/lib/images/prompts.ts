@@ -15,7 +15,7 @@ export const KIND_SIZES: Record<ImageKind, ImageSize> = {
 export const HERO_SIZE: ImageSize = '1536x1024';
 
 export const STYLE_GUIDE = [
-  'Editorial studio product photography for a specialty coffee company called Cofresso.',
+  'Editorial studio product photography for a specialty coffee roaster called Cofresso.',
   'Cream and linen backdrops, soft directional daylight from the left, gentle falloff, no harsh shadows.',
   'Brand palette: espresso brown #4A2C24, latte #A08977, cream #F6F1EB, copper #C8763A.',
   'Shot on a 50mm lens at f/4, natural depth of field, fine film grain, no vignette.',

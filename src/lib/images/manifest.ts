@@ -5,7 +5,7 @@ import { IMAGE_KINDS, type ImageKind } from '@/lib/db/schema/values';
 export const ASSETS_BASE_URL = 'https://cofresso.com/assets';
 
 const imageEntrySchema = z.object({
-  url: z.string().url().startsWith(`${ASSETS_BASE_URL}/`),
+  url: z.url().startsWith(`${ASSETS_BASE_URL}/`),
   alt: z.string().min(1),
   width: z.number().int().positive(),
   height: z.number().int().positive(),
@@ -17,7 +17,7 @@ const productImageEntrySchema = imageEntrySchema.extend({
 });
 
 export const imagesManifestSchema = z.object({
-  generatedAt: z.string().datetime(),
+  generatedAt: z.iso.datetime(),
   model: z.string().min(1),
   products: z.record(z.string(), z.array(productImageEntrySchema)).default({}),
   collections: z.record(z.string(), imageEntrySchema).default({}),

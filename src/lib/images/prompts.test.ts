@@ -62,7 +62,8 @@ describe('productPrompt', () => {
   it('describes equipment by its art shape instead of a bag', () => {
     const prompt = productPrompt(gear, 'front');
     expect(prompt).toContain('gooseneck pour-over kettle');
-    expect(prompt).not.toContain('roast');
+    expect(prompt).not.toMatch(/\broast\b/);
+    expect(prompt).not.toMatch(/\broasted\b/);
     expect(prompt).not.toContain('tastes of');
   });
 
