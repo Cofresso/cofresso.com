@@ -32,6 +32,30 @@ pnpm dev                      # http://localhost:3000
 | `pnpm art:generate`                        | Regenerate product SVGs from seed data                                                  |
 | `pnpm build:db`                            | Bundle the db CLI for the Docker image                                                  |
 
+## Interruptions
+
+The storefront deliberately gets in your way, because real ones do and Coframe uses this app to
+exercise computer-use QA agents. Six elements, all keyboard-accessible, all dismissible, and none
+of them allowed anywhere near checkout:
+
+| Element               | Behaviour                                                                        |
+| --------------------- | -------------------------------------------------------------------------------- |
+| Email capture popup   | 10% off, 8s after landing or on exit intent; never on `/checkout*` or `/orders*` |
+| Cookie consent banner | Accept / reject / manage; also gates the Coframe SDK slot on analytics consent   |
+| Live chat bubble      | Three scripted questions, a typing indicator and an unread badge after 30s       |
+| Social-proof toasts   | "Someone in Portland just bought …", three per session, bottom-left              |
+| Announcement rotator  | Three messages every 6s, one counting down to local midnight                     |
+| Deferred sections     | Reviews and related products render only once scrolled near                      |
+
+Timings and toggles live in [`src/lib/interruptions/config.ts`](src/lib/interruptions/config.ts).
+Set `UX_INTERRUPTIONS=off` in the server env to remove all of them from the page — useful when
+you want to demo or measure the storefront without them. The Playwright suite runs with them
+**on** and clears them through the `dismissInterruptions` helper, the way a visitor would.
+
+The kill switch is not a consent decision, so it does not lift the consent gate on the Coframe
+SDK slot: with interruptions off there is no banner, and a gated SDK will therefore not load.
+Set `gateSdkOnAnalytics: false` in the config if you need the SDK during a no-interruptions demo.
+
 ## Project layout
 
 See [docs/architecture.md](docs/architecture.md). Conventions for contributors and agents live in [AGENTS.md](AGENTS.md).

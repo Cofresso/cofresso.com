@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Deferred } from '@/components/interruptions/deferred';
 import { AddToCartForm } from '@/components/product/add-to-cart-form';
 import { ProductDetails } from '@/components/product/product-details';
 import { ProductGrid } from '@/components/product/product-grid';
@@ -10,10 +11,12 @@ import { Badge } from '@/components/ui/badge';
 import { Container } from '@/components/ui/container';
 import { Rating } from '@/components/ui/rating';
 import { SectionHeading } from '@/components/ui/section-heading';
+import { Skeleton } from '@/components/ui/skeleton';
 import { categoryLabel, roastLabel } from '@/lib/catalog/labels';
 import { lowestPriceCents } from '@/lib/catalog/types';
 import { getProductBySlug, listRelatedProducts } from '@/lib/db/queries/catalog';
 import { getServerEnv } from '@/lib/env';
+import { interruptionsEnabled } from '@/lib/interruptions/enabled';
 import { ViewItemTracker } from './view-item-tracker';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -39,6 +42,7 @@ export default async function ProductPage({ params }: Props) {
   const { product, variants, rating, collections, reviews } = data;
   const related = await listRelatedProducts(product, 4);
   const base = getServerEnv().SITE_URL;
+  const deferSections = interruptionsEnabled();
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -143,13 +147,17 @@ export default async function ProductPage({ params }: Props) {
 
       <section id="reviews" className="mt-20 scroll-mt-28">
         <SectionHeading eyebrow="Reviews" title="What people are brewing" />
-        <ReviewList reviews={reviews} average={rating.average} />
+        <Deferred enabled={deferSections} placeholder={<Skeleton className="h-72 w-full" />}>
+          <ReviewList reviews={reviews} average={rating.average} />
+        </Deferred>
       </section>
 
       {related.length ? (
         <section className="mt-20">
           <SectionHeading eyebrow="You might also like" title="Pairs well with" />
-          <ProductGrid items={related} listId={`related_${product.slug}`} />
+          <Deferred enabled={deferSections} placeholder={<Skeleton className="h-80 w-full" />}>
+            <ProductGrid items={related} listId={`related_${product.slug}`} />
+          </Deferred>
         </section>
       ) : null}
 

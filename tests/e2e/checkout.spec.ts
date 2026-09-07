@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { addToCart, closeDrawer, TEST_CARD_DECLINED, TEST_CARD_OK } from './helpers';
+import { addToCart, closeDrawer, suppressPopup, TEST_CARD_DECLINED, TEST_CARD_OK } from './helpers';
 
 async function fillCheckout(page: Page, card: string, email: string) {
   await page.goto('/checkout');
@@ -17,6 +17,11 @@ async function fillCheckout(page: Page, card: string, email: string) {
   await page.getByTestId('continue-payment').click();
   await page.getByTestId('place-order').click();
 }
+
+test.beforeEach(async ({ page }) => {
+  // The popup is covered by interruptions.spec.ts; here it would only land mid-flow.
+  await suppressPopup(page);
+});
 
 test.describe('checkout', () => {
   test('redirects an empty cart back to the cart page', async ({ page }) => {

@@ -1,3 +1,4 @@
+import { Deferred } from '@/components/interruptions/deferred';
 import { BrewGuidesTeaser } from '@/components/marketing/brew-guides-teaser';
 import { CollectionGrid } from '@/components/marketing/collection-grid';
 import { Hero } from '@/components/marketing/hero';
@@ -9,7 +10,9 @@ import { ProductGrid } from '@/components/product/product-grid';
 import { ButtonLink } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { SectionHeading } from '@/components/ui/section-heading';
+import { Skeleton } from '@/components/ui/skeleton';
 import { listCollections, listFeaturedProducts, listRecentReviews } from '@/lib/db/queries/catalog';
+import { interruptionsEnabled } from '@/lib/interruptions/enabled';
 
 export default async function HomePage() {
   const [featured, collections, reviews] = await Promise.all([
@@ -57,7 +60,12 @@ export default async function HomePage() {
 
       <Container className="pb-20">
         <SectionHeading eyebrow="Reviews" title="From the inbox" />
-        <ReviewsStrip reviews={reviews} />
+        <Deferred
+          enabled={interruptionsEnabled()}
+          placeholder={<Skeleton className="h-44 w-full" />}
+        >
+          <ReviewsStrip reviews={reviews} />
+        </Deferred>
       </Container>
 
       <section id="newsletter" className="bg-copper/10">

@@ -36,3 +36,14 @@ variable "alert_email" {
   description = "Email for uptime alerts. Empty disables the notification channel."
   default     = ""
 }
+
+variable "ux_interruptions" {
+  type        = string
+  description = "\"on\" or \"off\". Turns the storefront's deliberate UI interruptions (email popup, cookie banner, chat bubble, social-proof toasts, announcement rotator, deferred sections) on or off. Applies to every service; changing it rolls a new revision."
+  default     = "on"
+
+  validation {
+    condition     = contains(["on", "off"], var.ux_interruptions)
+    error_message = "ux_interruptions must be \"on\" or \"off\"."
+  }
+}

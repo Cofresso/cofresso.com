@@ -17,6 +17,10 @@ const serverSchema = z
     COFRAME_SCRIPT_URL: z.preprocess(emptyToUndefined, z.string().url().optional()),
     GIT_SHA: z.string().default('dev'),
     ALLOW_DB_RESET: z.preprocess(emptyToUndefined, z.string().optional()),
+    // Kill switch for the deliberate UI interruptions (popup, cookie banner, chat bubble,
+    // social-proof toasts, announcement rotator, deferred sections). See
+    // src/lib/interruptions/config.ts.
+    UX_INTERRUPTIONS: z.enum(['on', 'off']).default('on'),
   })
   .superRefine((env, ctx) => {
     const hasParts = Boolean(
