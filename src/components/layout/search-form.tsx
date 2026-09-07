@@ -1,20 +1,33 @@
+import { useId } from 'react';
 import { IconSearch } from '@/components/ui/icons';
 import { cn } from '@/lib/utils';
 
 export function SearchForm({
   className,
   defaultValue = '',
+  ariaLabel = 'Search products',
 }: {
   className?: string;
   defaultValue?: string;
+  /** Distinguishes this instance's `role="search"` landmark and input label when
+   * more than one SearchForm is mounted on the page at once (e.g. the header's
+   * and the mobile nav sheet's). */
+  ariaLabel?: string;
 }) {
+  const inputId = useId();
   return (
-    <form action="/search" method="get" role="search" className={cn('relative', className)}>
-      <label htmlFor="site-search" className="sr-only">
-        Search products
+    <form
+      action="/search"
+      method="get"
+      role="search"
+      aria-label={ariaLabel}
+      className={cn('relative', className)}
+    >
+      <label htmlFor={inputId} className="sr-only">
+        {ariaLabel}
       </label>
       <input
-        id="site-search"
+        id={inputId}
         name="q"
         type="search"
         defaultValue={defaultValue}

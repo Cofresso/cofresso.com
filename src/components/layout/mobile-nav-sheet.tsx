@@ -11,7 +11,7 @@ export function MobileNavSheet() {
   return (
     <Sheet open={open} onClose={closeNav} title="Menu" side="left" testId="mobile-nav">
       <div className="flex flex-col gap-6 p-5">
-        <SearchForm />
+        <SearchForm ariaLabel="Search products in menu" />
         <nav className="flex flex-col gap-1">
           {siteConfig.nav.map((item) => (
             <Link
