@@ -25,7 +25,7 @@ Every page is server-rendered on request. Reads use Drizzle query modules — `s
 | Preview    | `cofresso-web-preview` (tagged, zero-traffic revisions) | `cofresso_preview` | Pull request    |
 | Production | `cofresso-web`                                          | `cofresso`         | Merge to `main` |
 
-Migrations run as Cloud Run jobs (`cofresso-migrate`, `cofresso-migrate-preview`) using the same image before each deploy, followed by the idempotent seed.
+Migrations run as Cloud Run jobs (`cofresso-migrate`, `cofresso-migrate-preview`) using the same image before each deploy. Their args are `dist/db.mjs deploy`, which migrates and then runs the idempotent seed in one execution.
 
 ## Observability
 
