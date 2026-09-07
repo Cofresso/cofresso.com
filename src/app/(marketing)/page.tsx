@@ -12,6 +12,7 @@ import { Container } from '@/components/ui/container';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { Skeleton } from '@/components/ui/skeleton';
 import { listCollections, listFeaturedProducts, listRecentReviews } from '@/lib/db/queries/catalog';
+import { homeImage } from '@/lib/images/content';
 import { interruptionsEnabled } from '@/lib/interruptions/enabled';
 
 export default async function HomePage() {
@@ -23,7 +24,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero featured={featured} />
+      <Hero featured={featured} image={homeImage('hero')} />
       <ValueProps />
 
       <Container className="py-20">
@@ -46,7 +47,7 @@ export default async function HomePage() {
       </Container>
 
       <Container className="pb-20">
-        <Story />
+        <Story image={homeImage('story')} />
       </Container>
 
       <Container className="pb-20">

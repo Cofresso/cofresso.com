@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ProductGrid } from '@/components/product/product-grid';
@@ -6,6 +7,7 @@ import { Container } from '@/components/ui/container';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { brewGuides, getBrewGuide } from '@/lib/content/brew-guides';
 import { listProducts } from '@/lib/db/queries/catalog';
+import { guideImage } from '@/lib/images/content';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -18,6 +20,7 @@ export default async function BrewGuidePage({ params }: Props) {
   const { slug } = await params;
   const guide = getBrewGuide(slug);
   if (!guide) notFound();
+  const cover = guideImage(slug);
 
   const all = await listProducts({ category: 'coffee', sort: 'featured' });
   const recommended = guide.recommendedSlugs
@@ -35,6 +38,21 @@ export default async function BrewGuidePage({ params }: Props) {
       </nav>
       <div className="grid gap-12 lg:grid-cols-[1fr_320px]">
         <article>
+          {cover ? (
+            <div
+              className="bg-foam relative mb-8 aspect-[3/2] w-full overflow-hidden rounded-3xl"
+              data-testid="guide-cover"
+            >
+              <Image
+                src={cover.url}
+                alt={cover.alt}
+                fill
+                sizes="(min-width: 1024px) 66vw, 100vw"
+                priority
+                className="object-cover"
+              />
+            </div>
+          ) : null}
           <p className="text-copper mb-3 text-xs font-semibold tracking-[0.25em] uppercase">
             {guide.method}
           </p>

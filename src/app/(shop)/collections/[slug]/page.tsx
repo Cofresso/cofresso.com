@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { CollectionHero } from '@/components/product/collection-hero';
 import { ProductGrid } from '@/components/product/product-grid';
 import { ShopFilters } from '@/components/product/shop-filters';
 import { Container } from '@/components/ui/container';
@@ -34,6 +35,7 @@ export default async function CollectionPage({ params, searchParams }: Props) {
 
   return (
     <Container className="py-12">
+      <CollectionHero collection={collection} />
       <div className="mb-8 max-w-2xl">
         <p className="text-copper mb-2 text-xs font-semibold tracking-[0.2em] uppercase">
           Collection
