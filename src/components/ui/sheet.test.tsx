@@ -28,6 +28,15 @@ describe('Sheet', () => {
     vi.useRealTimers();
   });
 
+  it('schedules nothing while it has never been open', () => {
+    render(<Harness />);
+    // A pending close timer here is exactly the mount-time no-op update that caused the
+    // original bug: its deadline can land between the commit that opens the sheet and the
+    // effect flush that would have cleared it, which unmounts the panel that just opened and
+    // leaves body scroll locked.
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('opens correctly even after sitting idle on the page since hydration', () => {
     render(<Harness />);
 
