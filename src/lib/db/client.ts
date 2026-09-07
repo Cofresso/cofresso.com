@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import postgres, { type Options } from 'postgres';
 import { getServerEnv } from '@/lib/env';
 import * as schema from './schema';
 
@@ -43,9 +43,12 @@ export function getDb(): Db {
   return cached;
 }
 
+export type DbTarget = string | Options<Record<string, never>>;
+
 /** Build an isolated client (used by scripts and tests that need to close it). */
-export function createIsolatedDb(connectionString: string) {
-  const sql = postgres(connectionString, { max: 3 });
+export function createIsolatedDb(target: DbTarget) {
+  const sql =
+    typeof target === 'string' ? postgres(target, { max: 3 }) : postgres({ ...target, max: 3 });
   return {
     db: drizzle(sql, { schema, casing: 'snake_case' }),
     close: () => sql.end({ timeout: 5 }),

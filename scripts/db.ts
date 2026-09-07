@@ -4,22 +4,11 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import path from 'node:path';
 import { createIsolatedDb } from '../src/lib/db/client';
 import { runSeed } from '../src/lib/db/seed';
+import { resolveDbTarget } from '../src/lib/db/target';
 
 config({ path: ['.env.local', '.env'] });
 
 type Command = 'migrate' | 'seed' | 'reset';
-
-function connectionString(): string {
-  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
-  const { DB_USER, DB_PASSWORD, DB_NAME, DB_HOST, DB_PORT = '5432', DB_SOCKET_DIR } = process.env;
-  if (DB_USER && DB_PASSWORD && DB_NAME) {
-    const creds = `${encodeURIComponent(DB_USER)}:${encodeURIComponent(DB_PASSWORD)}`;
-    if (DB_SOCKET_DIR)
-      return `postgres://${creds}@/${DB_NAME}?host=${encodeURIComponent(DB_SOCKET_DIR)}`;
-    if (DB_HOST) return `postgres://${creds}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
-  }
-  throw new Error('No database configuration found (DATABASE_URL or DB_* variables).');
-}
 
 async function main() {
   const command = process.argv[2] as Command | undefined;
@@ -28,7 +17,7 @@ async function main() {
     process.exit(2);
   }
 
-  const { db, close } = createIsolatedDb(connectionString());
+  const { db, close } = createIsolatedDb(resolveDbTarget(process.env));
   const migrationsFolder = path.resolve(process.cwd(), 'drizzle');
 
   try {
