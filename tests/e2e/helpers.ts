@@ -7,15 +7,17 @@ import { expect, type Page } from '@playwright/test';
  * after any navigation.
  */
 export async function dismissInterruptions(page: Page) {
-  const banner = page.getByTestId('cookie-banner');
-  if (await banner.isVisible()) {
-    await page.getByTestId('consent-accept').click();
-    await expect(banner).toBeHidden();
-  }
+  // Popup first: it is a modal, so its overlay sits over the cookie banner and would
+  // swallow a click aimed at it.
   const popup = page.getByTestId('popup');
   if (await popup.isVisible()) {
     await page.getByTestId('popup-dismiss').click();
     await expect(popup).toBeHidden();
+  }
+  const banner = page.getByTestId('cookie-banner');
+  if (await banner.isVisible()) {
+    await page.getByTestId('consent-accept').click();
+    await expect(banner).toBeHidden();
   }
 }
 
