@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Modal } from './modal';
 
 function Fixture({ onClose }: { onClose?: () => void }) {
@@ -28,6 +28,19 @@ function Fixture({ onClose }: { onClose?: () => void }) {
 }
 
 describe('Modal', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('schedules nothing while it has never been open', () => {
+    vi.useFakeTimers();
+    render(<Fixture />);
+    // A pending "finish closing" timer here is a live hazard: its deadline can land between
+    // the commit that opens the modal and the effect flush that would have cleared it, which
+    // unmounts the panel that just opened and leaves body scroll locked.
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('is an accessible modal dialog', async () => {
     const user = userEvent.setup();
     render(<Fixture />);

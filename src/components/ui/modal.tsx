@@ -13,6 +13,9 @@ const FOCUSABLE = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
+/** Matches the `duration-200` on the overlay and panel below. */
+const CLOSE_TRANSITION_MS = 200;
+
 interface ModalProps {
   open: boolean;
   onClose: () => void;
@@ -50,20 +53,22 @@ export function Modal({
   const titleId = useId();
   const descriptionId = useId();
 
-  // Keeps the panel mounted through the close transition. Mirrors `Sheet`: adjust state
-  // during render on the opening edge so the transition starts in the same commit.
+  // Keeps the panel mounted through the close transition.
   const [rendered, setRendered] = useState(open);
-  const [wasOpen, setWasOpen] = useState(open);
-  if (open !== wasOpen) {
-    setWasOpen(open);
-    if (open) setRendered(true);
-  }
+  // Invariant: an open modal is always rendered. Adjusting state during render (React's
+  // documented pattern) means opening starts the transition in the same commit rather than a
+  // tick late, and it repairs the state if a close timer ever lands after a re-open.
+  if (open && !rendered) setRendered(true);
 
   useEffect(() => {
-    if (open) return;
-    const timeout = setTimeout(() => setRendered(false), 200);
+    // Only while actually closing. Scheduling this whenever `open` is false would leave a
+    // stray timer behind on mount, and its deadline can land in the window between the commit
+    // that opens the modal and the effect flush that would have cleared it — unmounting the
+    // panel that just opened and leaving body scroll locked.
+    if (open || !rendered) return;
+    const timeout = setTimeout(() => setRendered(false), CLOSE_TRANSITION_MS);
     return () => clearTimeout(timeout);
-  }, [open]);
+  }, [open, rendered]);
 
   const focusable = useCallback(
     () => Array.from(panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []),
