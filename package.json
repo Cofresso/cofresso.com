@@ -26,6 +26,7 @@
     "db:reset": "tsx scripts/db.ts reset",
     "db:studio": "drizzle-kit studio",
     "art:generate": "tsx scripts/generate-product-art.ts",
+    "images:generate": "tsx scripts/generate-images.ts",
     "build:db": "esbuild scripts/db.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/db.mjs --alias:@=./src --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\""
   },
   "dependencies": {
@@ -42,6 +43,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@google-cloud/storage": "^8.0.1",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
@@ -60,9 +62,12 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "eslint-config-prettier": "^10.1.8",
+    "google-auth-library": "^9.15.1",
     "jsdom": "^30.0.1",
+    "openai": "^7.10.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4",
     "tsx": "^4.23.13",
     "typescript": "^5",
