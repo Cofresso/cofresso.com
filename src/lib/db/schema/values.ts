@@ -4,6 +4,8 @@ export const GRINDS = ['whole_bean', 'drip', 'espresso', 'french_press', 'pour_o
 export const PURCHASE_TYPES = ['one_time', 'subscription'] as const;
 export const DISCOUNT_KINDS = ['percent', 'fixed', 'free_shipping'] as const;
 export const ORDER_STATUSES = ['paid', 'fulfilled', 'cancelled'] as const;
+/** Order matters: it is the display order of a product gallery. */
+export const IMAGE_KINDS = ['front', 'detail', 'lifestyle', 'packaging'] as const;
 
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
 export type RoastLevel = (typeof ROAST_LEVELS)[number];
@@ -11,3 +13,4 @@ export type Grind = (typeof GRINDS)[number];
 export type PurchaseType = (typeof PURCHASE_TYPES)[number];
 export type DiscountKind = (typeof DISCOUNT_KINDS)[number];
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
+export type ImageKind = (typeof IMAGE_KINDS)[number];
