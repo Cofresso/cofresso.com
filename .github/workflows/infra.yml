@@ -56,7 +56,7 @@ jobs:
           echo "exit=$?" >> "$GITHUB_OUTPUT"
           set -e
           { echo '### Terraform plan'; echo; echo '```hcl'; head -c 60000 plan.txt; echo; echo '```'; } > plan-trimmed.txt
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: marocchino/sticky-pull-request-comment@v3
         with:
           header: terraform
           path: infra/plan-trimmed.txt
