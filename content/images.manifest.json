@@ -1,8 +1,694 @@
 {
-  "collections": {},
-  "generatedAt": "1970-01-01T00:00:00.000Z",
-  "guides": {},
-  "home": {},
-  "model": "none",
-  "products": {}
+  "collections": {
+    "blends": {
+      "alt": "Cofresso Blends collection: balanced profiles built for every day and every brewer",
+      "height": 1024,
+      "sha": "5a208785fbf96893addcc4cce138e7a9ef78c06b63e5e46efb611431e72c18e8",
+      "url": "https://cofresso.com/assets/collections/blends-5a208785.webp",
+      "width": 1536
+    },
+    "decaf": {
+      "alt": "Cofresso Decaf collection: sugarcane and Swiss Water processed",
+      "height": 1024,
+      "sha": "286d10f2daf643e5e8e152bce9eb61cc7fe1c425eda51db271f4486168bdc6a4",
+      "url": "https://cofresso.com/assets/collections/decaf-286d10f2.webp",
+      "width": 1536
+    },
+    "equipment": {
+      "alt": "Cofresso Equipment collection: the tools we use on our own bar",
+      "height": 1024,
+      "sha": "a21b82b4898266541474fa35c283f45e590ec37b066827fb8804cc412a554cb3",
+      "url": "https://cofresso.com/assets/collections/equipment-a21b82b4.webp",
+      "width": 1536
+    },
+    "single-origin": {
+      "alt": "Cofresso Single Origin collection: one farm, one region, one story in the cup",
+      "height": 1024,
+      "sha": "11b7882ba9bf34c404b8a52ae729c010e75f25f64d9325d86cbb4f69486535cb",
+      "url": "https://cofresso.com/assets/collections/single-origin-11b7882b.webp",
+      "width": 1536
+    }
+  },
+  "generatedAt": "2026-09-07T05:20:27.505Z",
+  "guides": {
+    "cold-brew": {
+      "alt": "Brewing coffee with the Cold Brew method",
+      "height": 1024,
+      "sha": "294ab68a040c2b52f43354a874c5bd2b176e84bcf90b5fcc142ff599dd3ab7ec",
+      "url": "https://cofresso.com/assets/guides/cold-brew-294ab68a.webp",
+      "width": 1536
+    },
+    "espresso": {
+      "alt": "Brewing coffee with the Espresso method",
+      "height": 1024,
+      "sha": "2af1c34bfe59c9571605488d36d577a0e371731e6e34ad9ef8c903864599bb0f",
+      "url": "https://cofresso.com/assets/guides/espresso-2af1c34b.webp",
+      "width": 1536
+    },
+    "french-press": {
+      "alt": "Brewing coffee with the French Press method",
+      "height": 1024,
+      "sha": "22da27a2b7deb881b8546dddf3d6670414a50e7586f4f8ad2eaf0306340439d9",
+      "url": "https://cofresso.com/assets/guides/french-press-22da27a2.webp",
+      "width": 1536
+    },
+    "pour-over": {
+      "alt": "Brewing coffee with the Pour Over (V60 / Cofresso Dripper) method",
+      "height": 1024,
+      "sha": "10bb4332511470d991b144a3681e35f8582584a568400aad1804b88ac8b9f4e0",
+      "url": "https://cofresso.com/assets/guides/pour-over-10bb4332.webp",
+      "width": 1536
+    }
+  },
+  "home": {
+    "hero": {
+      "alt": "Freshly roasted Cofresso coffee bags and a pour-over setup on a cream linen backdrop",
+      "height": 1024,
+      "sha": "1ab9db679505d244b34ba82fabc10e02cc805e310b6d8ab386c325c16b3882ca",
+      "url": "https://cofresso.com/assets/home/hero-1ab9db67.webp",
+      "width": 1536
+    },
+    "story": {
+      "alt": "A Cofresso roaster weighing green coffee beside a sample roaster",
+      "height": 1024,
+      "sha": "4d5271bd07230d4970d58cf75fcea812ed5fa7d09e3772adf8b35025d8dce7a6",
+      "url": "https://cofresso.com/assets/home/story-4d5271bd.webp",
+      "width": 1536
+    }
+  },
+  "model": "gpt-image-2",
+  "products": {
+    "brazil-cerrado": [
+      {
+        "alt": "A bag of Cofresso Brazil Cerrado coffee from Brazil on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "0895a36eb175f7f5d27476e777a5db45494f9cb4972e41abe5b31eb358593ea4",
+        "url": "https://cofresso.com/assets/products/brazil-cerrado/brazil-cerrado-front-0895a36e.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Brazil Cerrado coffee beans, which taste of roasted peanut and milk chocolate",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "f8f57e99b3c443ebec1284408c565c8837f4e0892877407222e3e24de25f08b2",
+        "url": "https://cofresso.com/assets/products/brazil-cerrado/brazil-cerrado-detail-f8f57e99.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Brazil Cerrado on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "6b96f23f5459261f8c5cfefe4b1ea6c8b8c2e65301ea0539d0d817b7325fffe9",
+        "url": "https://cofresso.com/assets/products/brazil-cerrado/brazil-cerrado-lifestyle-6b96f23f.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Brazil Cerrado with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "a4269618a56ac2637307063f32467977866a5538b51e86a49ac36e8351e7f175",
+        "url": "https://cofresso.com/assets/products/brazil-cerrado/brazil-cerrado-packaging-a4269618.webp",
+        "width": 1024
+      }
+    ],
+    "brew-scale": [
+      {
+        "alt": "A Cofresso Brew Scale on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "cac73971e38e0fea81ab807ac1c3e80127fa35e0f98227287a14632355c2cea8",
+        "url": "https://cofresso.com/assets/products/brew-scale/brew-scale-front-cac73971.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up detail of a Cofresso Brew Scale",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "016b9c34547fb24996ca7981dcc0ee788b127afb89feeb5caa85875e539ce933",
+        "url": "https://cofresso.com/assets/products/brew-scale/brew-scale-detail-016b9c34.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A Cofresso Brew Scale in use on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "ca040cfe163803234779a7f4ffab3aa144edbf046b31eeb222aff73289b8002c",
+        "url": "https://cofresso.com/assets/products/brew-scale/brew-scale-lifestyle-ca040cfe.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a Cofresso Brew Scale",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "c09e1733d6b9619518a274377f6fa3922871b5d2308eff6229c149ff55f1d3a3",
+        "url": "https://cofresso.com/assets/products/brew-scale/brew-scale-packaging-c09e1733.webp",
+        "width": 1024
+      }
+    ],
+    "cofresso-mug": [
+      {
+        "alt": "A Cofresso Cofresso Stoneware Mug on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "2b9fbb3ab0a91658e5cd57ae2fb9d43cce2e069aa127d2570138d6948ad289b7",
+        "url": "https://cofresso.com/assets/products/cofresso-mug/cofresso-mug-front-2b9fbb3a.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up detail of a Cofresso Cofresso Stoneware Mug",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "b76ba0d3ac9ce4a953d989b977d977a8c1029bb92178d573097d47b5061e09c0",
+        "url": "https://cofresso.com/assets/products/cofresso-mug/cofresso-mug-detail-b76ba0d3.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A Cofresso Cofresso Stoneware Mug in use on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "b4a652c29d4327ed96b53f4a0c44acc072dc1793752185852addc9308d061522",
+        "url": "https://cofresso.com/assets/products/cofresso-mug/cofresso-mug-lifestyle-b4a652c2.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a Cofresso Cofresso Stoneware Mug",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "154f389bc0080ae0e8b79cb195e35015661739cc6783ba3710113d67128b9a27",
+        "url": "https://cofresso.com/assets/products/cofresso-mug/cofresso-mug-packaging-154f389b.webp",
+        "width": 1024
+      }
+    ],
+    "colombia-huila": [
+      {
+        "alt": "A bag of Cofresso Colombia Huila coffee from Colombia on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "31d169c8f2d1ae7b7cc44f09982ffd5067c1570b221bd2583c834b0377d69b9c",
+        "url": "https://cofresso.com/assets/products/colombia-huila/colombia-huila-front-31d169c8.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Colombia Huila coffee beans, which taste of panela and red grape",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "dc5b54bac9da9ba8c2da1184c902615535416bc059bcdc4bfd283180c0929c68",
+        "url": "https://cofresso.com/assets/products/colombia-huila/colombia-huila-detail-dc5b54ba.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Colombia Huila on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "de9f89de60de74ff90cf8e0b9421a63804d3578d79663212826825bed59e508c",
+        "url": "https://cofresso.com/assets/products/colombia-huila/colombia-huila-lifestyle-de9f89de.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Colombia Huila with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "44cc737df41c9e0710f9cd557c717d04d0a01ac594505ff63dfbee7115b6525d",
+        "url": "https://cofresso.com/assets/products/colombia-huila/colombia-huila-packaging-44cc737d.webp",
+        "width": 1024
+      }
+    ],
+    "costa-rica-tarrazu": [
+      {
+        "alt": "A bag of Cofresso Costa Rica Tarrazú coffee from Costa Rica on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "a89f240f23727c2dbcfcb02c6905fbec964329c17474265c43485f524e714b7d",
+        "url": "https://cofresso.com/assets/products/costa-rica-tarrazu/costa-rica-tarrazu-front-a89f240f.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Costa Rica Tarrazú coffee beans, which taste of apricot and honey",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "8d9fe231bfa06c2579d47d12e3e0dc549ef9a2061bd082eb733921933f0c89b5",
+        "url": "https://cofresso.com/assets/products/costa-rica-tarrazu/costa-rica-tarrazu-detail-8d9fe231.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Costa Rica Tarrazú on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "8ff2417325c6fdf036e413128a0c32995cde99e94b523176b9b6392dae58e75d",
+        "url": "https://cofresso.com/assets/products/costa-rica-tarrazu/costa-rica-tarrazu-lifestyle-8ff24173.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Costa Rica Tarrazú with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "9e17d57dc8be1dd08affa69b7968331d89f78f1e3813567e7fa693aa527471b3",
+        "url": "https://cofresso.com/assets/products/costa-rica-tarrazu/costa-rica-tarrazu-packaging-9e17d57d.webp",
+        "width": 1024
+      }
+    ],
+    "dark-mode-espresso": [
+      {
+        "alt": "A bag of Cofresso Dark Mode Espresso coffee from Sumatra, Guatemala & Ethiopia on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "e153c27d6c6c5f1a4c85df6a585ca96a4c4e31240a7ffa92d4d082b746a10c97",
+        "url": "https://cofresso.com/assets/products/dark-mode-espresso/dark-mode-espresso-front-e153c27d.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Dark Mode Espresso coffee beans, which taste of dark chocolate and molasses",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "254692cb864dcb4bcbeba1f02fe2978e80925061afb85c42a2eccefb1ca40da8",
+        "url": "https://cofresso.com/assets/products/dark-mode-espresso/dark-mode-espresso-detail-254692cb.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Dark Mode Espresso on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "8adc254eeaae154d22b7ae32a14bfed3db6750d930bc90d104ab63198233c66d",
+        "url": "https://cofresso.com/assets/products/dark-mode-espresso/dark-mode-espresso-lifestyle-8adc254e.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Dark Mode Espresso with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "567a3f8ae7b639a00463fb6abf564927cf96b1336bf98a91e0b75aacafdc40dd",
+        "url": "https://cofresso.com/assets/products/dark-mode-espresso/dark-mode-espresso-packaging-567a3f8a.webp",
+        "width": 1024
+      }
+    ],
+    "ethiopia-yirgacheffe": [
+      {
+        "alt": "A bag of Cofresso Ethiopia Yirgacheffe coffee from Ethiopia on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "0e0c1046bfee0f800da6525ba2fdf84ca587db75b4485ac34888f04b2d074438",
+        "url": "https://cofresso.com/assets/products/ethiopia-yirgacheffe/ethiopia-yirgacheffe-front-0e0c1046.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Ethiopia Yirgacheffe coffee beans, which taste of jasmine and bergamot",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "f38399cb5c2d31421d8b4007f39bb5af6c6a1e5e0ea18c2eee7aaa6f675c1390",
+        "url": "https://cofresso.com/assets/products/ethiopia-yirgacheffe/ethiopia-yirgacheffe-detail-f38399cb.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Ethiopia Yirgacheffe on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "53e4997be1e1e9e2111f56325a0583afc40f11603c2dda8b71c69d82e53dd013",
+        "url": "https://cofresso.com/assets/products/ethiopia-yirgacheffe/ethiopia-yirgacheffe-lifestyle-53e4997b.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Ethiopia Yirgacheffe with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "1f71ef57319e1d7e3f9b3754a1450efbf294a447f9265833bf76c8a51d018129",
+        "url": "https://cofresso.com/assets/products/ethiopia-yirgacheffe/ethiopia-yirgacheffe-packaging-1f71ef57.webp",
+        "width": 1024
+      }
+    ],
+    "gooseneck-kettle": [
+      {
+        "alt": "A Cofresso Gooseneck Kettle on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "75e148063344c83db68e98850571376ebd29561dbd6beaa8d11e6efc0a06fd32",
+        "url": "https://cofresso.com/assets/products/gooseneck-kettle/gooseneck-kettle-front-75e14806.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up detail of a Cofresso Gooseneck Kettle",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "d1aebdbbf666034f998a088ed3d464b61b36056646a6393995e57131d9196689",
+        "url": "https://cofresso.com/assets/products/gooseneck-kettle/gooseneck-kettle-detail-d1aebdbb.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A Cofresso Gooseneck Kettle in use on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "222fbd112a91a0a45879f80bd727f4c07bae504b353c420b0b72585e9fd01a02",
+        "url": "https://cofresso.com/assets/products/gooseneck-kettle/gooseneck-kettle-lifestyle-222fbd11.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a Cofresso Gooseneck Kettle",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "f95f52689592bd6235d1f8773a5ea6dd272c68985b10417d1e30cea78a1ed4af",
+        "url": "https://cofresso.com/assets/products/gooseneck-kettle/gooseneck-kettle-packaging-f95f5268.webp",
+        "width": 1024
+      }
+    ],
+    "guatemala-antigua": [
+      {
+        "alt": "A bag of Cofresso Guatemala Antigua coffee from Guatemala on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "6304b836105cb6820cc57bcf2476ebdbc62f14a216c4a842b8cca49d704fa545",
+        "url": "https://cofresso.com/assets/products/guatemala-antigua/guatemala-antigua-front-6304b836.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Guatemala Antigua coffee beans, which taste of cocoa and baking spice",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "73c4338c545c3186c22bcc7f0485d5b268738675c7c8ba7bf03e50d049682279",
+        "url": "https://cofresso.com/assets/products/guatemala-antigua/guatemala-antigua-detail-73c4338c.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Guatemala Antigua on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "111a994f41375982533e5d1cd5b087a86492f12e61b438dd7802b51482ed3e98",
+        "url": "https://cofresso.com/assets/products/guatemala-antigua/guatemala-antigua-lifestyle-111a994f.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Guatemala Antigua with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "ef8774163560d9b74cb9eaffe269eb865f594bc3ad027db5ca4039484dd7b077",
+        "url": "https://cofresso.com/assets/products/guatemala-antigua/guatemala-antigua-packaging-ef877416.webp",
+        "width": 1024
+      }
+    ],
+    "hand-grinder": [
+      {
+        "alt": "A Cofresso Hand Grinder on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "20d99df9e9db60c57a5ce58a0df9576bf2fb0bdc8d4f6f7ef4512206cbb5d404",
+        "url": "https://cofresso.com/assets/products/hand-grinder/hand-grinder-front-20d99df9.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up detail of a Cofresso Hand Grinder",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "2327a6ae52ea91fb27592c391bbaab6ba605a59d0117afa13c8f75796637c369",
+        "url": "https://cofresso.com/assets/products/hand-grinder/hand-grinder-detail-2327a6ae.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A Cofresso Hand Grinder in use on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "88be3d63cf2dcfa9fd5df747f7496e2c3d2ff2f6d7beb9f8e526d7d60c47f8b1",
+        "url": "https://cofresso.com/assets/products/hand-grinder/hand-grinder-lifestyle-88be3d63.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a Cofresso Hand Grinder",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "ff56dc24387be34642426bdc2eb5fb4c8f3c80144ca4a867cffe9240c85ec678",
+        "url": "https://cofresso.com/assets/products/hand-grinder/hand-grinder-packaging-ff56dc24.webp",
+        "width": 1024
+      }
+    ],
+    "hot-reload-cold-brew": [
+      {
+        "alt": "A bag of Cofresso Hot Reload Cold Brew Blend coffee from Brazil & Peru on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "db4a277ae13adb50765c7350a8d336c30357923be1cce233d6b885a554a7ef50",
+        "url": "https://cofresso.com/assets/products/hot-reload-cold-brew/hot-reload-cold-brew-front-db4a277a.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Hot Reload Cold Brew Blend coffee beans, which taste of cocoa nib and vanilla",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "19b6f8acdc915bcd4edc15459d951807e9a11779a44513b3cfeac977d7483b86",
+        "url": "https://cofresso.com/assets/products/hot-reload-cold-brew/hot-reload-cold-brew-detail-19b6f8ac.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Hot Reload Cold Brew Blend on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "602c1d1b156d57f99ee97ea8a408cbc4aaf39eb08dbfa36d4ab2c05fae7ffbc6",
+        "url": "https://cofresso.com/assets/products/hot-reload-cold-brew/hot-reload-cold-brew-lifestyle-602c1d1b.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Hot Reload Cold Brew Blend with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "e6500b043cd8120aa0f8ae480b69ba16d5bccd8fa89ba50db40e4b58763e8f56",
+        "url": "https://cofresso.com/assets/products/hot-reload-cold-brew/hot-reload-cold-brew-packaging-e6500b04.webp",
+        "width": 1024
+      }
+    ],
+    "kenya-nyeri": [
+      {
+        "alt": "A bag of Cofresso Kenya Nyeri AA coffee from Kenya on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "70977b097437a9869c2e6b95eba742680a3e347e69d3a47ddc973ecc65f700f1",
+        "url": "https://cofresso.com/assets/products/kenya-nyeri/kenya-nyeri-front-70977b09.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Kenya Nyeri AA coffee beans, which taste of blackcurrant and tomato leaf",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "967b24c9d13e40b10461e03f36610e547658ad131ec22cd89b82d4579315db1e",
+        "url": "https://cofresso.com/assets/products/kenya-nyeri/kenya-nyeri-detail-967b24c9.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Kenya Nyeri AA on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "15386bc3bef517adffaec234a4b57060816c14a545b7eb656fe8f704e1558f56",
+        "url": "https://cofresso.com/assets/products/kenya-nyeri/kenya-nyeri-lifestyle-15386bc3.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Kenya Nyeri AA with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "f8134476180f4742d0aa1f00c84457c912eedca91eecc2351746ee4c45f3d393",
+        "url": "https://cofresso.com/assets/products/kenya-nyeri/kenya-nyeri-packaging-f8134476.webp",
+        "width": 1024
+      }
+    ],
+    "morning-frame": [
+      {
+        "alt": "A bag of Cofresso Morning Frame coffee from Brazil & Colombia on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "274e5a844d526fe5e5c1a654e9b621f016f33672f9b6b67862792a6e9ae837f1",
+        "url": "https://cofresso.com/assets/products/morning-frame/morning-frame-front-274e5a84.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Morning Frame coffee beans, which taste of milk chocolate and hazelnut",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "94c01b1106acf8e105802008096b10ee2c6b3ac53da13ff9a99e9627daf6d9ca",
+        "url": "https://cofresso.com/assets/products/morning-frame/morning-frame-detail-94c01b11.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Morning Frame on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "3539782cf1da9c1cfb0b3ff7e31d0bcaa395e7a3e71859ca25fb1f6b99539759",
+        "url": "https://cofresso.com/assets/products/morning-frame/morning-frame-lifestyle-3539782c.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Morning Frame with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "f2ef7e08f3a91192171bf48457956c7bf06d9056e232ba24827e4fb86549da5b",
+        "url": "https://cofresso.com/assets/products/morning-frame/morning-frame-packaging-f2ef7e08.webp",
+        "width": 1024
+      }
+    ],
+    "night-build-decaf": [
+      {
+        "alt": "A bag of Cofresso Night Build Decaf coffee from Colombia on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "a8de39432943c74029259873db9d67f280930dbb2d4ed2aadcf28d6022335278",
+        "url": "https://cofresso.com/assets/products/night-build-decaf/night-build-decaf-front-a8de3943.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Night Build Decaf coffee beans, which taste of caramel and cherry",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "49b2a00f6f813a80188a9bf9b2c1895d01e8ba7c28ffd98553ff476d45a0118e",
+        "url": "https://cofresso.com/assets/products/night-build-decaf/night-build-decaf-detail-49b2a00f.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Night Build Decaf on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "2a15ec17d0ccd4721b9355cc554d9d64cfdf35e0912bf698ba46862ad40d7770",
+        "url": "https://cofresso.com/assets/products/night-build-decaf/night-build-decaf-lifestyle-2a15ec17.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Night Build Decaf with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "ec0a5bb1f3d7b7840f34dc92017848aa59c54db25eac61268c12ca7ef9c47274",
+        "url": "https://cofresso.com/assets/products/night-build-decaf/night-build-decaf-packaging-ec0a5bb1.webp",
+        "width": 1024
+      }
+    ],
+    "paper-filters": [
+      {
+        "alt": "A Cofresso Paper Filters, size 02 on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "0eef24e93d5fabf0e938e3c82ce067a774ff60f8c02e92139041f74f79c25461",
+        "url": "https://cofresso.com/assets/products/paper-filters/paper-filters-front-0eef24e9.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up detail of a Cofresso Paper Filters, size 02",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "1c2756f799b9c4192045ea3c94daad89cab3690c02ee6c148e88e6d01d44a08f",
+        "url": "https://cofresso.com/assets/products/paper-filters/paper-filters-detail-1c2756f7.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A Cofresso Paper Filters, size 02 in use on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "49d199c78444c3bf93a11407dd09d0652d111f2ecd7caa290dbb0c8fd01f637d",
+        "url": "https://cofresso.com/assets/products/paper-filters/paper-filters-lifestyle-49d199c7.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a Cofresso Paper Filters, size 02",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "9534829e73b08778299c4be888ae6a3f62db6ad0c9ad73b29bb1f7cdcb2ae645",
+        "url": "https://cofresso.com/assets/products/paper-filters/paper-filters-packaging-9534829e.webp",
+        "width": 1024
+      }
+    ],
+    "peru-cajamarca": [
+      {
+        "alt": "A bag of Cofresso Peru Cajamarca coffee from Peru on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "17caed0bb01789bec71ae06a6d9ae691f3555678e947a532d6d8b1874cb1fbe1",
+        "url": "https://cofresso.com/assets/products/peru-cajamarca/peru-cajamarca-front-17caed0b.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Peru Cajamarca coffee beans, which taste of caramel and soft citrus",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "8e0a0a9becddaf0fc8e5194a5aa514a578e9d311b0da361a0719110be9bdb151",
+        "url": "https://cofresso.com/assets/products/peru-cajamarca/peru-cajamarca-detail-8e0a0a9b.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Peru Cajamarca on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "a320a8d6a98014e78d000daddee9e7a307841619667de0af55c893457a08d468",
+        "url": "https://cofresso.com/assets/products/peru-cajamarca/peru-cajamarca-lifestyle-a320a8d6.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Peru Cajamarca with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "a61c50fbb715c5df0e3bf9668f79dd2042d30ddc276859bdbfd197b7f4622588",
+        "url": "https://cofresso.com/assets/products/peru-cajamarca/peru-cajamarca-packaging-a61c50fb.webp",
+        "width": 1024
+      }
+    ],
+    "pour-over-dripper": [
+      {
+        "alt": "A Cofresso Cofresso Ceramic Dripper on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "b9231f7995614561d10d82d57b671dda0c0fddcd5182ff882e5f5ce52df9a71d",
+        "url": "https://cofresso.com/assets/products/pour-over-dripper/pour-over-dripper-front-b9231f79.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up detail of a Cofresso Cofresso Ceramic Dripper",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "2214c8be2fac0f41f37a20d72e385492f9a27dd30c437faa02f1ba295e94e8f9",
+        "url": "https://cofresso.com/assets/products/pour-over-dripper/pour-over-dripper-detail-2214c8be.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A Cofresso Cofresso Ceramic Dripper in use on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "06d4e1a727017a300715dab257895659e4ff2de0bdf04239b3bee937d9dd5d95",
+        "url": "https://cofresso.com/assets/products/pour-over-dripper/pour-over-dripper-lifestyle-06d4e1a7.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a Cofresso Cofresso Ceramic Dripper",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "70e759cd4cc07a64fc41d78a1c95bfb74c19de2f57ad917cd148cba082ffaadb",
+        "url": "https://cofresso.com/assets/products/pour-over-dripper/pour-over-dripper-packaging-70e759cd.webp",
+        "width": 1024
+      }
+    ],
+    "sumatra-mandheling": [
+      {
+        "alt": "A bag of Cofresso Sumatra Mandheling coffee from Indonesia on a cream linen backdrop",
+        "height": 1024,
+        "kind": "front",
+        "sha": "af4be11f05f92e9d0832ca9d2c8d769251001834438252f1aaa1c3f3620cec08",
+        "url": "https://cofresso.com/assets/products/sumatra-mandheling/sumatra-mandheling-front-af4be11f.webp",
+        "width": 1024
+      },
+      {
+        "alt": "Close-up of roasted Sumatra Mandheling coffee beans, which taste of cedar and dark chocolate",
+        "height": 1024,
+        "kind": "detail",
+        "sha": "556ff9048ce99e76d8c6a8e936cc1d67f555a4a1b8bd51ab61f854ceb5828b59",
+        "url": "https://cofresso.com/assets/products/sumatra-mandheling/sumatra-mandheling-detail-556ff904.webp",
+        "width": 1024
+      },
+      {
+        "alt": "A pour-over brewing scene with a bag of Cofresso Sumatra Mandheling on a sunlit kitchen counter",
+        "height": 1024,
+        "kind": "lifestyle",
+        "sha": "44b0b9c2a3f41632750b46d36b73826aa6e1c12015749d27f12fbea87fd91380",
+        "url": "https://cofresso.com/assets/products/sumatra-mandheling/sumatra-mandheling-lifestyle-44b0b9c2.webp",
+        "width": 1536
+      },
+      {
+        "alt": "Hands holding a bag of Cofresso Sumatra Mandheling with the label facing the camera",
+        "height": 1024,
+        "kind": "packaging",
+        "sha": "c39c743ade7a99eeef9a853b4470e452938baa443084fc9194dc0397c9656191",
+        "url": "https://cofresso.com/assets/products/sumatra-mandheling/sumatra-mandheling-packaging-c39c743a.webp",
+        "width": 1024
+      }
+    ]
+  }
 }
