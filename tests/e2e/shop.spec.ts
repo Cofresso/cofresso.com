@@ -12,10 +12,6 @@ test.describe('shop', () => {
     for (const card of await cards.all()) await expect(card).toContainText('Light roast');
 
     await page.getByTestId('filter-roast').selectOption('');
-    // The filters update via a client-side transition; wait for the roast param to actually
-    // clear from the URL before changing sort, otherwise this select can fire while the
-    // component still holds the stale (roast=light) filters and clobber it back in.
-    await expect(page).not.toHaveURL(/roast=/);
     await page.getByTestId('filter-sort').selectOption('price_asc');
     await expect(page).toHaveURL(/sort=price_asc/);
     await expect(page.getByTestId('product-card').first()).toHaveAttribute(

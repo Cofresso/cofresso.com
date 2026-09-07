@@ -58,6 +58,14 @@ describe('computeDiscountCents', () => {
     ).toBe(0);
     expect(computeDiscountCents(null, 5400)).toBe(0);
   });
+  it('never returns a negative discount', () => {
+    expect(computeDiscountCents({ kind: 'percent', value: -10, minSubtotalCents: 0 }, 5400)).toBe(
+      0,
+    );
+    expect(computeDiscountCents({ kind: 'fixed', value: -1000, minSubtotalCents: 0 }, 5400)).toBe(
+      0,
+    );
+  });
 });
 
 describe('computeTotals', () => {

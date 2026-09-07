@@ -2,16 +2,15 @@ import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { IconSearch } from '@/components/ui/icons';
 import { siteConfig } from '@/lib/config';
-import { readCartId } from '@/lib/cart/cookie';
-import { getCartItemCount } from '@/lib/cart/queries';
+import { getCurrentCart } from '@/lib/cart/request-cache';
 import { CartButton } from './cart-button';
 import { Logo } from './logo';
 import { MobileNav } from './mobile-nav';
 import { SearchForm } from './search-form';
 
 export async function Header() {
-  const cartId = await readCartId();
-  const count = cartId ? await getCartItemCount(cartId) : 0;
+  const cart = await getCurrentCart();
+  const count = cart?.totals.itemCount ?? 0;
 
   return (
     <header className="border-latte/20 bg-cream/90 sticky top-0 z-40 border-b backdrop-blur">

@@ -1,9 +1,7 @@
-import { readCartId } from '@/lib/cart/cookie';
-import { getCartView } from '@/lib/cart/queries';
+import { getCurrentCart } from '@/lib/cart/request-cache';
 import { CartDrawerShell } from './cart-drawer-shell';
 
 export async function CartDrawer() {
-  const cartId = await readCartId();
-  const cart = cartId ? await getCartView(cartId) : null;
+  const cart = await getCurrentCart();
   return <CartDrawerShell cart={cart} />;
 }

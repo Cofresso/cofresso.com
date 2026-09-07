@@ -2,6 +2,7 @@ import { eq, inArray, sql } from 'drizzle-orm';
 import { randomBytes } from 'node:crypto';
 import { clearCart } from '@/lib/cart/mutations';
 import { getDb, type Db } from '@/lib/db/client';
+import { describeDbError, pgErrorField } from '@/lib/db/errors';
 import {
   cartItems,
   carts,
@@ -40,22 +41,6 @@ class PlaceOrderError extends Error {
 
 /** Postgres unique_violation on `orders.idempotency_key` — see drizzle/0000_init.sql. */
 const IDEMPOTENCY_KEY_CONSTRAINT = 'orders_idempotency_key_unique';
-
-/**
- * postgres.js reports the underlying `PostgresError` (with `.code` / `.constraint_name`) as
- * `.cause` on the `DrizzleQueryError` it throws, not as own properties of the thrown error —
- * so both layers need to be checked.
- */
-function pgErrorField(err: unknown, field: 'code' | 'constraint_name'): unknown {
-  if (typeof err !== 'object' || err === null) return undefined;
-  const own = err as Record<string, unknown>;
-  if (field in own) return own[field];
-  const cause = 'cause' in own ? own.cause : undefined;
-  if (typeof cause === 'object' && cause !== null && field in cause) {
-    return (cause as Record<string, unknown>)[field];
-  }
-  return undefined;
-}
 
 function isIdempotencyKeyViolation(err: unknown): boolean {
   return (
@@ -312,12 +297,7 @@ export async function placeOrder(params: {
     // Never log the raw error: drizzle/postgres embed the statement and bound params
     // (email, address, card_last4, payment_reference, idempotency_key, lookup_token) in
     // `error.message`, and the logger serialises whatever it is given.
-    const pgCode = pgErrorField(err, 'code');
-    logger.error('placeOrder failed', {
-      cartId,
-      errName: err instanceof Error ? err.name : 'unknown',
-      pgCode: pgCode === undefined ? undefined : String(pgCode),
-    });
+    logger.error('placeOrder failed', { ...describeDbError(err), cartId });
     return {
       ok: false,
       code: 'unknown',

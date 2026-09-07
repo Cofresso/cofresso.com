@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { fail, ok, type ActionResult } from '@/lib/action-result';
+import { describeDbError } from '@/lib/db/errors';
 import { subscribeToNewsletter } from '@/lib/db/queries/newsletter';
 import { logger } from '@/lib/logger';
 
@@ -23,7 +24,12 @@ export async function subscribeNewsletterAction(
   try {
     return ok(await subscribeToNewsletter(parsed.data.email, parsed.data.source));
   } catch (err) {
-    logger.error('newsletter subscribe failed', { err });
+    // Never log the raw error: drizzle embeds the statement and its bound params — here the
+    // subscriber's email address — in `error.message`.
+    logger.error('newsletter subscribe failed', {
+      ...describeDbError(err),
+      source: parsed.data.source,
+    });
     return fail('Something went wrong. Please try again.');
   }
 }
