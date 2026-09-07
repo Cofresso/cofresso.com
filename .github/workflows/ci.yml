@@ -222,7 +222,7 @@ jobs:
           curl -fsS "$URL/_next/image?url=%2Flogo.png&w=64&q=75" -o /dev/null
           echo "Image optimizer OK"
 
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: marocchino/sticky-pull-request-comment@v3
         with:
           header: preview
           message: |
