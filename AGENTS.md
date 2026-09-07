@@ -9,13 +9,14 @@ Cofresso is an ecommerce storefront for a fictional coffee roaster. It is a real
 ## Ground rules
 
 - **Money is integer cents.** Never floats. Formatting happens only in `formatPrice`.
-- **Reads go through `src/lib/db/queries`.** Server components call query functions. Client components never import `src/lib/db/client`.
+- **Reads go through query modules.** `src/lib/db/queries` for catalog and newsletter, `src/lib/cart/queries.ts` for the cart, `src/lib/checkout/queries.ts` for orders. Server components call query functions. Client components never import `src/lib/db/client`.
 - **Writes are server actions** validated with Zod and returning `ActionResult<T>` (`src/lib/action-result.ts`). Cart actions live in `src/lib/cart/actions.ts`; other actions live in `actions.ts` next to their route.
 - **Pure logic stays pure.** Pricing (`src/lib/pricing`), payments (`src/lib/payments`) and schemas have no I/O and are unit tested.
 - **Schema changes ship with a migration.** Edit `src/lib/db/schema/*`, run `pnpm db:generate`, commit the new file under `drizzle/` in the same PR. Never edit an applied migration.
 - **Every page is dynamic.** The root layout sets `dynamic = 'force-dynamic'` so `next build` never needs a database.
 - **No secrets in the repo.** Server env is validated in `src/lib/env.ts`. Add new variables there and to `.env.example`.
-- **Card data never touches the database or logs.** Only `card_last4` and the provider reference are stored.
+- **Card data never touches the database or logs.** Only `card_last4` and the provider reference are stored. Never log a drizzle error either — its `message` embeds the statement and every bound parameter; log `describeDbError(err)` from `src/lib/db/errors.ts` plus the ids you need.
+- **Payment authorization happens inside the `placeOrder` transaction**, while the variant rows are locked `FOR UPDATE`. That is safe with the simulated provider because it never does I/O. When a real gateway replaces it, either give `authorize` a hard timeout or move authorization out of the lock window — a slow gateway would otherwise hold row locks on the affected variants and stall every other checkout for the same product.
 - **Tests accompany changes.** Unit tests next to the code (`*.test.ts`), integration tests in `tests/integration`, end-to-end in `tests/e2e`. Prefer `data-testid` hooks for e2e selectors.
 - **Conventional Commits** for commit messages and PR titles (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`, `build:`, `ci:`).
 
@@ -26,8 +27,8 @@ Cofresso is an ecommerce storefront for a fictional coffee roaster. It is a real
 | `src/app`                                                           | Routes. Route groups: `(marketing)`, `(shop)`, `(checkout)`, plus `api/`             |
 | `src/components/ui`                                                 | Presentational primitives (Button, Input, Sheet, …)                                  |
 | `src/components/{layout,product,cart,checkout,marketing,analytics}` | Domain components                                                                    |
-| `src/lib/db`                                                        | Drizzle client, schema, queries, seed                                                |
-| `src/lib/pricing` `payments` `cart` `checkout`                      | Domain logic                                                                         |
+| `src/lib/db`                                                        | Drizzle client, schema, catalog/newsletter queries, error helpers, seed              |
+| `src/lib/pricing` `payments` `cart` `checkout`                      | Domain logic; `cart/queries.ts` and `checkout/queries.ts` hold their own reads       |
 | `src/lib/analytics`                                                 | Typed events + `track()`; SDK slot in `components/analytics/third-party-scripts.tsx` |
 | `src/content`                                                       | Brew guides and FAQ as typed data                                                    |
 | `scripts/`                                                          | `db.ts` CLI (bundled to `dist/db.mjs` for the image), product art generator          |
