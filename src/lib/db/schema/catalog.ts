@@ -8,9 +8,10 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { productCategoryEnum, roastLevelEnum } from './enums';
+import { imageKindEnum, productCategoryEnum, roastLevelEnum } from './enums';
 
 export const products = pgTable(
   'products',
@@ -63,12 +64,39 @@ export const productVariants = pgTable(
   ],
 );
 
+/**
+ * Generated product photography. One row per (product, kind); the manifest is
+ * the source of truth and `runSeed` reconciles this table against it.
+ */
+export const productImages = pgTable(
+  'product_images',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    productId: uuid('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    url: text('url').notNull(),
+    alt: text('alt').notNull(),
+    kind: imageKindEnum('kind').notNull(),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+    position: integer('position').notNull().default(0),
+  },
+  (t) => [
+    index('product_images_product_idx').on(t.productId),
+    unique('product_images_product_kind_key').on(t.productId, t.kind),
+  ],
+);
+
 export const collections = pgTable('collections', {
   id: uuid('id').primaryKey().defaultRandom(),
   slug: text('slug').notNull().unique(),
   name: text('name').notNull(),
   description: text('description').notNull(),
   position: integer('position').notNull().default(0),
+  /** Generated hero banner (see content/images.manifest.json). Null falls back to no banner. */
+  heroImageUrl: text('hero_image_url'),
+  heroImageAlt: text('hero_image_alt'),
 });
 
 export const productCollections = pgTable(
@@ -106,5 +134,7 @@ export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
 export type ProductVariant = typeof productVariants.$inferSelect;
 export type NewProductVariant = typeof productVariants.$inferInsert;
+export type ProductImage = typeof productImages.$inferSelect;
+export type NewProductImage = typeof productImages.$inferInsert;
 export type Collection = typeof collections.$inferSelect;
 export type Review = typeof reviews.$inferSelect;

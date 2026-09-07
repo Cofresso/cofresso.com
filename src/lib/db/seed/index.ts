@@ -1,13 +1,16 @@
-import { sql } from 'drizzle-orm';
+import { and, eq, notInArray, sql } from 'drizzle-orm';
 import type { Db } from '@/lib/db/client';
 import {
   collections,
   discountCodes,
   productCollections,
+  productImages,
   productVariants,
   products,
   reviews,
 } from '@/lib/db/schema';
+import { contentImages } from '@/lib/images/content';
+import { sortProductImages, type ImagesManifest } from '@/lib/images/manifest';
 import { seedCollections, seedDiscountCodes, seedProducts } from './data';
 import { stableId } from './ids';
 import { buildSeedReviews } from './reviews';
@@ -18,19 +21,42 @@ export interface SeedSummary {
   variants: number;
   reviews: number;
   discountCodes: number;
+  productImages: number;
+  collectionHeroes: number;
 }
 
-export async function runSeed(db: Db): Promise<SeedSummary> {
+export interface SeedOptions {
+  /** Defaults to the committed `content/images.manifest.json`. */
+  manifest?: ImagesManifest;
+}
+
+export async function runSeed(db: Db, options: SeedOptions = {}): Promise<SeedSummary> {
   const seedReviews = buildSeedReviews();
+  const manifest = options.manifest ?? contentImages();
+  let imageCount = 0;
+  let heroCount = 0;
 
   await db.transaction(async (tx) => {
     for (const c of seedCollections) {
+      const hero = manifest.collections[c.slug];
+      if (hero) heroCount += 1;
       await tx
         .insert(collections)
-        .values({ id: stableId(`collection:${c.slug}`), ...c })
+        .values({
+          id: stableId(`collection:${c.slug}`),
+          ...c,
+          heroImageUrl: hero?.url ?? null,
+          heroImageAlt: hero?.alt ?? null,
+        })
         .onConflictDoUpdate({
           target: collections.slug,
-          set: { name: c.name, description: c.description, position: c.position },
+          set: {
+            name: c.name,
+            description: c.description,
+            position: c.position,
+            heroImageUrl: hero?.url ?? null,
+            heroImageAlt: hero?.alt ?? null,
+          },
         });
     }
 
@@ -102,6 +128,43 @@ export async function runSeed(db: Db): Promise<SeedSummary> {
             set: { position: index },
           });
       }
+
+      // The manifest is authoritative: upsert what it has, then delete the
+      // kinds it no longer lists so a regenerated set never leaves orphans.
+      const images = sortProductImages(manifest.products[p.slug] ?? []);
+      imageCount += images.length;
+      for (const [index, image] of images.entries()) {
+        await tx
+          .insert(productImages)
+          .values({
+            id: stableId(`product-image:${p.slug}:${image.kind}`),
+            productId,
+            url: image.url,
+            alt: image.alt,
+            kind: image.kind,
+            width: image.width,
+            height: image.height,
+            position: index,
+          })
+          .onConflictDoUpdate({
+            target: [productImages.productId, productImages.kind],
+            set: {
+              url: image.url,
+              alt: image.alt,
+              width: image.width,
+              height: image.height,
+              position: index,
+            },
+          });
+      }
+      const keptKinds = images.map((i) => i.kind);
+      await tx
+        .delete(productImages)
+        .where(
+          keptKinds.length
+            ? and(eq(productImages.productId, productId), notInArray(productImages.kind, keptKinds))
+            : eq(productImages.productId, productId),
+        );
     }
 
     for (const r of seedReviews) {
@@ -152,5 +215,7 @@ export async function runSeed(db: Db): Promise<SeedSummary> {
     variants: seedProducts.reduce((n, p) => n + p.variants.length, 0),
     reviews: seedReviews.length,
     discountCodes: seedDiscountCodes.length,
+    productImages: imageCount,
+    collectionHeroes: heroCount,
   };
 }
