@@ -1,8 +1,11 @@
 import Link from 'next/link';
+import { AnnouncementRotator } from '@/components/interruptions/announcement-rotator';
 import { Container } from '@/components/ui/container';
 import { IconSearch } from '@/components/ui/icons';
 import { siteConfig } from '@/lib/config';
 import { getCurrentCart } from '@/lib/cart/request-cache';
+import { announcements } from '@/lib/interruptions/announcements';
+import { interruptionsEnabled } from '@/lib/interruptions/enabled';
 import { CartButton } from './cart-button';
 import { Logo } from './logo';
 import { MobileNav } from './mobile-nav';
@@ -16,7 +19,7 @@ export async function Header() {
     <header className="border-latte/20 bg-cream/90 sticky top-0 z-40 border-b backdrop-blur">
       <div className="bg-espresso text-foam text-center text-xs" data-testid="announcement-bar">
         <Container className="py-2">
-          Free shipping on orders over $45 · Subscribe &amp; save 15%
+          {interruptionsEnabled() ? <AnnouncementRotator /> : announcements[0].text}
         </Container>
       </div>
       <Container className="flex h-16 items-center justify-between gap-6">
