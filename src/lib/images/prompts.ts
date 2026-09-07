@@ -1,4 +1,5 @@
 import { type ImageKind, type ProductCategory, type RoastLevel } from '@/lib/db/schema/values';
+import { brandedName } from './alt';
 import type { HomeImageName } from './paths';
 
 /** Sizes the Images API accepts for gpt-image models. */
@@ -59,7 +60,7 @@ const COMPOSITIONS: Record<ImageKind, string> = {
 function productSubject(product: PromptProduct, kind: ImageKind): string {
   const shape = SHAPE_SUBJECTS[product.art.shape] ?? 'piece of coffee brewing equipment';
   if (product.category !== 'coffee') {
-    return `Subject: a ${shape} finished in the colour ${product.art.accent} — the Cofresso ${product.name}.`;
+    return `Subject: a ${shape} finished in the colour ${product.art.accent} — the ${brandedName(product.name)}.`;
   }
   const origin = product.origin ? ` of ${product.origin} coffee` : ' of coffee';
   const roast = product.roastLevel ? ` It is a ${product.roastLevel.replace('_', ' ')} roast.` : '';

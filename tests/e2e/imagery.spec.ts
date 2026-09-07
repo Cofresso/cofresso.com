@@ -48,17 +48,35 @@ test.describe('generated imagery', () => {
     const main = page.getByTestId('gallery-main');
     const first = await main.getAttribute('src');
     expect(first).toContain(filename(productImages[0].url));
+    await expect(page.getByTestId('gallery-thumb-0')).toHaveAttribute('aria-current', 'true');
 
     await page.getByTestId('gallery-thumb-1').click();
     await expect(main).not.toHaveAttribute('src', first!);
     await expect(main).toHaveAttribute('src', new RegExp(filename(productImages[1].url)));
+    await expect(page.getByTestId('gallery-thumb-1')).toHaveAttribute('aria-current', 'true');
 
     await gallery.focus();
     await page.keyboard.press('ArrowRight');
     await expect(main).toHaveAttribute('src', new RegExp(filename(productImages[2].url)));
+    await expect(page.getByTestId('gallery-thumb-2')).toHaveAttribute('aria-current', 'true');
 
     await page.getByTestId('gallery-prev').click();
     await expect(main).toHaveAttribute('src', new RegExp(filename(productImages[1].url)));
+    await expect(page.getByTestId('gallery-thumb-1')).toHaveAttribute('aria-current', 'true');
+
+    // Wrap-around: prev from the first image goes to the last, next from the last returns to the first.
+    await page.getByTestId('gallery-thumb-0').click();
+    await expect(main).toHaveAttribute('src', new RegExp(filename(productImages[0].url)));
+    await page.getByTestId('gallery-prev').click();
+    const lastIndex = productImages.length - 1;
+    await expect(main).toHaveAttribute('src', new RegExp(filename(productImages[lastIndex].url)));
+    await expect(page.getByTestId(`gallery-thumb-${lastIndex}`)).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+    await page.getByTestId('gallery-next').click();
+    await expect(main).toHaveAttribute('src', new RegExp(filename(productImages[0].url)));
+    await expect(page.getByTestId('gallery-thumb-0')).toHaveAttribute('aria-current', 'true');
   });
 
   test('the collection hero renders', async ({ page }) => {
@@ -77,7 +95,13 @@ test.describe('generated imagery', () => {
 
     await page.goto('/');
     await dismissInterruptions(page);
-    await expect(page.getByTestId('hero-image')).toBeVisible();
+    const heroImage = page.getByTestId('hero-image').locator('img');
+    await expect(heroImage).toBeVisible();
+    // A broken image (404, decode failure) still passes `toBeVisible`, so also
+    // require a decoded image with real pixels.
+    expect(await heroImage.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(
+      0,
+    );
     await expect(page.getByTestId('story-image')).toBeVisible();
 
     const guideSlug = Object.keys(manifest.guides)[0];

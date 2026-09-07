@@ -2,12 +2,13 @@ import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import { brewGuides } from '@/content/brew-guides';
 import { seedCollections, seedProducts } from '@/lib/db/seed/data';
-import { EMPTY_MANIFEST, type ImagesManifest } from './manifest';
+import { EMPTY_MANIFEST, type ImagesManifest, type ManifestImage } from './manifest';
 import {
   existingEntry,
   objectPathFor,
   planJobs,
   putEntry,
+  refreshAlt,
   runImageJobs,
   type ImageDeps,
 } from './generate';
@@ -34,7 +35,6 @@ describe('planJobs', () => {
     expect(jobs).toHaveLength(
       seedProducts.length * 4 + seedCollections.length + 2 + brewGuides.length,
     );
-    expect(jobs).toHaveLength(82);
     expect(new Set(jobs.map((j) => j.key)).size).toBe(jobs.length);
     expect(jobs.every((j) => j.prompt.length > 100 && j.alt.length > 10)).toBe(true);
   });
@@ -99,6 +99,54 @@ describe('putEntry and existingEntry', () => {
     }
     expect(EMPTY_MANIFEST.products).toEqual({});
     expect(manifest.products['morning-frame']).toHaveLength(1);
+  });
+});
+
+describe('refreshAlt', () => {
+  function fixtureEntry(job: ReturnType<typeof planJobs>[number], alt: string): ManifestImage {
+    return {
+      url: `https://cofresso.com/assets/${objectPathFor(job, 'deadbeef')}`,
+      alt,
+      width: 1024,
+      height: 1024,
+      sha: WEBP_SHA,
+    };
+  }
+
+  it('recomputes stale alt text, leaves current alt and other fields untouched, and never adds or removes entries', () => {
+    const jobs = new Map(planJobs().map((j) => [j.key, j]));
+    const frontJob = jobs.get('product:morning-frame:front')!;
+    const heroJob = jobs.get('home:hero')!;
+    const guideJob = jobs.get('guide:pour-over')!;
+
+    let manifest: ImagesManifest = EMPTY_MANIFEST;
+    // Stale alt, as if generated before an alt.ts fix landed.
+    manifest = putEntry(manifest, frontJob, fixtureEntry(frontJob, 'stale alt text'));
+    // Already-current alt: should be counted as unchanged.
+    manifest = putEntry(manifest, heroJob, fixtureEntry(heroJob, heroJob.alt));
+    // `guide:pour-over` and every collection are deliberately left absent.
+    const before = manifest;
+
+    const result = refreshAlt(manifest);
+
+    expect(result.changed).toBe(1);
+    expect(result.manifest.products['morning-frame']![0]).toEqual({
+      ...before.products['morning-frame']![0],
+      alt: frontJob.alt,
+    });
+    expect(result.manifest.home.hero).toEqual(before.home.hero);
+    expect(existingEntry(result.manifest, guideJob)).toBeUndefined();
+    expect(result.manifest.guides).toEqual({});
+    expect(result.manifest.collections).toEqual({});
+  });
+
+  it('does not mutate its input', () => {
+    const jobs = new Map(planJobs().map((j) => [j.key, j]));
+    const frontJob = jobs.get('product:morning-frame:front')!;
+    const manifest = putEntry(EMPTY_MANIFEST, frontJob, fixtureEntry(frontJob, 'stale'));
+    const snapshot = structuredClone(manifest);
+    refreshAlt(manifest);
+    expect(manifest).toEqual(snapshot);
   });
 });
 

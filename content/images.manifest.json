@@ -32,28 +32,28 @@
   "generatedAt": "2026-09-07T05:20:27.505Z",
   "guides": {
     "cold-brew": {
-      "alt": "Brewing coffee with the Cold Brew method",
+      "alt": "Brewing coffee with the cold immersion method: Cold Brew",
       "height": 1024,
       "sha": "294ab68a040c2b52f43354a874c5bd2b176e84bcf90b5fcc142ff599dd3ab7ec",
       "url": "https://cofresso.com/assets/guides/cold-brew-294ab68a.webp",
       "width": 1536
     },
     "espresso": {
-      "alt": "Brewing coffee with the Espresso method",
+      "alt": "Brewing coffee with the pressure method: Espresso",
       "height": 1024,
       "sha": "2af1c34bfe59c9571605488d36d577a0e371731e6e34ad9ef8c903864599bb0f",
       "url": "https://cofresso.com/assets/guides/espresso-2af1c34b.webp",
       "width": 1536
     },
     "french-press": {
-      "alt": "Brewing coffee with the French Press method",
+      "alt": "Brewing coffee with the immersion method: French Press",
       "height": 1024,
       "sha": "22da27a2b7deb881b8546dddf3d6670414a50e7586f4f8ad2eaf0306340439d9",
       "url": "https://cofresso.com/assets/guides/french-press-22da27a2.webp",
       "width": 1536
     },
     "pour-over": {
-      "alt": "Brewing coffee with the Pour Over (V60 / Cofresso Dripper) method",
+      "alt": "Brewing coffee with the pour over method: Pour Over (V60 / Cofresso Dripper)",
       "height": 1024,
       "sha": "10bb4332511470d991b144a3681e35f8582584a568400aad1804b88ac8b9f4e0",
       "url": "https://cofresso.com/assets/guides/pour-over-10bb4332.webp",
@@ -148,7 +148,7 @@
     ],
     "cofresso-mug": [
       {
-        "alt": "A Cofresso Cofresso Stoneware Mug on a cream linen backdrop",
+        "alt": "A Cofresso Stoneware Mug on a cream linen backdrop",
         "height": 1024,
         "kind": "front",
         "sha": "2b9fbb3ab0a91658e5cd57ae2fb9d43cce2e069aa127d2570138d6948ad289b7",
@@ -156,7 +156,7 @@
         "width": 1024
       },
       {
-        "alt": "Close-up detail of a Cofresso Cofresso Stoneware Mug",
+        "alt": "Close-up detail of a Cofresso Stoneware Mug",
         "height": 1024,
         "kind": "detail",
         "sha": "b76ba0d3ac9ce4a953d989b977d977a8c1029bb92178d573097d47b5061e09c0",
@@ -164,7 +164,7 @@
         "width": 1024
       },
       {
-        "alt": "A Cofresso Cofresso Stoneware Mug in use on a sunlit kitchen counter",
+        "alt": "A Cofresso Stoneware Mug in use on a sunlit kitchen counter",
         "height": 1024,
         "kind": "lifestyle",
         "sha": "b4a652c29d4327ed96b53f4a0c44acc072dc1793752185852addc9308d061522",
@@ -172,7 +172,7 @@
         "width": 1536
       },
       {
-        "alt": "Hands holding a Cofresso Cofresso Stoneware Mug",
+        "alt": "Hands holding a Cofresso Stoneware Mug",
         "height": 1024,
         "kind": "packaging",
         "sha": "154f389bc0080ae0e8b79cb195e35015661739cc6783ba3710113d67128b9a27",
@@ -624,7 +624,7 @@
     ],
     "pour-over-dripper": [
       {
-        "alt": "A Cofresso Cofresso Ceramic Dripper on a cream linen backdrop",
+        "alt": "A Cofresso Ceramic Dripper on a cream linen backdrop",
         "height": 1024,
         "kind": "front",
         "sha": "b9231f7995614561d10d82d57b671dda0c0fddcd5182ff882e5f5ce52df9a71d",
@@ -632,7 +632,7 @@
         "width": 1024
       },
       {
-        "alt": "Close-up detail of a Cofresso Cofresso Ceramic Dripper",
+        "alt": "Close-up detail of a Cofresso Ceramic Dripper",
         "height": 1024,
         "kind": "detail",
         "sha": "2214c8be2fac0f41f37a20d72e385492f9a27dd30c437faa02f1ba295e94e8f9",
@@ -640,7 +640,7 @@
         "width": 1024
       },
       {
-        "alt": "A Cofresso Cofresso Ceramic Dripper in use on a sunlit kitchen counter",
+        "alt": "A Cofresso Ceramic Dripper in use on a sunlit kitchen counter",
         "height": 1024,
         "kind": "lifestyle",
         "sha": "06d4e1a727017a300715dab257895659e4ff2de0bdf04239b3bee937d9dd5d95",
@@ -648,7 +648,7 @@
         "width": 1536
       },
       {
-        "alt": "Hands holding a Cofresso Cofresso Ceramic Dripper",
+        "alt": "Hands holding a Cofresso Ceramic Dripper",
         "height": 1024,
         "kind": "packaging",
         "sha": "70e759cd4cc07a64fc41d78a1c95bfb74c19de2f57ad917cd148cba082ffaadb",

@@ -100,10 +100,9 @@ describe('catalog queries', () => {
     }
 
     const detail = await getProductBySlug('morning-frame', db);
-    expect(detail!.images.map((i) => i.position)).toEqual(
-      detail!.images.map((_, i) => i).slice(0, detail!.images.length),
-    );
-    if (detail!.images.length > 0) expect(primaryImage(detail!.images)!.kind).toBe('front');
+    expect(detail!.images).toHaveLength(4);
+    expect(detail!.images.map((i) => i.position)).toEqual([0, 1, 2, 3]);
+    expect(primaryImage(detail!.images)?.kind).toBe('front');
   });
 
   it('exposes collection hero columns', async () => {

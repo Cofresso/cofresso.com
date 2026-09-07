@@ -8,7 +8,9 @@ const nextConfig: NextConfig = {
     // Product art is local SVG, served as-is.
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    formats: ['image/webp', 'image/avif'],
+    // Next serves the first format the browser's Accept header advertises
+    // support for, so AVIF must come first or it is effectively inert.
+    formats: ['image/avif', 'image/webp'],
     // Generated photography lives in the CDN-backed assets bucket, served by
     // the same load balancer under /assets/* (see infra/loadbalancer.tf).
     remotePatterns: [{ protocol: 'https', hostname: 'cofresso.com', pathname: '/assets/**' }],

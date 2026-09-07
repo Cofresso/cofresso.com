@@ -16,7 +16,7 @@ export function CollectionHero({ collection }: { collection: Collection }) {
         src={collection.heroImageUrl}
         alt={collection.heroImageAlt ?? `Cofresso ${collection.name} collection`}
         fill
-        sizes="100vw"
+        sizes="(min-width: 1152px) 1152px, 100vw"
         priority
         className="object-cover"
       />
