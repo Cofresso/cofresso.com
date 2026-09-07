@@ -8,29 +8,39 @@ import { getDb, type Db } from '@/lib/db/client';
 import {
   collections,
   productCollections,
+  productImages,
   products,
   reviews,
   type Collection,
   type Product,
+  type ProductImage,
   type Review,
 } from '@/lib/db/schema';
 import type { ProductFilters } from '@/lib/shop/filters';
 
 type ProductWithRelations = Product & {
   variants: ProductCardData['variants'];
+  images: ProductImage[];
   reviews: Pick<Review, 'rating'>[];
 };
 
 function toCard(p: ProductWithRelations): ProductCardData {
   const count = p.reviews.length;
   const average = count ? p.reviews.reduce((n, r) => n + r.rating, 0) / count : 0;
-  const { reviews: _reviews, variants, ...product } = p;
+  const { reviews: _reviews, variants, images, ...product } = p;
   return {
     product,
     variants: [...variants].sort((a, b) => a.position - b.position),
+    images: [...images].sort((a, b) => a.position - b.position),
     rating: { average: Math.round(average * 10) / 10, count },
   };
 }
+
+const withCardRelations = {
+  variants: true as const,
+  images: { orderBy: [asc(productImages.position)] },
+  reviews: { columns: { rating: true as const } },
+};
 
 function sortCards(items: ProductCardData[], sort: ProductFilters['sort']): ProductCardData[] {
   const byName = (a: ProductCardData, b: ProductCardData) =>
@@ -78,7 +88,7 @@ export async function listProducts(
 
   const rows = await db.query.products.findMany({
     where: and(...conditions),
-    with: { variants: true, reviews: { columns: { rating: true } } },
+    with: withCardRelations,
   });
   return sortCards(rows.map(toCard), filters.sort);
 }
@@ -89,7 +99,7 @@ export async function listFeaturedProducts(
 ): Promise<ProductCardData[]> {
   const rows = await db.query.products.findMany({
     where: and(eq(products.active, true), eq(products.featured, true)),
-    with: { variants: true, reviews: { columns: { rating: true } } },
+    with: withCardRelations,
     orderBy: [asc(products.name)],
     limit,
   });
@@ -104,6 +114,7 @@ export async function getProductBySlug(
     where: and(eq(products.slug, slug), eq(products.active, true)),
     with: {
       variants: true,
+      images: { orderBy: [asc(productImages.position)] },
       reviews: { orderBy: [desc(reviews.createdAt)] },
       productCollections: {
         with: { collection: true },
@@ -128,7 +139,7 @@ export async function listRelatedProducts(
       ne(products.id, product.id),
       eq(products.category, product.category),
     ),
-    with: { variants: true, reviews: { columns: { rating: true } } },
+    with: withCardRelations,
     orderBy: [desc(products.featured), asc(products.name)],
     limit,
   });
@@ -150,7 +161,7 @@ export async function searchProducts(query: string, db: Db = getDb()): Promise<P
         sql`array_to_string(${products.tastingNotes}, ' ') ilike ${pattern}`,
       ),
     ),
-    with: { variants: true, reviews: { columns: { rating: true } } },
+    with: withCardRelations,
     orderBy: [desc(products.featured), asc(products.name)],
   });
   return rows.map(toCard);
