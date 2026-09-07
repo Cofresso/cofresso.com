@@ -1,6 +1,7 @@
-import { eq, sql } from 'drizzle-orm';
+import { asc, eq, sql } from 'drizzle-orm';
+import { thumbnailImage } from '@/lib/catalog/types';
 import { getDb, type Db } from '@/lib/db/client';
-import { cartItems, carts, discountCodes } from '@/lib/db/schema';
+import { cartItems, carts, discountCodes, productImages } from '@/lib/db/schema';
 import {
   computeTotals,
   effectiveUnitPriceCents,
@@ -16,7 +17,11 @@ export async function getCartView(cartId: string, db: Db = getDb()): Promise<Car
     with: {
       items: {
         orderBy: (items, { asc }) => [asc(items.createdAt)],
-        with: { variant: { with: { product: true } } },
+        with: {
+          variant: {
+            with: { product: { with: { images: { orderBy: [asc(productImages.position)] } } } },
+          },
+        },
       },
     },
   });
@@ -47,7 +52,7 @@ export async function getCartView(cartId: string, db: Db = getDb()): Promise<Car
         id: item.variant.product.id,
         slug: item.variant.product.slug,
         name: item.variant.product.name,
-        imagePath: item.variant.product.imagePath,
+        image: thumbnailImage(item.variant.product, item.variant.product.images),
         category: item.variant.product.category,
       },
     };

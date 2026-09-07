@@ -1,3 +1,4 @@
+import type { ThumbnailImage } from '@/lib/catalog/types';
 import type { Grind, ProductCategory, PurchaseType } from '@/lib/db/schema';
 import type { DiscountRule, Totals } from '@/lib/pricing';
 
@@ -11,7 +12,14 @@ export interface CartLine {
   effectiveUnitPriceCents: number;
   lineTotalCents: number;
   variant: { id: string; name: string; sku: string; stockQuantity: number };
-  product: { id: string; slug: string; name: string; imagePath: string; category: ProductCategory };
+  product: {
+    id: string;
+    slug: string;
+    name: string;
+    /** Lead photograph from `product_images`, or the SVG fallback — see `thumbnailImage`. */
+    image: ThumbnailImage;
+    category: ProductCategory;
+  };
 }
 
 export interface CartView {

@@ -52,3 +52,22 @@ export function primaryImage(images: readonly ProductImage[]): ProductImage | un
 export function hoverImage(images: readonly ProductImage[]): ProductImage | undefined {
   return imageOfKind(images, 'lifestyle') ?? imageOfKind(images, 'detail');
 }
+
+/** A renderable image: the `src` is a CDN URL for generated photography or a local SVG path. */
+export interface ThumbnailImage {
+  src: string;
+  alt: string;
+}
+
+/**
+ * The image every non-gallery surface (cart lines, checkout summary, order history)
+ * shows for a product: the same lead photograph the card and PDP use, falling back to
+ * the product's SVG art when the manifest has nothing for it.
+ */
+export function thumbnailImage(
+  product: Pick<Product, 'name' | 'imagePath'>,
+  images: readonly ProductImage[],
+): ThumbnailImage {
+  const lead = primaryImage(images);
+  return lead ? { src: lead.url, alt: lead.alt } : { src: product.imagePath, alt: product.name };
+}

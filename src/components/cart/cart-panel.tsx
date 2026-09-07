@@ -31,7 +31,7 @@ export function CartPanel({ cart, mode, onNavigate }: CartPanelProps) {
   const lines = (
     <ul className="divide-latte/20 divide-y" data-testid="cart-lines">
       {cart.lines.map((line) => (
-        <CartLine key={line.id} line={line} compact={mode === 'drawer'} />
+        <CartLine key={line.id} line={line} />
       ))}
     </ul>
   );

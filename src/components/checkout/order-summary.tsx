@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import { CartSummary } from '@/components/cart/cart-summary';
+import { ProductThumbnail } from '@/components/product/product-thumbnail';
 import type { CartView } from '@/lib/cart/types';
 import { grindLabel, purchaseTypeLabel } from '@/lib/catalog/labels';
 import { formatPrice } from '@/lib/pricing';
@@ -14,14 +14,12 @@ export function OrderSummary({ cart }: { cart: CartView }) {
       <ul className="divide-latte/20 mt-4 divide-y">
         {cart.lines.map((line) => (
           <li key={line.id} className="flex items-center gap-3 py-3">
-            <span className="bg-cream relative shrink-0 overflow-hidden rounded-lg">
-              <Image
-                src={line.product.imagePath}
-                alt=""
-                width={56}
-                height={70}
-                unoptimized
-                className="h-auto w-14"
+            <span className="relative shrink-0">
+              <ProductThumbnail
+                image={line.product.image}
+                className="w-14"
+                sizes="56px"
+                decorative
               />
               <span className="bg-espresso text-foam absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full text-[10px] font-semibold">
                 {line.quantity}

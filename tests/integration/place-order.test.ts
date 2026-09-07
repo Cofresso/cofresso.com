@@ -3,9 +3,11 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, describe, expect, it } from 'vitest';
 import { addLine, applyDiscountCode, ensureCart } from '../../src/lib/cart/mutations';
 import { getCartView } from '../../src/lib/cart/queries';
+import { primaryImage } from '../../src/lib/catalog/types';
 import { placeOrder } from '../../src/lib/checkout/place-order';
 import { getOrderForConfirmation, getOrderForLookup } from '../../src/lib/checkout/queries';
 import type { CheckoutInput } from '../../src/lib/checkout/schemas';
+import { getProductBySlug } from '../../src/lib/db/queries/catalog';
 import { cartItems, productVariants } from '../../src/lib/db/schema';
 import { SimulatedPaymentProvider, TEST_CARDS, type PaymentProvider } from '../../src/lib/payments';
 import { testDb } from './helpers';
@@ -74,6 +76,9 @@ describe('placeOrder', () => {
       quantity: 2,
       unitPriceCents: variant.priceCents,
     });
+    // The snapshot keeps the photograph the shopper saw in the cart, not the SVG fallback.
+    const scale = await getProductBySlug('brew-scale', db);
+    expect(order!.items[0].imagePath).toBe(primaryImage(scale!.images)!.url);
     expect(order!.totals.discountCents).toBe(Math.round(variant.priceCents * 2 * 0.1));
     expect(order!.discountCode).toBe('WELCOME10');
     expect(order!.cardLast4).toBe('4242');

@@ -10,7 +10,9 @@ import {
   setLineQuantity,
 } from '../../src/lib/cart/mutations';
 import { getCartItemCount, getCartView } from '../../src/lib/cart/queries';
-import { productVariants } from '../../src/lib/db/schema';
+import { primaryImage } from '../../src/lib/catalog/types';
+import { getProductBySlug } from '../../src/lib/db/queries/catalog';
+import { productImages, products, productVariants } from '../../src/lib/db/schema';
 import { testDb } from './helpers';
 
 const { db, close } = testDb();
@@ -58,6 +60,48 @@ describe('cart', () => {
     expect(whole.lineTotalCents).toBe(3 * v.priceCents);
     expect(view!.totals.itemCount).toBe(4);
     expect(await getCartItemCount(cartId, db)).toBe(4);
+  });
+
+  it('shows the same lead photograph on a line as the product card', async () => {
+    const v = await variantBySku('MORNINGFRAME-1');
+    await addLine(db, cartId, {
+      variantId: v.id,
+      quantity: 1,
+      grind: 'whole_bean',
+      purchaseType: 'one_time',
+      subscriptionIntervalWeeks: null,
+    });
+    const view = await getCartView(cartId, db);
+    const detail = await getProductBySlug('morning-frame', db);
+    const lead = primaryImage(detail!.images)!;
+    expect(view!.lines[0].product.image).toEqual({ src: lead.url, alt: lead.alt });
+    expect(view!.lines[0].product.image.src).not.toContain('.svg');
+  });
+
+  it('falls back to the SVG art when a product has no photography', async () => {
+    const v = await variantBySku('MORNINGFRAME-1');
+    await addLine(db, cartId, {
+      variantId: v.id,
+      quantity: 1,
+      grind: 'whole_bean',
+      purchaseType: 'one_time',
+      subscriptionIntervalWeeks: null,
+    });
+    const [product] = await db.select().from(products).where(eq(products.slug, 'morning-frame'));
+    const photos = await db
+      .select()
+      .from(productImages)
+      .where(eq(productImages.productId, product.id));
+    try {
+      await db.delete(productImages).where(eq(productImages.productId, product.id));
+      const view = await getCartView(cartId, db);
+      expect(view!.lines[0].product.image).toEqual({
+        src: product.imagePath,
+        alt: product.name,
+      });
+    } finally {
+      await db.insert(productImages).values(photos);
+    }
   });
 
   it('applies subscription pricing per line', async () => {
