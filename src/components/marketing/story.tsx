@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import { ButtonLink } from '@/components/ui/button';
+import type { ManifestImage } from '@/lib/images/manifest';
 import logo from '../../../public/logo.png';
 
-export function Story() {
+export function Story({ image }: { image?: ManifestImage | null }) {
   return (
     <section
       className="bg-espresso text-foam grid items-center gap-10 rounded-3xl p-8 sm:p-12 lg:grid-cols-2"
@@ -30,13 +31,28 @@ export function Story() {
         </ButtonLink>
       </div>
       <div className="flex justify-center">
-        <Image
-          src={logo}
-          alt="Cofresso double-bean mark"
-          width={260}
-          height={260}
-          className="drop-shadow-2xl"
-        />
+        {image ? (
+          <div
+            className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl"
+            data-testid="story-image"
+          >
+            <Image
+              src={image.url}
+              alt={image.alt}
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <Image
+            src={logo}
+            alt="Cofresso double-bean mark"
+            width={260}
+            height={260}
+            className="drop-shadow-2xl"
+          />
+        )}
       </div>
     </section>
   );
