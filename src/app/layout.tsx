@@ -13,6 +13,7 @@ import { siteConfig } from '@/lib/config';
 import { getServerEnv } from '@/lib/env';
 import { fraunces, inter } from './fonts';
 import './globals.css';
+import logo from '../../public/logo.png';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s · ${siteConfig.name}`,
     },
     description: siteConfig.description,
-    openGraph: { type: 'website', siteName: siteConfig.name, images: ['/logo.png'] },
+    openGraph: { type: 'website', siteName: siteConfig.name, images: [logo.src] },
   };
 }
 
