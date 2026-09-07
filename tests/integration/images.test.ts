@@ -2,7 +2,7 @@ import { asc, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   ASSETS_BASE_URL,
-  sortProductImages,
+  EMPTY_MANIFEST,
   type ImagesManifest,
 } from '../../src/lib/images/manifest';
 import { collections, productImages, products } from '../../src/lib/db/schema';
@@ -98,20 +98,30 @@ describe('runSeed with an images manifest', () => {
     expect(rows.map((r) => r.position)).toEqual([0, 1]);
   });
 
-  it('reconciles against the real manifest when no override is given', async () => {
-    // The background generation script is the only writer of
-    // content/images.manifest.json and may have already populated it, so
-    // this asserts against contentImages() rather than assuming it is
-    // still empty (see AGENTS coordination note in the task brief).
-    const summary = await runSeed(db);
-    const manifest = (await import('../../src/lib/images/content')).contentImages();
-    const expectedKinds = sortProductImages(manifest.products['morning-frame'] ?? []).map(
-      (i) => i.kind,
-    );
-    expect((await imagesFor('morning-frame')).map((r) => r.kind)).toEqual(expectedKinds);
+  it('fully reconciles to empty: deletes all rows and clears the hero when the manifest is empty', async () => {
+    // Establish a known non-empty state deterministically (a fixture, never
+    // the on-disk manifest), then reconcile against EMPTY_MANIFEST. This
+    // exercises the `keptKinds.length === 0` branch in runSeed, which the
+    // notInArray-based deletion in the previous test does not reach.
+    await runSeed(db, { manifest: fixture(['front', 'detail', 'lifestyle', 'packaging']) });
+    const summary = await runSeed(db, { manifest: EMPTY_MANIFEST });
+    expect(await imagesFor('morning-frame')).toEqual([]);
+    expect(summary.productImages).toBe(0);
+    expect(summary.collectionHeroes).toBe(0);
     const [blends] = await db.select().from(collections).where(eq(collections.slug, 'blends'));
-    expect(blends.heroImageUrl).toBe(manifest.collections.blends?.url ?? null);
-    expect(summary.productImages).toBe(Object.values(manifest.products).flat().length);
+    expect(blends.heroImageUrl).toBeNull();
+    expect(blends.heroImageAlt).toBeNull();
+  });
+
+  it('resolves against the real manifest when no override is given', async () => {
+    // Smoke check only: content/images.manifest.json is owned by the
+    // background generation script and may be empty or fully populated at
+    // any given time, so this must not assert anything derived from its
+    // current contents (that would just re-run production logic to compute
+    // what it asserts). It only proves the no-argument call is wired up.
+    const summary = await runSeed(db);
+    expect(summary.productImages).toBeGreaterThanOrEqual(0);
+    expect(summary.collectionHeroes).toBeGreaterThanOrEqual(0);
   });
 
   it('reports counts in the summary', async () => {
