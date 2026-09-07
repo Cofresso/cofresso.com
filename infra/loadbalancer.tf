@@ -41,8 +41,26 @@ resource "google_compute_backend_service" "web" {
 }
 
 resource "google_compute_url_map" "https" {
-  name            = "cofresso-https"
+  name = "cofresso-https"
+
+  # Requests that do not match a host rule (health probes by IP, for example)
+  # still reach Cloud Run.
   default_service = google_compute_backend_service.web.id
+
+  host_rule {
+    hosts        = [var.domain, "www.${var.domain}"]
+    path_matcher = "main"
+  }
+
+  path_matcher {
+    name            = "main"
+    default_service = google_compute_backend_service.web.id
+
+    path_rule {
+      paths   = ["/assets/*"]
+      service = google_compute_backend_bucket.assets.id
+    }
+  }
 }
 
 resource "google_compute_managed_ssl_certificate" "web" {
@@ -91,4 +109,63 @@ resource "google_compute_global_forwarding_rule" "http" {
   port_range            = "80"
   target                = google_compute_target_http_proxy.redirect.id
   load_balancing_scheme = "EXTERNAL_MANAGED"
+}
+
+# ---------------------------------------------------------------------------
+# Static assets (generated product photography), served at /assets/* by the
+# same load balancer that fronts Cloud Run. Objects are content-addressed
+# (<name>-<sha8>.webp) and uploaded with an immutable Cache-Control, so the
+# CDN may hold them for a year.
+# ---------------------------------------------------------------------------
+
+resource "google_storage_bucket" "assets" {
+  name          = "${var.project_id}-assets"
+  location      = upper(var.region)
+  storage_class = "STANDARD"
+
+  # A backend bucket needs objects readable by allUsers, so object ACLs stay
+  # off and access is granted once, at the bucket level, in the IAM member
+  # below. "inherited" keeps the (absent) org-level public access prevention.
+  uniform_bucket_level_access = true
+  public_access_prevention    = "inherited"
+
+  # Content addressing makes overwrites impossible in practice; versioning
+  # would only pay for bytes nobody can reach.
+  versioning {
+    enabled = false
+  }
+
+  cors {
+    origin          = ["*"]
+    method          = ["GET", "HEAD"]
+    response_header = ["Content-Type", "Cache-Control"]
+    max_age_seconds = 3600
+  }
+
+  labels = {
+    app  = "cofresso"
+    role = "assets"
+  }
+}
+
+resource "google_storage_bucket_iam_member" "assets_public" {
+  bucket = google_storage_bucket.assets.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+}
+
+resource "google_compute_backend_bucket" "assets" {
+  name        = "cofresso-assets-backend"
+  description = "Generated product imagery, served at https://${var.domain}/assets/*"
+  bucket_name = google_storage_bucket.assets.name
+  enable_cdn  = true
+
+  cdn_policy {
+    cache_mode        = "CACHE_ALL_STATIC"
+    default_ttl       = 86400
+    max_ttl           = 31536000
+    client_ttl        = 86400
+    negative_caching  = true
+    serve_while_stale = 86400
+  }
 }

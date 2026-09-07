@@ -29,6 +29,8 @@ Changes under `infra/` get a plan comment on the PR and apply automatically on m
 
 Cloud Run (`cofresso-web`, `cofresso-web-preview`, migration jobs), Cloud SQL Postgres 16, Artifact Registry, global HTTPS load balancer with Cloud CDN and a managed certificate, Cloud DNS zone, Workload Identity Federation for GitHub Actions, an uptime check and alert policy.
 
+`cofresso-prod-assets` holds the generated product imagery. It is public-read and fronted by a CDN-backed backend bucket, so the URL map sends `/assets/*` there and everything else to Cloud Run. Objects are content-addressed and uploaded with `Cache-Control: public, max-age=31536000, immutable` by `scripts/generate-images.ts` (see the repository README).
+
 Container images and the deployed revision are managed by CI, not Terraform (`ignore_changes` on the image).
 
 ## Outputs you will need

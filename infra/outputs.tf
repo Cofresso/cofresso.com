@@ -47,3 +47,8 @@ output "planner_service_account" {
 output "applier_service_account" {
   value = google_service_account.applier.email
 }
+
+output "assets_base_url" {
+  description = "Public base URL for generated imagery (see scripts/generate-images.ts)"
+  value       = "https://${var.domain}/assets"
+}

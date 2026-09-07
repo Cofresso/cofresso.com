@@ -113,6 +113,7 @@ resource "google_project_iam_member" "applier_roles" {
     "roles/serviceusage.serviceUsageAdmin",  # apis.tf
     "roles/monitoring.editor",               # monitoring.tf
     "roles/logging.admin",                   # monitoring.tf log-based resources
+    "roles/storage.admin",                   # loadbalancer.tf (assets bucket)
   ])
   project = var.project_id
   role    = each.value
