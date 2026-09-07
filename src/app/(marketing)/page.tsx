@@ -21,10 +21,11 @@ export default async function HomePage() {
     listCollections(),
     listRecentReviews(3),
   ]);
+  const heroImage = homeImage('hero');
 
   return (
     <>
-      <Hero featured={featured} image={homeImage('hero')} />
+      <Hero featured={featured} image={heroImage} />
       <ValueProps />
 
       <Container className="py-20">
@@ -38,7 +39,11 @@ export default async function HomePage() {
             </ButtonLink>
           }
         />
-        <ProductGrid items={featured} listId="home_featured" />
+        <ProductGrid
+          items={featured}
+          listId="home_featured"
+          priorityCount={heroImage ? 0 : undefined}
+        />
       </Container>
 
       <Container className="pb-20">

@@ -44,7 +44,7 @@ export function ProductCard({
               src={lead.url}
               alt={lead.alt}
               fill
-              sizes="(min-width: 1024px) 25vw, 50vw"
+              sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
               priority={priority}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               data-testid="card-image"
@@ -55,7 +55,7 @@ export function ProductCard({
                 alt=""
                 aria-hidden="true"
                 fill
-                sizes="(min-width: 1024px) 25vw, 50vw"
+                sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
                 className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 data-testid="card-image-hover"
               />

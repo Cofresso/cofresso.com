@@ -52,7 +52,11 @@ export default async function CollectionPage({ params, searchParams }: Props) {
         resultCount={items.length}
         lockCollection
       />
-      <ProductGrid items={items} listId={`collection_${slug}`} />
+      <ProductGrid
+        items={items}
+        listId={`collection_${slug}`}
+        priorityCount={collection.heroImageUrl ? 2 : undefined}
+      />
     </Container>
   );
 }

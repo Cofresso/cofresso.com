@@ -154,7 +154,7 @@ export function ProductGallery({ images, fallback, className }: ProductGalleryPr
                 i === active ? 'border-copper' : 'hover:border-latte/60 border-transparent'
               }`}
             >
-              <Image src={image.url} alt="" fill sizes="120px" className="object-cover" />
+              <Image src={image.url} alt="" fill sizes="200px" className="object-cover" />
             </button>
           </li>
         ))}
