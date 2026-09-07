@@ -17,6 +17,15 @@ function trim(text: string): string {
   return text.replace(/\s+/g, ' ').replace(/[.\s]+$/, '');
 }
 
+/**
+ * Prefixes a product name with "Cofresso ", unless the name already starts
+ * with it (a few equipment/merch products are named e.g. "Cofresso Ceramic
+ * Dripper"), which would otherwise double up as "Cofresso Cofresso …".
+ */
+export function brandedName(name: string): string {
+  return name.startsWith('Cofresso ') ? name : `Cofresso ${name}`;
+}
+
 function firstNotes(notes: readonly string[]): string | null {
   const picked = notes.slice(0, 2);
   if (picked.length === 0) return null;
@@ -43,15 +52,16 @@ export function productAltText(product: AltProduct, kind: ImageKind): string {
         return trim(`Hands holding a bag of Cofresso ${name} with the label facing the camera`);
     }
   }
+  const branded = brandedName(name);
   switch (kind) {
     case 'front':
-      return trim(`A Cofresso ${name} on a cream linen backdrop`);
+      return trim(`A ${branded} on a cream linen backdrop`);
     case 'detail':
-      return trim(`Close-up detail of a Cofresso ${name}`);
+      return trim(`Close-up detail of a ${branded}`);
     case 'lifestyle':
-      return trim(`A Cofresso ${name} in use on a sunlit kitchen counter`);
+      return trim(`A ${branded} in use on a sunlit kitchen counter`);
     case 'packaging':
-      return trim(`Hands holding a Cofresso ${name}`);
+      return trim(`Hands holding a ${branded}`);
   }
 }
 
@@ -68,5 +78,5 @@ export function homeAltText(name: HomeImageName): string {
 }
 
 export function guideAltText(guide: { title: string; method: string }): string {
-  return trim(`Brewing coffee with the ${guide.title} method`);
+  return trim(`Brewing coffee with the ${guide.method.toLowerCase()} method: ${guide.title}`);
 }

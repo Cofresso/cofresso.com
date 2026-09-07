@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { IMAGE_KINDS } from '@/lib/db/schema/values';
 import {
+  brandedName,
   collectionAltText,
   guideAltText,
   homeAltText,
@@ -57,6 +58,19 @@ describe('productAltText', () => {
     expect(productAltText(plain, 'detail')).toBe('Close-up of roasted House Blend coffee beans');
   });
 
+  it('does not double the brand when the name already starts with Cofresso', () => {
+    const dripper: AltProduct = {
+      name: 'Cofresso Ceramic Dripper',
+      tastingNotes: [],
+      category: 'equipment',
+    };
+    for (const kind of IMAGE_KINDS) {
+      const alt = productAltText(dripper, kind);
+      expect(alt).toContain('Cofresso Ceramic Dripper');
+      expect(alt).not.toContain('Cofresso Cofresso');
+    }
+  });
+
   it('produces screen-reader friendly strings for every kind', () => {
     for (const product of [coffee, gear]) {
       for (const kind of IMAGE_KINDS) {
@@ -82,7 +96,29 @@ describe('other alt text', () => {
       'A Cofresso roaster weighing green coffee beside a sample roaster',
     );
     expect(guideAltText({ title: 'French Press', method: 'Immersion' })).toBe(
-      'Brewing coffee with the French Press method',
+      'Brewing coffee with the immersion method: French Press',
     );
+  });
+});
+
+describe('brandedName', () => {
+  it('prefixes a plain name with Cofresso', () => {
+    expect(brandedName('Gooseneck Kettle')).toBe('Cofresso Gooseneck Kettle');
+  });
+
+  it('leaves a name that already starts with Cofresso unchanged', () => {
+    expect(brandedName('Cofresso Ceramic Dripper')).toBe('Cofresso Ceramic Dripper');
+  });
+});
+
+describe('guideAltText', () => {
+  it('uses the method field, not a duplicated title parenthetical', () => {
+    const alt = guideAltText({
+      title: 'Pour Over (V60 / Cofresso Dripper)',
+      method: 'Pour over',
+    });
+    expect(alt).toContain('pour over method');
+    expect(alt).toContain('Pour Over (V60 / Cofresso Dripper)');
+    expect(alt).not.toContain('the Pour Over (V60 / Cofresso Dripper) method');
   });
 });

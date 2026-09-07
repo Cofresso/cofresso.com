@@ -48,6 +48,7 @@ Cofresso is an ecommerce storefront for a fictional coffee roaster. It is a real
 
 - **Add a product:** edit `src/lib/db/seed/data.ts`, run `pnpm art:generate` (SVG fallback), `pnpm images:generate --only <slug>` (photography) and `pnpm db:seed`.
 - **Regenerate one image:** `pnpm images:generate --only <slug> --force`, then `pnpm db:seed`. Commit the manifest change.
+- **Refresh alt text only (no regeneration):** after changing `src/lib/images/alt.ts`, run `pnpm images:generate --refresh-alt` to recompute every entry's `alt` in place (no OpenAI/GCS calls, no key needed) and commit the manifest change.
 - **Add a page:** create `page.tsx` under the right route group; add it to `src/app/sitemap.ts` if public.
 - **Change pricing rules:** edit `src/lib/pricing`, update `src/lib/pricing/index.test.ts` first.
 - **Add an analytics event:** extend the union in `src/lib/analytics/events.ts`; call `track()` from a client component.

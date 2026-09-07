@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { config } from 'dotenv';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -6,17 +7,44 @@ import { OAuth2Client } from 'google-auth-library';
 import OpenAI from 'openai';
 import sharp from 'sharp';
 import { contentImages } from '../src/lib/images/content';
-import { runImageJobs, type ImageDeps, type RunOptions } from '../src/lib/images/generate';
+import {
+  refreshAlt,
+  runImageJobs,
+  type ImageDeps,
+  type RunOptions,
+} from '../src/lib/images/generate';
 import { serializeManifest } from '../src/lib/images/manifest';
 import { bucketObjectName } from '../src/lib/images/paths';
 import type { ImageSize } from '../src/lib/images/prompts';
 
-// The key lives outside the repository. `.superpowers/` is git-ignored; the
-// absolute path is the primary checkout, so this also works from a worktree.
+/**
+ * The key lives outside the repository, in the main checkout's
+ * `.superpowers/` (git-ignored). From a linked worktree that directory isn't
+ * present locally, so resolve the main checkout via `--git-common-dir` (the
+ * shared `.git`, whichever checkout it's opened from) instead of a personal
+ * absolute path. Swallows any failure (not a git repo, git missing) and
+ * falls back to the cwd-relative entry only.
+ */
+function mainCheckoutEnvPath(): string | null {
+  try {
+    const gitCommonDir = execSync('git rev-parse --git-common-dir', {
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim();
+    const mainCheckoutRoot = path.dirname(path.resolve(process.cwd(), gitCommonDir));
+    return path.join(mainCheckoutRoot, '.superpowers/sdd/images/.env');
+  } catch {
+    return null;
+  }
+}
+
+const mainEnvPath = mainCheckoutEnvPath();
+
 config({
   path: [
     '.superpowers/sdd/images/.env',
-    '/Users/joshpayne/cofresso.com/.superpowers/sdd/images/.env',
+    ...(mainEnvPath ? [mainEnvPath] : []),
     '.env.local',
     '.env',
   ],
@@ -30,6 +58,7 @@ const MANIFEST_PATH = path.resolve(process.cwd(), 'content/images.manifest.json'
 interface Flags extends Omit<RunOptions, 'model'> {
   model?: string;
   bucket: string;
+  refreshAlt?: boolean;
 }
 
 function parseFlags(argv: readonly string[]): Flags {
@@ -61,10 +90,14 @@ function parseFlags(argv: readonly string[]): Flags {
       case '--dry-run':
         flags.dryRun = true;
         break;
+      case '--refresh-alt':
+        flags.refreshAlt = true;
+        break;
       case '--help':
         console.log(
-          'Usage: pnpm images:generate [--only <slug|collections|home|guides>] [--force] [--dry-run] [--concurrency 6] [--model gpt-image-2] [--bucket cofresso-prod-assets]\n' +
-            'Objects are written under an `assets/` prefix in the bucket (the load balancer forwards the full request path), even though public URLs and --only values have no such prefix.',
+          'Usage: pnpm images:generate [--only <slug|collections|home|guides>] [--force] [--dry-run] [--refresh-alt] [--concurrency 6] [--model gpt-image-2] [--bucket cofresso-prod-assets]\n' +
+            'Objects are written under an `assets/` prefix in the bucket (the load balancer forwards the full request path), even though public URLs and --only values have no such prefix.\n' +
+            '--refresh-alt recomputes `alt` for every entry already in the manifest from the current seed/content data and rewrites the manifest in place. It never calls OpenAI or GCS, needs no API key or token, and never adds or removes an entry.',
         );
         process.exit(0);
       default:
@@ -102,6 +135,16 @@ function createStorage(): Storage {
 
 async function main(): Promise<void> {
   const flags = parseFlags(process.argv.slice(2));
+
+  if (flags.refreshAlt) {
+    const result = refreshAlt(contentImages());
+    mkdirSync(path.dirname(MANIFEST_PATH), { recursive: true });
+    writeFileSync(MANIFEST_PATH, serializeManifest(result.manifest), 'utf8');
+    console.log(
+      `Refreshed alt text: ${result.changed} entr${result.changed === 1 ? 'y' : 'ies'} changed. Manifest: ${path.relative(process.cwd(), MANIFEST_PATH)}`,
+    );
+    return;
+  }
 
   if (flags.dryRun) {
     const deps: ImageDeps = {

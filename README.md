@@ -75,6 +75,12 @@ pnpm db:seed                                  # push the manifest into the datab
 A full run is 82 images, roughly $16 and 10–20 minutes at concurrency 6. Commit the updated
 `content/images.manifest.json`; never commit the API key.
 
+If only alt text logic changed (`src/lib/images/alt.ts`), there is no need to regenerate any
+photography: `pnpm images:generate --refresh-alt` recomputes `alt` for every entry already in the
+manifest from the current seed/content data and rewrites `content/images.manifest.json` in place.
+It never calls OpenAI or GCS, so it needs neither `OPENAI_API_KEY` nor
+`GOOGLE_OAUTH_ACCESS_TOKEN`, and it never adds or removes an entry — only `alt` strings change.
+
 ## Interruptions
 
 The storefront deliberately gets in your way, because real ones do and Coframe uses this app to

@@ -172,6 +172,30 @@ export function putEntry(
   }
 }
 
+export interface RefreshAltResult {
+  manifest: ImagesManifest;
+  changed: number;
+}
+
+/**
+ * Recomputes `alt` for every entry already in the manifest from the same
+ * seed/content data `planJobs` uses, without touching urls, dimensions or
+ * shas. Never adds or removes an entry: a job with no existing entry is
+ * skipped, so this is purely a text refresh, not a plan for what to
+ * generate. No network calls, so it needs neither an API key nor a token.
+ */
+export function refreshAlt(previous: ImagesManifest): RefreshAltResult {
+  let manifest = previous;
+  let changed = 0;
+  for (const job of planJobs()) {
+    const existing = existingEntry(manifest, job);
+    if (!existing || existing.alt === job.alt) continue;
+    manifest = putEntry(manifest, job, { ...existing, alt: job.alt });
+    changed += 1;
+  }
+  return { manifest, changed };
+}
+
 export interface ImageDeps {
   /** Returns the raw bytes the model produced (PNG for gpt-image models). */
   generate(input: { prompt: string; size: ImageSize; model: string }): Promise<Buffer>;
