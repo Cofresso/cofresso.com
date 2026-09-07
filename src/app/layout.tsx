@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { AnalyticsProvider } from '@/components/analytics/analytics-provider';
 import { ConsoleEasterEgg } from '@/components/analytics/console-easter-egg';
 import { ThirdPartyScripts } from '@/components/analytics/third-party-scripts';
+import Coframe from '@/components/Coframe';
 import { Interruptions } from '@/components/interruptions/interruptions';
 import { CartDrawer } from '@/components/layout/cart-drawer';
 import { CartDrawerProvider } from '@/components/layout/cart-drawer-context';
@@ -32,7 +33,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${fraunces.variable} ${inter.variable}`}>
+      <head>
+        <Coframe />
+      </head>
       <body className="flex min-h-screen flex-col">
         <CartDrawerProvider>
           <MobileNavProvider>
