@@ -60,7 +60,10 @@ jobs:
         with:
           header: terraform
           path: infra/plan-trimmed.txt
-      - run: exit ${{ steps.plan.outputs.exit }}
+      - name: Fail if the plan errored
+        env:
+          PLAN_EXIT: ${{ steps.plan.outputs.exit }}
+        run: exit "$PLAN_EXIT"
 
   apply:
     name: terraform apply

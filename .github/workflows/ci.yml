@@ -137,6 +137,12 @@ jobs:
     environment:
       name: preview
       url: ${{ steps.url.outputs.preview_url }}
+    # `cofresso-migrate-preview` is a single shared job: two PRs deploying at once would
+    # interleave `jobs update` (which swaps the image) and `jobs execute`, so one PR can end
+    # up migrating and seeding the other PR's image. Serialise the whole preview deploy.
+    concurrency:
+      group: preview-migrate
+      cancel-in-progress: false
     env:
       PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
       REGION: ${{ vars.GCP_REGION }}
@@ -155,7 +161,7 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+          service_account: ${{ vars.GCP_PREVIEW_DEPLOYER_SA }}
           token_format: access_token
 
       - uses: google-github-actions/setup-gcloud@v2
@@ -200,12 +206,19 @@ jobs:
           echo "Preview: $URL"
 
       - name: Smoke test
+        env:
+          URL: ${{ steps.url.outputs.preview_url }}
         run: |
+          healthy=
           for _ in $(seq 1 12); do
-            if curl -fsS "${{ steps.url.outputs.preview_url }}/api/health" | tee /tmp/health.json | grep -q '"db":"up"'; then exit 0; fi
+            if curl -fsS "$URL/api/health" | tee /tmp/health.json | grep -q '"db":"up"'; then healthy=1; break; fi
             sleep 5
           done
-          echo "Health check failed"; cat /tmp/health.json || true; exit 1
+          if [ -z "$healthy" ]; then echo "Health check failed"; cat /tmp/health.json || true; exit 1; fi
+          # Every product image goes through the optimizer, which needs a writable cache
+          # directory in the container. A broken deploy serves HTML fine and 500s here.
+          curl -fsS "$URL/_next/image?url=%2Flogo.png&w=64&q=75" -o /dev/null
+          echo "Image optimizer OK"
 
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
@@ -242,7 +255,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      deployments: write
     environment:
       name: production
       url: ${{ vars.PRODUCTION_URL }}
@@ -301,20 +313,43 @@ jobs:
       - name: Deploy
         run: |
           gcloud run deploy cofresso-web --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
+          # After a rollback the service pins traffic to a specific revision, so `deploy`
+          # creates the new revision without giving it any traffic. Move traffic explicitly.
+          gcloud run services update-traffic cofresso-web --to-latest --region "$REGION" --project "$PROJECT_ID" --quiet
 
       - name: Smoke test (Cloud Run URL)
         run: |
           URL=$(gcloud run services describe cofresso-web --region "$REGION" --project "$PROJECT_ID" --format 'value(status.url)')
+          serving=
           for _ in $(seq 1 12); do
             if curl -fsS "$URL/api/health" | tee /tmp/health.json | grep -q "\"commit\":\"${{ steps.meta.outputs.short_sha }}\""; then
-              echo "Serving ${{ steps.meta.outputs.short_sha }} at $URL"; exit 0
+              serving=1; break
             fi
             sleep 5
           done
-          echo "New revision not healthy"; cat /tmp/health.json || true; exit 1
+          if [ -z "$serving" ]; then echo "New revision not healthy"; cat /tmp/health.json || true; exit 1; fi
+          echo "Serving ${{ steps.meta.outputs.short_sha }} at $URL"
+          # Every product image goes through the optimizer, which needs a writable cache
+          # directory in the container. A broken deploy serves HTML fine and 500s here.
+          curl -fsS "$URL/_next/image?url=%2Flogo.png&w=64&q=75" -o /dev/null
+          echo "Image optimizer OK"
 
       - name: Smoke test (public URL)
-        run: curl -fsS "${{ vars.PRODUCTION_URL }}/api/health"
+        env:
+          URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          if [ -z "$URL" ]; then echo "PRODUCTION_URL not set; skipping"; exit 0; fi
+          # The load balancer and CDN can keep serving the previous revision for a while, so
+          # poll until the public URL reports the commit we just deployed.
+          for _ in $(seq 1 12); do
+            if curl -fsS "$URL/api/health" | tee /tmp/public-health.json | grep -q "\"commit\":\"${{ steps.meta.outputs.short_sha }}\""; then
+              echo "Public URL serving ${{ steps.meta.outputs.short_sha }}"; exit 0
+            fi
+            sleep 5
+          done
+          echo "Public URL never served ${{ steps.meta.outputs.short_sha }}"
+          cat /tmp/public-health.json || true
+          exit 1
 
       - name: Summary
         run: |
