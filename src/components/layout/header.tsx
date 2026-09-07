@@ -1,8 +1,11 @@
 import Link from 'next/link';
+import { AnnouncementRotator } from '@/components/interruptions/announcement-rotator';
 import { Container } from '@/components/ui/container';
 import { IconSearch } from '@/components/ui/icons';
 import { siteConfig } from '@/lib/config';
 import { getCurrentCart } from '@/lib/cart/request-cache';
+import { announcements } from '@/lib/interruptions/announcements';
+import { interruptionsEnabled } from '@/lib/interruptions/enabled';
 import { CartButton } from './cart-button';
 import { Logo } from './logo';
 import { MobileNav } from './mobile-nav';
@@ -14,9 +17,16 @@ export async function Header() {
 
   return (
     <header className="border-latte/20 bg-cream/90 sticky top-0 z-40 border-b backdrop-blur">
-      <div className="bg-espresso text-foam text-center text-xs" data-testid="announcement-bar">
+      {/* The height is reserved rather than left to the content: the rotator swaps messages of
+          different lengths every 6s, and on a narrow viewport some of them wrap while others do
+          not, which would make this sticky bar (and everything below it) jump. Two lines below
+          `sm`, one line above, where nothing wraps. */}
+      <div
+        className="bg-espresso text-foam flex min-h-12 items-center text-center text-xs sm:min-h-8"
+        data-testid="announcement-bar"
+      >
         <Container className="py-2">
-          Free shipping on orders over $45 · Subscribe &amp; save 15%
+          {interruptionsEnabled() ? <AnnouncementRotator /> : announcements[0].text}
         </Container>
       </div>
       <Container className="flex h-16 items-center justify-between gap-6">

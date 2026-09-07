@@ -1,8 +1,15 @@
 import { expect, test } from '@playwright/test';
+import { dismissInterruptions, suppressPopup } from './helpers';
+
+test.beforeEach(async ({ page }) => {
+  // The popup is covered by interruptions.spec.ts; here it would only land mid-flow.
+  await suppressPopup(page);
+});
 
 test.describe('home', () => {
   test('renders hero, featured products and navigates to the shop', async ({ page }) => {
     await page.goto('/');
+    await dismissInterruptions(page);
     await expect(page.getByTestId('hero')).toBeVisible();
     await expect(page.getByTestId('product-card')).toHaveCount(4);
     await expect(page.getByTestId('collection-grid').getByRole('link')).toHaveCount(4);
@@ -20,6 +27,7 @@ test.describe('home', () => {
 
   test('newsletter signup succeeds', async ({ page }) => {
     await page.goto('/');
+    await dismissInterruptions(page);
     const form = page.getByTestId('newsletter-form');
     await form.getByRole('textbox').fill(`e2e-${Date.now()}@example.com`);
     await form.getByRole('button').click();
