@@ -1,4 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { suppressPopup } from './helpers';
+
+test.beforeEach(async ({ page }) => {
+  // The popup is covered by interruptions.spec.ts; here it would only land mid-flow.
+  await suppressPopup(page);
+});
 
 test.describe('misc', () => {
   test('404 page', async ({ page }) => {
