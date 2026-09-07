@@ -49,6 +49,9 @@ export async function waitForHydration(page: Page) {
  * after any navigation.
  */
 export async function dismissInterruptions(page: Page) {
+  // The banner is server-rendered, so it is on screen and clickable-looking before React has
+  // attached any handlers. Without this the accept click can land on nothing.
+  await waitForHydration(page);
   // Popup first: it is a modal, so its overlay sits over the cookie banner and would
   // swallow a click aimed at it.
   const popup = page.getByTestId('popup');
