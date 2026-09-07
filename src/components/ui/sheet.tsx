@@ -14,6 +14,11 @@ interface SheetProps {
   testId?: string;
 }
 
+/**
+ * Render this at layout level. Ancestors with `backdrop-filter`, `transform` or
+ * `filter` become the containing block for the fixed wrapper (this is why the
+ * mobile nav's sheet lives outside the header).
+ */
 export function Sheet({
   open,
   onClose,
@@ -29,17 +34,32 @@ export function Sheet({
   // of the sheet disappearing (via `invisible` + unmounted children) the instant `open`
   // flips to false.
   const [rendered, setRendered] = useState(open);
-  // Tracks the previous `open` value so the transition to `rendered = true` on opening can
-  // happen synchronously during render (React's documented pattern for adjusting state in
-  // response to a prop/state change) rather than one tick late from inside an effect.
-  const [wasOpen, setWasOpen] = useState(open);
-  if (open !== wasOpen) {
-    setWasOpen(open);
-    if (open) setRendered(true);
-  }
+  // Whether the sheet has ever been opened. Used below to skip scheduling the
+  // close-timer on mount when the sheet starts closed and has never been shown.
+  const everOpenRef = useRef(open);
 
+  // `rendered` used to be adjusted during render (the documented "adjusting state
+  // in response to a prop change" pattern: `if (open !== wasOpen) { ...
+  // setRendered(true) }`). That was removed because it interacted badly with the
+  // close-timer effect below: that effect also runs on mount when `open` starts
+  // false, scheduling a same-value `setRendered(false)` 300ms later. React
+  // eagerly bails out of that no-op update (the value doesn't change) but still
+  // leaves it enqueued on the hook; the next time the component re-renders for
+  // an unrelated reason, React can replay that stale queued update, which then
+  // clobbers the render-phase `setRendered(true)` that was supposed to open the
+  // sheet. The net effect: opening the sheet any time after ~300ms of idle time
+  // post-hydration silently failed to un-hide it. Doing the "open" transition
+  // from an effect instead avoids ever queuing that stale same-value update.
   useEffect(() => {
-    if (open) return;
+    if (open) {
+      everOpenRef.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- delayed-unmount pattern; see comment above
+      setRendered(true);
+      return;
+    }
+    // Never opened: there is nothing keeping mounted, and scheduling the timer
+    // here is exactly the no-op update that caused the bug above, so skip it.
+    if (!everOpenRef.current) return;
     const timeout = setTimeout(() => setRendered(false), 300);
     return () => clearTimeout(timeout);
   }, [open]);
