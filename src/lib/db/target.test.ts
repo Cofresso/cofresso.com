@@ -18,20 +18,27 @@ describe('resolveDbTarget', () => {
     expect(resolveDbTarget(env)).toBe('postgres://user:pass@example.com:5432/db');
   });
 
-  it('returns a socket options object when DB_SOCKET_DIR and credentials are set', () => {
+  // The socket DIRECTORY belongs in `host`, not `path`: postgres.js appends
+  // `/.s.PGSQL.<port>` to a `host` containing a `/`, while `path` must be the full socket
+  // file path. Passing the directory as `path` connects to a directory (EACCES on Cloud Run).
+  it('returns a socket options object with the directory as host, and no port', () => {
     const env = envWith({
       DB_USER: 'app',
       DB_PASSWORD: 'secret',
       DB_NAME: 'cofresso',
       DB_SOCKET_DIR: '/cloudsql/proj:region:instance',
+      DB_PORT: '5433',
     });
 
-    expect(resolveDbTarget(env)).toEqual({
-      path: '/cloudsql/proj:region:instance',
+    const target = resolveDbTarget(env);
+    expect(target).toEqual({
+      host: '/cloudsql/proj:region:instance',
       user: 'app',
       password: 'secret',
       database: 'cofresso',
     });
+    expect(target).not.toHaveProperty('path');
+    expect(target).not.toHaveProperty('port');
   });
 
   it('returns a TCP options object with the default port when DB_HOST is set and DB_PORT is not', () => {

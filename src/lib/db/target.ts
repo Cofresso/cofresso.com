@@ -11,7 +11,11 @@ function isSet(value: string | undefined): value is string {
  * 1. `DATABASE_URL` — returned as-is (a connection string).
  * 2. `DB_USER` + `DB_PASSWORD` + `DB_NAME` + `DB_SOCKET_DIR` — Cloud SQL Unix
  *    socket, returned as an options object (never a URL, since postgres.js
- *    rejects a URL with an empty host).
+ *    rejects a URL with an empty host). The socket directory goes in `host`,
+ *    NOT `path`: postgres.js appends `/.s.PGSQL.<port>` to a `host` containing
+ *    a `/`, whereas `path` must already be the full socket file path (see
+ *    `parseOptions` in postgres/src/index.js). Passing the directory as `path`
+ *    makes it connect() to a directory, which fails with EACCES on Cloud Run.
  * 3. `DB_HOST` (+ user/password/database) — TCP, returned as an options
  *    object with `DB_PORT` defaulting to 5432.
  *
@@ -24,7 +28,7 @@ export function resolveDbTarget(env: NodeJS.ProcessEnv): DbTarget {
   if (isSet(DATABASE_URL)) return DATABASE_URL;
 
   if (isSet(DB_USER) && isSet(DB_PASSWORD) && isSet(DB_NAME) && isSet(DB_SOCKET_DIR)) {
-    return { path: DB_SOCKET_DIR, user: DB_USER, password: DB_PASSWORD, database: DB_NAME };
+    return { host: DB_SOCKET_DIR, user: DB_USER, password: DB_PASSWORD, database: DB_NAME };
   }
 
   if (isSet(DB_HOST)) {

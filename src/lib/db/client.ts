@@ -12,10 +12,15 @@ function createSql() {
     return postgres(env.DATABASE_URL, common);
   }
   if (env.DB_SOCKET_DIR) {
-    // Cloud Run mounts the Cloud SQL socket at /cloudsql/<connection-name>/.s.PGSQL.5432
+    // Cloud Run mounts the Cloud SQL socket at /cloudsql/<connection-name>/.s.PGSQL.5432.
+    // postgres.js treats a `host` containing a `/` as a socket DIRECTORY and appends
+    // `/.s.PGSQL.<port>` itself, while `path` must already be the full socket FILE path
+    // (see `parseOptions` in postgres/src/index.js: `path: o.path || host.indexOf('/') > -1
+    // && host + '/.s.PGSQL.' + port`). So pass the directory as `host` and no port — passing
+    // it as `path` makes it connect() to a directory, which fails with EACCES on Cloud Run.
     return postgres({
       ...common,
-      path: env.DB_SOCKET_DIR,
+      host: env.DB_SOCKET_DIR,
       user: env.DB_USER,
       password: env.DB_PASSWORD,
       database: env.DB_NAME,
