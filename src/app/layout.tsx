@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { AnalyticsProvider } from '@/components/analytics/analytics-provider';
 import { ConsoleEasterEgg } from '@/components/analytics/console-easter-egg';
 import { ThirdPartyScripts } from '@/components/analytics/third-party-scripts';
+import { Interruptions } from '@/components/interruptions/interruptions';
 import { CartDrawer } from '@/components/layout/cart-drawer';
 import { CartDrawerProvider } from '@/components/layout/cart-drawer-context';
 import { Footer } from '@/components/layout/footer';
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1">{children}</main>
           <Footer />
           <CartDrawer />
+          <Interruptions />
         </CartDrawerProvider>
         <AnalyticsProvider />
         <ConsoleEasterEgg />
