@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { NewsletterForm } from '@/components/marketing/newsletter-form';
 import { ButtonLink } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
+import logo from '../../../../public/logo.png';
 
 export const metadata: Metadata = {
   title: 'Our story',
@@ -44,7 +45,7 @@ export default function AboutPage() {
         </div>
         <div className="bg-espresso flex justify-center rounded-3xl p-12">
           <Image
-            src="/logo.png"
+            src={logo}
             alt="Cofresso double-bean mark"
             width={320}
             height={320}

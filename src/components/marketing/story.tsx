@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { ButtonLink } from '@/components/ui/button';
+import logo from '../../../public/logo.png';
 
 export function Story() {
   return (
@@ -30,7 +31,7 @@ export function Story() {
       </div>
       <div className="flex justify-center">
         <Image
-          src="/logo.png"
+          src={logo}
           alt="Cofresso double-bean mark"
           width={260}
           height={260}
