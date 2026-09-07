@@ -13,6 +13,7 @@ Cofresso is an ecommerce storefront for a fictional coffee roaster. It is a real
 - **Writes are server actions** validated with Zod and returning `ActionResult<T>` (`src/lib/action-result.ts`). Cart actions live in `src/lib/cart/actions.ts`; other actions live in `actions.ts` next to their route.
 - **Pure logic stays pure.** Pricing (`src/lib/pricing`), payments (`src/lib/payments`) and schemas have no I/O and are unit tested.
 - **Schema changes ship with a migration.** Edit `src/lib/db/schema/*`, run `pnpm db:generate`, commit the new file under `drizzle/` in the same PR. Never edit an applied migration.
+- **Imagery is generated, not uploaded.** `content/images.manifest.json` is the source of truth for photography: `pnpm db:seed` upserts it into `product_images` / `collections.hero_image_url`, and `src/lib/images/content.ts` serves the homepage and guide images from it. Regenerate with `pnpm images:generate` (needs `OPENAI_API_KEY`; see the README), commit the manifest, and never hand-edit it. A product with no manifest entry falls back to its SVG in `public/products/`. Public URLs are `https://cofresso.com/assets/...`, served by a CDN-backed GCS bucket, content-addressed and immutable.
 - **Every page is dynamic.** The root layout sets `dynamic = 'force-dynamic'` so `next build` never needs a database.
 - **No secrets in the repo.** Server env is validated in `src/lib/env.ts`. Add new variables there and to `.env.example`.
 - **Card data never touches the database or logs.** Only `card_last4` and the provider reference are stored. Never log a drizzle error either — its `message` embeds the statement and every bound parameter; log `describeDbError(err)` from `src/lib/db/errors.ts` plus the ids you need.
@@ -33,7 +34,9 @@ Cofresso is an ecommerce storefront for a fictional coffee roaster. It is a real
 | `src/lib/pricing` `payments` `cart` `checkout`                      | Domain logic; `cart/queries.ts` and `checkout/queries.ts` hold their own reads       |
 | `src/lib/interruptions`                                             | Interruption config, consent/suppression/toast/countdown helpers, chat script        |
 | `src/lib/analytics`                                                 | Typed events + `track()`; SDK slot in `components/analytics/third-party-scripts.tsx` |
+| `src/lib/images`                                                    | Manifest schema, prompts, alt text, generation orchestration, gallery math           |
 | `src/content`                                                       | Brew guides and FAQ as typed data                                                    |
+| `content/images.manifest.json`                                      | Generated imagery manifest (committed; written by `pnpm images:generate`)            |
 | `scripts/`                                                          | `db.ts` CLI (bundled to `dist/db.mjs` for the image), product art generator          |
 | `drizzle/`                                                          | Migrations                                                                           |
 | `tests/`                                                            | Integration and e2e tests                                                            |
@@ -43,7 +46,8 @@ Cofresso is an ecommerce storefront for a fictional coffee roaster. It is a real
 
 ## Common tasks
 
-- **Add a product:** edit `src/lib/db/seed/data.ts`, run `pnpm art:generate` and `pnpm db:seed`.
+- **Add a product:** edit `src/lib/db/seed/data.ts`, run `pnpm art:generate` (SVG fallback), `pnpm images:generate --only <slug>` (photography) and `pnpm db:seed`.
+- **Regenerate one image:** `pnpm images:generate --only <slug> --force`, then `pnpm db:seed`. Commit the manifest change.
 - **Add a page:** create `page.tsx` under the right route group; add it to `src/app/sitemap.ts` if public.
 - **Change pricing rules:** edit `src/lib/pricing`, update `src/lib/pricing/index.test.ts` first.
 - **Add an analytics event:** extend the union in `src/lib/analytics/events.ts`; call `track()` from a client component.
