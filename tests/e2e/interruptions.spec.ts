@@ -189,6 +189,8 @@ test.describe('chat bubble', () => {
 
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('chat-panel')).toBeHidden();
+    // Focus has to come back to the bubble, which is display:none while the panel is open.
+    await expect(page.getByTestId('chat-bubble')).toBeFocused();
   });
 
   test('shows an unread badge until it is opened', async ({ page }) => {

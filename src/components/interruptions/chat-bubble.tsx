@@ -106,8 +106,16 @@ export function ChatBubble() {
       if (e.key === 'Escape') setChatOpen(false);
     };
     document.addEventListener('keydown', onKey);
+    const bubble = bubbleRef.current;
     panelRef.current?.focus();
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      // Focus goes back to the bubble here rather than in the close handler: the bubble is
+      // `display:none` while the panel is open, so focusing it before React has committed the
+      // DOM that makes it visible again is silently a no-op and focus falls to <body>. This
+      // cleanup runs after that commit, and it covers Escape as well as the close button.
+      if (bubble?.isConnected) bubble.focus();
+    };
   }, [chatOpen, setChatOpen]);
 
   useEffect(() => {
@@ -124,10 +132,7 @@ export function ChatBubble() {
     track({ name: 'chat_opened' });
   }, [setChatOpen]);
 
-  const close = useCallback(() => {
-    setChatOpen(false);
-    bubbleRef.current?.focus();
-  }, [setChatOpen]);
+  const close = useCallback(() => setChatOpen(false), [setChatOpen]);
 
   const ask = useCallback(
     (reply: ChatQuickReply) => {
