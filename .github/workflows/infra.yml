@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - run: terraform fmt -check -recursive -diff
       - run: terraform init -backend=false
       - run: terraform validate
@@ -45,7 +45,7 @@ jobs:
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_PLANNER_SA }}
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_wrapper: false
       - run: terraform init
@@ -83,7 +83,7 @@ jobs:
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_APPLIER_SA }}
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_wrapper: false
       - run: terraform init
