@@ -187,9 +187,11 @@ jobs:
 
       - name: Migrate and seed preview database
         run: |
+          # One execution, no --args: the job's own args are `dist/db.mjs deploy`, which
+          # migrates then seeds. gcloud 548.x cannot send arg overrides on `jobs execute`
+          # (it fails client-side on an unknown `priorityTier` field).
           gcloud run jobs update cofresso-migrate-preview --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
           gcloud run jobs execute cofresso-migrate-preview --region "$REGION" --project "$PROJECT_ID" --wait
-          gcloud run jobs execute cofresso-migrate-preview --region "$REGION" --project "$PROJECT_ID" --wait --args="dist/db.mjs,seed"
 
       - name: Deploy tagged revision (no traffic)
         run: |
@@ -306,9 +308,11 @@ jobs:
 
       - name: Migrate and seed production database
         run: |
+          # One execution, no --args: the job's own args are `dist/db.mjs deploy`, which
+          # migrates then seeds. gcloud 548.x cannot send arg overrides on `jobs execute`
+          # (it fails client-side on an unknown `priorityTier` field).
           gcloud run jobs update cofresso-migrate --image "${{ steps.meta.outputs.image }}" --region "$REGION" --project "$PROJECT_ID" --quiet
           gcloud run jobs execute cofresso-migrate --region "$REGION" --project "$PROJECT_ID" --wait
-          gcloud run jobs execute cofresso-migrate --region "$REGION" --project "$PROJECT_ID" --wait --args="dist/db.mjs,seed"
 
       - name: Deploy
         run: |
