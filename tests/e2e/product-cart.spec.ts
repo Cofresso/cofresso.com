@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { addToCart, closeDrawer } from './helpers';
+import { addToCart, closeDrawer, dismissInterruptions } from './helpers';
 
 test.describe('product and cart', () => {
   test('variant and subscription change the price, add to cart opens the drawer', async ({
     page,
   }) => {
     await page.goto('/products/morning-frame');
+    await dismissInterruptions(page);
     await expect(page.getByTestId('product-title')).toHaveText('Morning Frame');
     await expect(page.getByTestId('selected-price')).toHaveText('$18.00');
     await page.getByRole('radio', { name: /2 lb/ }).click();

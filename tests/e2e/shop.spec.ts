@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { dismissInterruptions } from './helpers';
 
 test.describe('shop', () => {
   test('filters by roast and sorts by price', async ({ page }) => {
     await page.goto('/shop');
+    await dismissInterruptions(page);
     await expect(page.getByTestId('product-card')).toHaveCount(18);
     await page.getByTestId('filter-roast').selectOption('light');
     await expect(page).toHaveURL(/roast=light/);
@@ -22,6 +24,7 @@ test.describe('shop', () => {
 
   test('collection pages and search work', async ({ page }) => {
     await page.goto('/collections/equipment');
+    await dismissInterruptions(page);
     await expect(page.getByTestId('collection-title')).toHaveText('Equipment');
     await expect(page.getByTestId('product-card')).toHaveCount(6);
 

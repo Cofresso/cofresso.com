@@ -1,11 +1,31 @@
 import { expect, type Page } from '@playwright/test';
 
+/**
+ * Clear the interruptions a real visitor has to get past before they can use the page: accept
+ * the cookie banner, close the email-capture popup if it has already fired. Idempotent and a
+ * no-op when nothing is showing (including when `UX_INTERRUPTIONS=off`), so specs can call it
+ * after any navigation.
+ */
+export async function dismissInterruptions(page: Page) {
+  const banner = page.getByTestId('cookie-banner');
+  if (await banner.isVisible()) {
+    await page.getByTestId('consent-accept').click();
+    await expect(banner).toBeHidden();
+  }
+  const popup = page.getByTestId('popup');
+  if (await popup.isVisible()) {
+    await page.getByTestId('popup-dismiss').click();
+    await expect(popup).toBeHidden();
+  }
+}
+
 export async function addToCart(
   page: Page,
   slug: string,
   options: { size?: string; subscription?: boolean } = {},
 ) {
   await page.goto(`/products/${slug}`);
+  await dismissInterruptions(page);
   if (options.size) await page.getByRole('radio', { name: new RegExp(options.size) }).click();
   if (options.subscription) await page.getByRole('radio', { name: /subscribe/i }).click();
   await page.getByTestId('add-to-cart').click();
