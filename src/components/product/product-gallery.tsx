@@ -91,6 +91,10 @@ export function ProductGallery({ images, fallback, className }: ProductGalleryPr
     if (direction !== 0) go(direction);
   }
 
+  function onPointerCancel() {
+    pointerStartX.current = null;
+  }
+
   return (
     <div
       className={`flex flex-col gap-3 ${className ?? ''}`}
@@ -102,10 +106,10 @@ export function ProductGallery({ images, fallback, className }: ProductGalleryPr
       onKeyDown={onKeyDown}
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
     >
       <div className="bg-foam relative aspect-square overflow-hidden rounded-3xl">
         <Image
-          key={current.url}
           src={current.url}
           alt={current.alt}
           fill
@@ -136,7 +140,10 @@ export function ProductGallery({ images, fallback, className }: ProductGalleryPr
             </button>
           </>
         ) : null}
-        <p className="bg-espresso/70 text-foam absolute bottom-3 left-3 rounded-full px-3 py-1 text-xs">
+        <p
+          className="bg-espresso/70 text-foam absolute bottom-3 left-3 rounded-full px-3 py-1 text-xs"
+          aria-live="polite"
+        >
           {active + 1} / {images.length}
         </p>
       </div>

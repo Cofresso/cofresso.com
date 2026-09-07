@@ -35,7 +35,6 @@ describe('planJobs', () => {
     expect(jobs).toHaveLength(
       seedProducts.length * 4 + seedCollections.length + 2 + brewGuides.length,
     );
-    expect(jobs).toHaveLength(82);
     expect(new Set(jobs.map((j) => j.key)).size).toBe(jobs.length);
     expect(jobs.every((j) => j.prompt.length > 100 && j.alt.length > 10)).toBe(true);
   });

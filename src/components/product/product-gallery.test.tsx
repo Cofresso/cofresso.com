@@ -108,4 +108,9 @@ describe('ProductGallery', () => {
     expect(screen.queryByTestId('gallery-next')).toBeNull();
     expect(screen.getByTestId('gallery-thumb-0')).toBeInTheDocument();
   });
+
+  it('announces the position counter politely so screen readers hear it change', () => {
+    setup();
+    expect(screen.getByText('1 / 4')).toHaveAttribute('aria-live', 'polite');
+  });
 });
