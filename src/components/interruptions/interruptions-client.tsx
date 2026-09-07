@@ -4,6 +4,7 @@ import type { Consent } from '@/lib/interruptions/consent';
 import { ChatBubble } from './chat-bubble';
 import { CookieBanner } from './cookie-banner';
 import { EmailCaptureModal } from './email-capture-modal';
+import { SocialProofToasts } from './social-proof-toasts';
 import { InterruptionStateProvider } from './state';
 
 /**
@@ -17,6 +18,7 @@ export function InterruptionsClient({ consent }: { consent: Consent | null }) {
       <CookieBanner consent={consent} />
       <EmailCaptureModal />
       <ChatBubble />
+      <SocialProofToasts />
     </InterruptionStateProvider>
   );
 }
