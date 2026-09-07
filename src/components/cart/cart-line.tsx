@@ -1,8 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
+import { ProductThumbnail } from '@/components/product/product-thumbnail';
 import { QuantityStepper } from '@/components/ui/quantity-stepper';
 import { track } from '@/lib/analytics/track';
 import { removeCartLineAction, updateCartLineAction } from '@/lib/cart/actions';
@@ -10,7 +10,7 @@ import type { CartLine as CartLineData } from '@/lib/cart/types';
 import { grindLabel, purchaseTypeLabel } from '@/lib/catalog/labels';
 import { formatPrice } from '@/lib/pricing';
 
-export function CartLine({ line, compact = false }: { line: CartLineData; compact?: boolean }) {
+export function CartLine({ line }: { line: CartLineData }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -47,17 +47,11 @@ export function CartLine({ line, compact = false }: { line: CartLineData; compac
 
   return (
     <li className="flex gap-4 py-4" data-testid="cart-line" data-line-id={line.id}>
-      <Link
-        href={`/products/${line.product.slug}`}
-        className="bg-cream shrink-0 overflow-hidden rounded-lg"
-      >
-        <Image
-          src={line.product.imagePath}
-          alt={line.product.name}
-          width={compact ? 72 : 96}
-          height={compact ? 90 : 120}
-          unoptimized
-          className="h-auto w-[72px] sm:w-24"
+      <Link href={`/products/${line.product.slug}`} className="shrink-0">
+        <ProductThumbnail
+          image={line.product.image}
+          className="w-[72px] sm:w-24"
+          sizes="(min-width: 640px) 96px, 72px"
         />
       </Link>
       <div className="flex flex-1 flex-col gap-1">

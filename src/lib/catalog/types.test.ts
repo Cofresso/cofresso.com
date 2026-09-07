@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ProductImage } from '@/lib/db/schema';
-import { hoverImage, imageOfKind, primaryImage } from './types';
+import { hoverImage, imageOfKind, primaryImage, thumbnailImage } from './types';
 
 function image(kind: ProductImage['kind'], position: number): ProductImage {
   return {
@@ -34,5 +34,21 @@ describe('image selectors', () => {
     expect(hoverImage(all)?.kind).toBe('lifestyle');
     expect(hoverImage([image('front', 0), image('detail', 1)])?.kind).toBe('detail');
     expect(hoverImage([image('front', 0)])).toBeUndefined();
+  });
+
+  it('builds the thumbnail from the lead photograph, else the SVG art', () => {
+    const product = { name: 'Morning Frame', imagePath: '/products/morning-frame.svg' };
+    expect(thumbnailImage(product, all)).toEqual({
+      src: 'https://cofresso.com/assets/products/x/x-front-deadbeef.webp',
+      alt: 'x front',
+    });
+    expect(thumbnailImage(product, [image('lifestyle', 2)])).toEqual({
+      src: 'https://cofresso.com/assets/products/x/x-lifestyle-deadbeef.webp',
+      alt: 'x lifestyle',
+    });
+    expect(thumbnailImage(product, [])).toEqual({
+      src: '/products/morning-frame.svg',
+      alt: 'Morning Frame',
+    });
   });
 });

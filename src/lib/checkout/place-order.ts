@@ -1,6 +1,7 @@
 import { eq, inArray, sql } from 'drizzle-orm';
 import { randomBytes } from 'node:crypto';
 import { clearCart } from '@/lib/cart/mutations';
+import { thumbnailImage } from '@/lib/catalog/types';
 import { getDb, type Db } from '@/lib/db/client';
 import { describeDbError, pgErrorField } from '@/lib/db/errors';
 import {
@@ -113,9 +114,12 @@ export async function placeOrder(params: {
         .where(inArray(productVariants.id, variantIds))
         .for('update');
       const variantById = new Map(lockedVariants.map((v) => [v.id, v]));
+      // `images` is needed so the order snapshot keeps the photograph the shopper saw in
+      // the cart rather than the SVG fallback in `products.image_path`.
       const products = await tx.query.products.findMany({
         where: (p, { inArray: inArr }) =>
           inArr(p.id, [...new Set(lockedVariants.map((v) => v.productId))]),
+        with: { images: true },
       });
       const productById = new Map(products.map((p) => [p.id, p]));
 
@@ -235,7 +239,7 @@ export async function placeOrder(params: {
             productName: product.name,
             productSlug: product.slug,
             variantName: variant.name,
-            imagePath: product.imagePath,
+            imagePath: thumbnailImage(product, product.images).src,
             grind: item.grind,
             purchaseType: item.purchaseType,
             subscriptionIntervalWeeks: item.subscriptionIntervalWeeks,

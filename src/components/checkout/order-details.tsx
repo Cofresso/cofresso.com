@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import Link from 'next/link';
+import { ProductThumbnail } from '@/components/product/product-thumbnail';
 import { Badge } from '@/components/ui/badge';
 import { grindLabel, purchaseTypeLabel } from '@/lib/catalog/labels';
 import type { OrderView } from '@/lib/checkout/queries';
@@ -32,13 +32,11 @@ export function OrderDetails({ order }: { order: OrderView }) {
         <ul className="divide-latte/20 bg-foam divide-y rounded-2xl px-6">
           {order.items.map((item) => (
             <li key={item.id} className="flex items-center gap-4 py-4">
-              <Image
-                src={item.imagePath}
-                alt=""
-                width={64}
-                height={80}
-                unoptimized
-                className="bg-cream h-auto w-16 rounded-lg"
+              <ProductThumbnail
+                image={{ src: item.imagePath, alt: item.productName }}
+                className="w-16"
+                sizes="64px"
+                decorative
               />
               <div className="flex-1 text-sm">
                 <Link
