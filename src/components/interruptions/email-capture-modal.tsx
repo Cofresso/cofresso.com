@@ -98,6 +98,10 @@ export function EmailCaptureModal() {
     setPopupOpen(open);
   }, [open, setPopupOpen]);
 
+  // Reported once per mount, not once per session: a full navigation remounts this and the
+  // popup is genuinely due again, so a second page view that reaches the popup reports a second
+  // `popup_shown`. The ref only stops a re-report when `open` flickers within one mount — for
+  // instance a client-side navigation onto checkout and back.
   useEffect(() => {
     if (!open || !trigger || shownRef.current) return;
     shownRef.current = true;
@@ -113,7 +117,10 @@ export function EmailCaptureModal() {
 
   const close = useCallback(() => {
     setClosed(true);
-    if (!subscribedRef.current) remember('dismissed');
+    // Closing the success panel is not a dismissal — the visitor did exactly what was asked,
+    // and reporting it as one would understate the popup's conversion rate.
+    if (subscribedRef.current) return;
+    remember('dismissed');
     track({ name: 'popup_dismissed' });
   }, []);
 

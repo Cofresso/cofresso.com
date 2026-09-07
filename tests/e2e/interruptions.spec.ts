@@ -35,6 +35,15 @@ async function openWithFrozenClock(page: Page, path: string) {
  * 200ms so the fade-out can play, which under a frozen clock would otherwise never elapse —
  * the panel is genuinely still on screen, just transparent and click-through.
  */
+/** The `track()` buffer, in order, as event names. */
+async function trackedEventNames(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const buffered = (window as unknown as { cofresso?: { events: { event: { name: string } }[] } })
+      .cofresso;
+    return (buffered?.events ?? []).map((e) => e.event.name);
+  });
+}
+
 async function dismissPopup(page: Page) {
   await page.getByTestId('popup-dismiss').click();
   await page.clock.fastForward(500);
@@ -75,6 +84,11 @@ test.describe('email capture popup', () => {
     await expect(page.getByTestId('popup-success')).toBeVisible();
     await expect(page.getByTestId('popup-code')).toHaveText(popup.code);
     await expect(page.getByTestId('popup-form')).toHaveCount(0);
+
+    // Closing the success panel is not a dismissal — the visitor did what was asked.
+    await dismissPopup(page);
+    expect(await trackedEventNames(page)).toContain('newsletter_signup');
+    expect(await trackedEventNames(page)).not.toContain('popup_dismissed');
   });
 
   test('stays dismissed across a reload', async ({ page }) => {
