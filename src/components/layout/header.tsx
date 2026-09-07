@@ -17,7 +17,14 @@ export async function Header() {
 
   return (
     <header className="border-latte/20 bg-cream/90 sticky top-0 z-40 border-b backdrop-blur">
-      <div className="bg-espresso text-foam text-center text-xs" data-testid="announcement-bar">
+      {/* The height is reserved rather than left to the content: the rotator swaps messages of
+          different lengths every 6s, and on a narrow viewport some of them wrap while others do
+          not, which would make this sticky bar (and everything below it) jump. Two lines below
+          `sm`, one line above, where nothing wraps. */}
+      <div
+        className="bg-espresso text-foam flex min-h-12 items-center text-center text-xs sm:min-h-8"
+        data-testid="announcement-bar"
+      >
         <Container className="py-2">
           {interruptionsEnabled() ? <AnnouncementRotator /> : announcements[0].text}
         </Container>

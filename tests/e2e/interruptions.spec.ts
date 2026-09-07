@@ -1,8 +1,11 @@
-import { expect, test, type Page } from '@playwright/test';
+import { devices, expect, test, type Page } from '@playwright/test';
+import { announcements } from '../../src/lib/interruptions/announcements';
 import { interruptionsConfig } from '../../src/lib/interruptions/config';
 import { addToCart, waitForHydration } from './helpers';
 
 const { popup, chat, toasts, announcement } = interruptionsConfig;
+
+const { defaultBrowserType: _webkit, ...iPhone13 } = devices['iPhone 13'];
 
 /** Local noon, well clear of midnight so the countdown assertions have room either side. */
 const CLOCK_START = new Date('2026-09-06T12:00:00-07:00');
@@ -242,6 +245,29 @@ test.describe('announcement rotator', () => {
 
     await page.clock.fastForward(2_000);
     await expect(countdown).toHaveText('11:59:52');
+  });
+
+  test.describe('on a phone', () => {
+    // Everything from the iPhone 13 descriptor except `defaultBrowserType`, which would force
+    // a WebKit worker; the suite is Chromium and the emulated viewport is what matters here.
+    test.use(iPhone13);
+
+    test('keeps the sticky bar the same height across a full rotation', async ({ page }) => {
+      await openWithFrozenClock(page, '/orders');
+      const bar = page.getByTestId('announcement-bar');
+
+      const heights: number[] = [];
+      // One extra step so the sequence wraps back round to message 0.
+      for (let i = 0; i <= announcements.length; i++) {
+        heights.push((await bar.boundingBox())!.height);
+        await page.clock.fastForward(announcement.rotateMs);
+      }
+
+      expect(
+        new Set(heights).size,
+        `the sticky announcement bar changed height as it rotated: ${heights.join(', ')}px`,
+      ).toBe(1);
+    });
   });
 });
 
