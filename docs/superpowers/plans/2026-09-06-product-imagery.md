@@ -619,9 +619,7 @@ export function serializeManifest(manifest: ImagesManifest): string {
 const KIND_ORDER = new Map<ImageKind, number>(IMAGE_KINDS.map((k, i) => [k, i]));
 
 /** Gallery display order: front, detail, lifestyle, packaging. */
-export function sortProductImages(
-  images: readonly ManifestProductImage[],
-): ManifestProductImage[] {
+export function sortProductImages(images: readonly ManifestProductImage[]): ManifestProductImage[] {
   return [...images].sort((a, b) => (KIND_ORDER.get(a.kind) ?? 0) - (KIND_ORDER.get(b.kind) ?? 0));
 }
 ```
@@ -678,9 +676,7 @@ describe('paths', () => {
   });
 
   it('builds public URLs under the assets base', () => {
-    expect(assetUrl('home/hero-deadbeef.webp')).toBe(
-      `${ASSETS_BASE_URL}/home/hero-deadbeef.webp`,
-    );
+    expect(assetUrl('home/hero-deadbeef.webp')).toBe(`${ASSETS_BASE_URL}/home/hero-deadbeef.webp`);
   });
 
   it('pins the immutable cache header and content type', () => {
@@ -738,7 +734,13 @@ Run: `pnpm test:unit src/lib/images/paths` → PASS.
 ```ts
 import { describe, expect, it } from 'vitest';
 import { IMAGE_KINDS } from '@/lib/db/schema/values';
-import { collectionAltText, guideAltText, homeAltText, productAltText, type AltProduct } from './alt';
+import {
+  collectionAltText,
+  guideAltText,
+  homeAltText,
+  productAltText,
+  type AltProduct,
+} from './alt';
 
 const coffee: AltProduct = {
   name: 'Ethiopia Yirgacheffe',
@@ -1085,16 +1087,12 @@ function productSubject(product: PromptProduct, kind: ImageKind): string {
     return `Subject: a ${shape} finished in the colour ${product.art.accent} — the Cofresso ${product.name}.`;
   }
   const origin = product.origin ? ` of ${product.origin} coffee` : ' of coffee';
-  const roast = product.roastLevel
-    ? ` It is a ${product.roastLevel.replace('_', ' ')} roast.`
-    : '';
+  const roast = product.roastLevel ? ` It is a ${product.roastLevel.replace('_', ' ')} roast.` : '';
   const notes = product.tastingNotes.length
     ? ` The coffee tastes of ${product.tastingNotes.join(', ')}.`
     : '';
   const beans =
-    kind === 'detail'
-      ? ' Show loose roasted whole beans spilling from the open bag.'
-      : '';
+    kind === 'detail' ? ' Show loose roasted whole beans spilling from the open bag.' : '';
   return `Subject: a matte ${shape}${origin} named ${product.name}, with a flat label panel in the colour ${product.art.accent} carrying the word "Cofresso".${roast}${notes}${beans}`;
 }
 
@@ -1385,13 +1383,17 @@ describe('mapWithConcurrency', () => {
   it('never exceeds the limit', async () => {
     let inFlight = 0;
     let peak = 0;
-    await mapWithConcurrency(Array.from({ length: 20 }, (_, i) => i), 6, async (i) => {
-      inFlight += 1;
-      peak = Math.max(peak, inFlight);
-      await tick();
-      inFlight -= 1;
-      return i;
-    });
+    await mapWithConcurrency(
+      Array.from({ length: 20 }, (_, i) => i),
+      6,
+      async (i) => {
+        inFlight += 1;
+        peak = Math.max(peak, inFlight);
+        await tick();
+        inFlight -= 1;
+        return i;
+      },
+    );
     expect(peak).toBeLessThanOrEqual(6);
     expect(peak).toBeGreaterThan(1);
   });
@@ -1482,7 +1484,9 @@ function deps(overrides: Partial<ImageDeps> = {}): ImageDeps {
 describe('planJobs', () => {
   it('plans four jobs per product plus collections, home and guides', () => {
     const jobs = planJobs();
-    expect(jobs).toHaveLength(seedProducts.length * 4 + seedCollections.length + 2 + brewGuides.length);
+    expect(jobs).toHaveLength(
+      seedProducts.length * 4 + seedCollections.length + 2 + brewGuides.length,
+    );
     expect(jobs).toHaveLength(82);
     expect(new Set(jobs.map((j) => j.key)).size).toBe(jobs.length);
     expect(jobs.every((j) => j.prompt.length > 100 && j.alt.length > 10)).toBe(true);
@@ -1491,7 +1495,9 @@ describe('planJobs', () => {
   it('uses 3:2 for lifestyle and every banner, square otherwise', () => {
     const jobs = planJobs();
     const landscape = jobs.filter((j) => j.size === '1536x1024');
-    expect(landscape).toHaveLength(seedProducts.length + seedCollections.length + 2 + brewGuides.length);
+    expect(landscape).toHaveLength(
+      seedProducts.length + seedCollections.length + 2 + brewGuides.length,
+    );
     expect(jobs.filter((j) => j.size === '1024x1024')).toHaveLength(seedProducts.length * 3);
   });
 
@@ -1867,8 +1873,7 @@ export async function runImageJobs(
   }
 
   type Outcome =
-    | { ok: true; job: ImageJob; entry: ManifestImage }
-    | { ok: false; job: ImageJob; error: string };
+    { ok: true; job: ImageJob; entry: ManifestImage } | { ok: false; job: ImageJob; error: string };
 
   const outcomes = await mapWithConcurrency(
     pending,
@@ -2087,7 +2092,9 @@ async function main(): Promise<void> {
   const model = await resolveModel(openai, flags.model);
   const bucket = createStorage().bucket(flags.bucket);
 
-  console.log(`Model: ${model}. Bucket: gs://${flags.bucket}. Concurrency: ${flags.concurrency ?? 6}.`);
+  console.log(
+    `Model: ${model}. Bucket: gs://${flags.bucket}. Concurrency: ${flags.concurrency ?? 6}.`,
+  );
 
   const deps: ImageDeps = {
     async generate({ prompt, size, model: modelId }) {
@@ -2434,13 +2441,7 @@ Expected: `Applying migrations from …/drizzle... Migrations applied.`
 ```ts
 import { describe, expect, it } from 'vitest';
 import { IMAGE_KINDS } from '@/lib/db/schema/values';
-import {
-  collectionImage,
-  contentImages,
-  guideImage,
-  homeImage,
-  productImagesFor,
-} from './content';
+import { collectionImage, contentImages, guideImage, homeImage, productImagesFor } from './content';
 import { ASSETS_BASE_URL, imagesManifestSchema } from './manifest';
 
 describe('contentImages', () => {
@@ -2822,10 +2823,7 @@ export async function runSeed(db: Db, options: SeedOptions = {}): Promise<SeedSu
         .delete(productImages)
         .where(
           keptKinds.length
-            ? and(
-                eq(productImages.productId, productId),
-                notInArray(productImages.kind, keptKinds),
-              )
+            ? and(eq(productImages.productId, productId), notInArray(productImages.kind, keptKinds))
             : eq(productImages.productId, productId),
         );
     }
@@ -3023,9 +3021,7 @@ export function imageOfKind(
 
 /** The card and PDP lead image. */
 export function primaryImage(images: readonly ProductImage[]): ProductImage | undefined {
-  return (
-    imageOfKind(images, 'front') ?? [...images].sort((a, b) => a.position - b.position)[0]
-  );
+  return imageOfKind(images, 'front') ?? [...images].sort((a, b) => a.position - b.position)[0];
 }
 
 /** The card's hover swap: a scene if we have one, otherwise a close-up. */
@@ -3101,49 +3097,49 @@ const withCardRelations = {
 Declare that constant just below `toCard`, then use it in `listProducts`, `listFeaturedProducts`, `listRelatedProducts` and `searchProducts`:
 
 ```ts
-  const rows = await db.query.products.findMany({
-    where: and(...conditions),
-    with: withCardRelations,
-  });
+const rows = await db.query.products.findMany({
+  where: and(...conditions),
+  with: withCardRelations,
+});
 ```
 
 ```ts
-  const rows = await db.query.products.findMany({
-    where: and(eq(products.active, true), eq(products.featured, true)),
-    with: withCardRelations,
-    orderBy: [asc(products.name)],
-    limit,
-  });
+const rows = await db.query.products.findMany({
+  where: and(eq(products.active, true), eq(products.featured, true)),
+  with: withCardRelations,
+  orderBy: [asc(products.name)],
+  limit,
+});
 ```
 
 ```ts
-  const rows = await db.query.products.findMany({
-    where: and(
-      eq(products.active, true),
-      ne(products.id, product.id),
-      eq(products.category, product.category),
+const rows = await db.query.products.findMany({
+  where: and(
+    eq(products.active, true),
+    ne(products.id, product.id),
+    eq(products.category, product.category),
+  ),
+  with: withCardRelations,
+  orderBy: [desc(products.featured), asc(products.name)],
+  limit,
+});
+```
+
+```ts
+const rows = await db.query.products.findMany({
+  where: and(
+    eq(products.active, true),
+    or(
+      ilike(products.name, pattern),
+      ilike(products.tagline, pattern),
+      ilike(products.origin, pattern),
+      ilike(products.region, pattern),
+      sql`array_to_string(${products.tastingNotes}, ' ') ilike ${pattern}`,
     ),
-    with: withCardRelations,
-    orderBy: [desc(products.featured), asc(products.name)],
-    limit,
-  });
-```
-
-```ts
-  const rows = await db.query.products.findMany({
-    where: and(
-      eq(products.active, true),
-      or(
-        ilike(products.name, pattern),
-        ilike(products.tagline, pattern),
-        ilike(products.origin, pattern),
-        ilike(products.region, pattern),
-        sql`array_to_string(${products.tastingNotes}, ' ') ilike ${pattern}`,
-      ),
-    ),
-    with: withCardRelations,
-    orderBy: [desc(products.featured), asc(products.name)],
-  });
+  ),
+  with: withCardRelations,
+  orderBy: [desc(products.featured), asc(products.name)],
+});
 ```
 
 4. `getProductBySlug` keeps its own `with` (it needs full reviews and collections):
@@ -3177,36 +3173,36 @@ export async function getProductBySlug(
 `tests/integration/catalog.test.ts` — add these two tests inside the existing `describe('catalog queries', …)` block, and extend the imports at the top with `import { primaryImage } from '../../src/lib/catalog/types';`:
 
 ```ts
-  it('returns product images in position order on cards and detail', async () => {
-    const items = await listProducts(undefined, db);
-    for (const item of items) {
-      const positions = item.images.map((i) => i.position);
-      expect(positions).toEqual([...positions].sort((a, b) => a - b));
-      expect(new Set(item.images.map((i) => i.kind)).size).toBe(item.images.length);
-      for (const image of item.images) {
-        expect(image.productId).toBe(item.product.id);
-        expect(image.url).toContain('/assets/');
-        expect(image.alt.length).toBeGreaterThan(0);
-      }
+it('returns product images in position order on cards and detail', async () => {
+  const items = await listProducts(undefined, db);
+  for (const item of items) {
+    const positions = item.images.map((i) => i.position);
+    expect(positions).toEqual([...positions].sort((a, b) => a - b));
+    expect(new Set(item.images.map((i) => i.kind)).size).toBe(item.images.length);
+    for (const image of item.images) {
+      expect(image.productId).toBe(item.product.id);
+      expect(image.url).toContain('/assets/');
+      expect(image.alt.length).toBeGreaterThan(0);
     }
+  }
 
-    const detail = await getProductBySlug('morning-frame', db);
-    expect(detail!.images.map((i) => i.position)).toEqual(
-      detail!.images.map((_, i) => i).slice(0, detail!.images.length),
-    );
-    if (detail!.images.length > 0) expect(primaryImage(detail!.images)!.kind).toBe('front');
-  });
+  const detail = await getProductBySlug('morning-frame', db);
+  expect(detail!.images.map((i) => i.position)).toEqual(
+    detail!.images.map((_, i) => i).slice(0, detail!.images.length),
+  );
+  if (detail!.images.length > 0) expect(primaryImage(detail!.images)!.kind).toBe('front');
+});
 
-  it('exposes collection hero columns', async () => {
-    const list = await listCollections(db);
-    for (const collection of list) {
-      expect(collection).toHaveProperty('heroImageUrl');
-      expect(collection).toHaveProperty('heroImageAlt');
-      if (collection.heroImageUrl) expect(collection.heroImageUrl).toContain('/assets/');
-    }
-    const blends = await getCollectionBySlug('blends', db);
-    expect(blends).toHaveProperty('heroImageUrl');
-  });
+it('exposes collection hero columns', async () => {
+  const list = await listCollections(db);
+  for (const collection of list) {
+    expect(collection).toHaveProperty('heroImageUrl');
+    expect(collection).toHaveProperty('heroImageAlt');
+    if (collection.heroImageUrl) expect(collection.heroImageUrl).toContain('/assets/');
+  }
+  const blends = await getCollectionBySlug('blends', db);
+  expect(blends).toHaveProperty('heroImageUrl');
+});
 ```
 
 Both tests pass with an empty manifest (the loops are vacuous) and tighten automatically once the manifest is populated. That is deliberate: the app PR must not depend on the paid run having finished.
@@ -3607,7 +3603,7 @@ export function ProductGallery({ images, fallback, className }: ProductGalleryPr
               aria-current={i === active ? 'true' : undefined}
               data-testid={`gallery-thumb-${i}`}
               className={`bg-foam relative block aspect-square w-full overflow-hidden rounded-xl border-2 transition-colors ${
-                i === active ? 'border-copper' : 'border-transparent hover:border-latte/60'
+                i === active ? 'border-copper' : 'hover:border-latte/60 border-transparent'
               }`}
             >
               <Image src={image.url} alt="" fill sizes="120px" className="object-cover" />
@@ -3672,9 +3668,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 3. Destructure `images` and use every generated URL in the JSON-LD. Replace the `const { product, … } = data;` line and the `image:` line of `jsonLd`:
 
 ```ts
-  const { product, variants, rating, images, collections, reviews } = data;
-  const related = await listRelatedProducts(product, 4);
-  const base = getServerEnv().SITE_URL;
+const { product, variants, rating, images, collections, reviews } = data;
+const related = await listRelatedProducts(product, 4);
+const base = getServerEnv().SITE_URL;
 ```
 
 ```ts
@@ -3684,16 +3680,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 4. Replace the whole image column (the `<div className="bg-foam relative overflow-hidden rounded-3xl">` block) with the gallery plus an overlay for the badges:
 
 ```tsx
-        <div className="relative">
-          <ProductGallery
-            images={images}
-            fallback={{ src: product.imagePath, alt: product.name }}
-          />
-          <div className="pointer-events-none absolute top-4 left-4 z-20 flex gap-2">
-            {product.roastLevel ? <Badge>{roastLabel(product.roastLevel)} roast</Badge> : null}
-            {product.featured ? <Badge tone="copper">Staff pick</Badge> : null}
-          </div>
-        </div>
+<div className="relative">
+  <ProductGallery images={images} fallback={{ src: product.imagePath, alt: product.name }} />
+  <div className="pointer-events-none absolute top-4 left-4 z-20 flex gap-2">
+    {product.roastLevel ? <Badge>{roastLabel(product.roastLevel)} roast</Badge> : null}
+    {product.featured ? <Badge tone="copper">Staff pick</Badge> : null}
+  </div>
+</div>
 ```
 
 The badges stay server-rendered (no client cost) and sit above the gallery's own controls at `z-20`.
@@ -3775,62 +3768,62 @@ import {
 ```
 
 ```tsx
-  const { product, variants, rating, images } = data;
+const { product, variants, rating, images } = data;
 ```
 
 ```tsx
-      <Link
-        href={`/products/${product.slug}`}
-        className="bg-foam relative block overflow-hidden rounded-2xl"
-      >
-        {lead ? (
-          <div className="relative aspect-[4/5] w-full">
-            <Image
-              src={lead.url}
-              alt={lead.alt}
-              fill
-              sizes="(min-width: 1024px) 25vw, 50vw"
-              priority={priority}
-              className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-              data-testid="card-image"
-            />
-            {hover ? (
-              <Image
-                src={hover.url}
-                alt=""
-                aria-hidden="true"
-                fill
-                sizes="(min-width: 1024px) 25vw, 50vw"
-                className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                data-testid="card-image-hover"
-              />
-            ) : null}
-          </div>
-        ) : (
-          <Image
-            src={product.imagePath}
-            alt={product.name}
-            width={600}
-            height={750}
-            unoptimized
-            priority={priority}
-            className="h-auto w-full transition-transform duration-500 group-hover:scale-[1.03]"
-            data-testid="card-image"
-          />
-        )}
-        <div className="absolute top-3 left-3 z-10 flex gap-2">
-          {product.roastLevel ? <Badge>{roastLabel(product.roastLevel)} roast</Badge> : null}
-          {onSale ? <Badge tone="copper">Sale</Badge> : null}
-          {soldOut ? <Badge tone="espresso">Sold out</Badge> : null}
-        </div>
-      </Link>
+<Link
+  href={`/products/${product.slug}`}
+  className="bg-foam relative block overflow-hidden rounded-2xl"
+>
+  {lead ? (
+    <div className="relative aspect-[4/5] w-full">
+      <Image
+        src={lead.url}
+        alt={lead.alt}
+        fill
+        sizes="(min-width: 1024px) 25vw, 50vw"
+        priority={priority}
+        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+        data-testid="card-image"
+      />
+      {hover ? (
+        <Image
+          src={hover.url}
+          alt=""
+          aria-hidden="true"
+          fill
+          sizes="(min-width: 1024px) 25vw, 50vw"
+          className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          data-testid="card-image-hover"
+        />
+      ) : null}
+    </div>
+  ) : (
+    <Image
+      src={product.imagePath}
+      alt={product.name}
+      width={600}
+      height={750}
+      unoptimized
+      priority={priority}
+      className="h-auto w-full transition-transform duration-500 group-hover:scale-[1.03]"
+      data-testid="card-image"
+    />
+  )}
+  <div className="absolute top-3 left-3 z-10 flex gap-2">
+    {product.roastLevel ? <Badge>{roastLabel(product.roastLevel)} roast</Badge> : null}
+    {onSale ? <Badge tone="copper">Sale</Badge> : null}
+    {soldOut ? <Badge tone="espresso">Sold out</Badge> : null}
+  </div>
+</Link>
 ```
 
 Add the two selectors next to the existing `soldOut` / `cheapest` / `onSale` computations:
 
 ```tsx
-  const lead = primaryImage(images);
-  const hover = hoverImage(images);
+const lead = primaryImage(images);
+const hover = hoverImage(images);
 ```
 
 The SVG fallback keeps its intrinsic 600×750 sizing; the photo branch uses a fixed `aspect-[4/5]` frame so a grid can mix square `front` photos and 4:5 SVGs without the rows jumping. The swap is pure CSS — no `useState`, so the card stays a server component.
@@ -3909,36 +3902,38 @@ export function Hero({
 Replace the collage `<div>` with:
 
 ```tsx
-        {image ? (
-          <div
-            className="relative aspect-[3/2] w-full overflow-hidden rounded-3xl shadow-2xl"
-            data-testid="hero-image"
-          >
-            <Image
-              src={image.url}
-              alt={image.alt}
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              priority
-              className="object-cover"
-            />
-          </div>
-        ) : (
-          <div className="relative mx-auto grid w-full max-w-md grid-cols-3 items-end gap-3">
-            {[b, a, c].filter(Boolean).map((item, i) => (
-              <Image
-                key={item.product.id}
-                src={item.product.imagePath}
-                alt={item.product.name}
-                width={300}
-                height={375}
-                unoptimized
-                priority
-                className={i === 1 ? 'scale-110 drop-shadow-2xl' : 'opacity-90 drop-shadow-xl'}
-              />
-            ))}
-          </div>
-        )}
+{
+  image ? (
+    <div
+      className="relative aspect-[3/2] w-full overflow-hidden rounded-3xl shadow-2xl"
+      data-testid="hero-image"
+    >
+      <Image
+        src={image.url}
+        alt={image.alt}
+        fill
+        sizes="(min-width: 1024px) 50vw, 100vw"
+        priority
+        className="object-cover"
+      />
+    </div>
+  ) : (
+    <div className="relative mx-auto grid w-full max-w-md grid-cols-3 items-end gap-3">
+      {[b, a, c].filter(Boolean).map((item, i) => (
+        <Image
+          key={item.product.id}
+          src={item.product.imagePath}
+          alt={item.product.name}
+          width={300}
+          height={375}
+          unoptimized
+          priority
+          className={i === 1 ? 'scale-110 drop-shadow-2xl' : 'opacity-90 drop-shadow-xl'}
+        />
+      ))}
+    </div>
+  );
+}
 ```
 
 `src/components/marketing/story.tsx` — change the signature and the image column:
@@ -3952,30 +3947,30 @@ export function Story({ image }: { image?: ManifestImage | null }) {
 ```
 
 ```tsx
-      <div className="flex justify-center">
-        {image ? (
-          <div
-            className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl"
-            data-testid="story-image"
-          >
-            <Image
-              src={image.url}
-              alt={image.alt}
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-        ) : (
-          <Image
-            src="/logo.png"
-            alt="Cofresso double-bean mark"
-            width={260}
-            height={260}
-            className="drop-shadow-2xl"
-          />
-        )}
-      </div>
+<div className="flex justify-center">
+  {image ? (
+    <div
+      className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl"
+      data-testid="story-image"
+    >
+      <Image
+        src={image.url}
+        alt={image.alt}
+        fill
+        sizes="(min-width: 1024px) 50vw, 100vw"
+        className="object-cover"
+      />
+    </div>
+  ) : (
+    <Image
+      src="/logo.png"
+      alt="Cofresso double-bean mark"
+      width={260}
+      height={260}
+      className="drop-shadow-2xl"
+    />
+  )}
+</div>
 ```
 
 `src/app/(marketing)/page.tsx` — import the accessor and pass both images:
@@ -3985,13 +3980,13 @@ import { homeImage } from '@/lib/images/content';
 ```
 
 ```tsx
-      <Hero featured={featured} image={homeImage('hero')} />
+<Hero featured={featured} image={homeImage('hero')} />
 ```
 
 ```tsx
-      <Container className="pb-20">
-        <Story image={homeImage('story')} />
-      </Container>
+<Container className="pb-20">
+  <Story image={homeImage('story')} />
+</Container>
 ```
 
 - [ ] **Step 6: Brew-guide covers**
@@ -4062,9 +4057,9 @@ import { guideImage } from '@/lib/images/content';
 ```
 
 ```tsx
-  const guide = getBrewGuide(slug);
-  if (!guide) notFound();
-  const cover = guideImage(slug);
+const guide = getBrewGuide(slug);
+if (!guide) notFound();
+const cover = guideImage(slug);
 ```
 
 ```tsx
@@ -4206,7 +4201,10 @@ test.describe('generated imagery', () => {
     test.skip(productImages.length === 0, 'no generated imagery in the manifest yet');
 
     await page.goto('/shop');
-    const card = page.getByTestId('product-card').filter({ has: page.locator('h3') }).first();
+    const card = page
+      .getByTestId('product-card')
+      .filter({ has: page.locator('h3') })
+      .first();
     await expect(card.getByTestId('card-image').first()).toBeVisible();
   });
 
@@ -4251,7 +4249,7 @@ Expected: all four unit/integration suites pass; Playwright reports the pre-exis
 Add one row to the scripts table in `README.md`, after `art:generate`:
 
 ```markdown
-| `pnpm images:generate`                     | Regenerate photography with the OpenAI Images API (see below)                           |
+| `pnpm images:generate` | Regenerate photography with the OpenAI Images API (see below) |
 ```
 
 Then add this section immediately after "Scripts":
@@ -4304,8 +4302,8 @@ In the "Ground rules" list, after the "Schema changes ship with a migration" bul
 In the "Where things live" table, add two rows:
 
 ```markdown
-| `src/lib/images`                                                    | Manifest schema, prompts, alt text, generation orchestration, gallery math          |
-| `content/images.manifest.json`                                      | Generated imagery manifest (committed; written by `pnpm images:generate`)            |
+| `src/lib/images` | Manifest schema, prompts, alt text, generation orchestration, gallery math |
+| `content/images.manifest.json` | Generated imagery manifest (committed; written by `pnpm images:generate`) |
 ```
 
 And in "Common tasks", extend the "Add a product" entry and add a new one:
@@ -4362,22 +4360,22 @@ If Step 6's first `git add -A` already swept the docs in, skip the second commit
 
 **Spec coverage.** Every line of the design maps to a task:
 
-| Spec section | Where |
-| --- | --- |
-| Bucket, `allUsers` read, backend bucket + CDN policy, URL map, applier IAM, `assets_base_url` | Task 1 |
-| Style guide + per-kind prompts, sizes, `art.accent` label colour, deterministic alt text | Task 2 |
-| Script, model resolution, sharp pipeline, content-addressed upload, `Cache-Control`, concurrency 6, 3 retries on 429/5xx, `--only` / `--dry-run` / `--force`, manifest write | Task 3 |
-| `product_images` (+ unique `(product_id, kind)`), `collections.hero_image_*`, migration `0002_product_images`, seed from the manifest | Task 4 |
-| `ProductCardData.images`, `getProductBySlug` images, collection hero fields on `listCollections` / `getCollectionBySlug` | Task 5 |
-| `ProductGallery` (thumbnails, arrows, keyboard, swipe, `aria-roledescription`, test ids, SVG fallback) | Task 6 |
-| Card hover swap, collection hero banner, home hero + story, guide covers, `remotePatterns` + `formats` | Task 7 |
+| Spec section                                                                                                                                                                                                          | Where     |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Bucket, `allUsers` read, backend bucket + CDN policy, URL map, applier IAM, `assets_base_url`                                                                                                                         | Task 1    |
+| Style guide + per-kind prompts, sizes, `art.accent` label colour, deterministic alt text                                                                                                                              | Task 2    |
+| Script, model resolution, sharp pipeline, content-addressed upload, `Cache-Control`, concurrency 6, 3 retries on 429/5xx, `--only` / `--dry-run` / `--force`, manifest write                                          | Task 3    |
+| `product_images` (+ unique `(product_id, kind)`), `collections.hero_image_*`, migration `0002_product_images`, seed from the manifest                                                                                 | Task 4    |
+| `ProductCardData.images`, `getProductBySlug` images, collection hero fields on `listCollections` / `getCollectionBySlug`                                                                                              | Task 5    |
+| `ProductGallery` (thumbnails, arrows, keyboard, swipe, `aria-roledescription`, test ids, SVG fallback)                                                                                                                | Task 6    |
+| Card hover swap, collection hero banner, home hero + story, guide covers, `remotePatterns` + `formats`                                                                                                                | Task 7    |
 | Unit tests (manifest schema, alt text, gallery math), component test, integration tests (seed + position order), e2e (4 thumbnails, second thumbnail changes `src`, arrow key advances, hero renders, `/assets/` 200) | Tasks 2–8 |
 
 **Type consistency across tasks.** `IMAGE_KINDS` / `ImageKind` are declared once (Task 2, `schema/values.ts`) and reused by the Zod enum, the pg enum (Task 4), the DB row type, the query layer (Task 5) and the gallery (Task 6). `ManifestImage` (Task 2) is the prop type for the home, story and guide images (Task 7). `ProductImage` (Task 4) is structurally assignable to `GalleryImage` (Task 6), so the PDP passes `data.images` with no mapping. `ProductCardData` gains `images` in Task 5 before any component reads it in Tasks 6–7; nothing else in the repo constructs a `ProductCardData` literal, so no fixtures need patching. `contentImages()` (Task 4) is the only module that imports the JSON, and both the seed (Task 4) and the UI (Task 7) go through it, so the esbuild bundle and the Next build inline exactly one copy.
 
 **Judgement calls worth a reviewer's attention.**
 
-- The seed *reconciles* `product_images` (deleting kinds the manifest no longer lists) rather than only upserting, so a regenerated set never leaves orphan rows pointing at deleted objects.
+- The seed _reconciles_ `product_images` (deleting kinds the manifest no longer lists) rather than only upserting, so a regenerated set never leaves orphan rows pointing at deleted objects.
 - The collection hero is image-only; the page keeps the `<h1>` and the `collection-title` test id, which avoids two elements sharing one test id and breaking the existing `shop.spec.ts`.
 - `next/image` is mocked in the gallery component test. jsdom has neither Next's build-time image config nor a configured remote host, and the test is about carousel behaviour, not the optimizer.
 - Photos render inside fixed-aspect frames with `object-cover` (`4/5` on cards, `square` on the PDP main image, `16/6` and `3/2` on banners) because generated sizes are mixed (1024² and 1536×1024) and the SVG fallback is 600×750. The alternative — `object-contain` on cream — was rejected as visually weaker for an editorial look.

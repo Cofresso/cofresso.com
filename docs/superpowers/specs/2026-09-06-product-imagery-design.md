@@ -12,16 +12,16 @@ Cloud Storage bucket, and served through the existing global load balancer with 
 
 ## Decisions
 
-| Decision | Choice |
-| --- | --- |
-| Look | Editorial studio photography: bags and gear on cream/linen backdrops, soft daylight, brand palette (espresso, latte, cream, copper); a few lifestyle scenes |
-| Storage | GCS bucket `cofresso-prod-assets`, uniform bucket-level access, public object read, served as a CDN-backed backend bucket on the existing LB under `/assets/*` |
-| Per product | 4 images: `front` (bag on backdrop), `detail` (beans/product close-up), `lifestyle` (brewing scene), `packaging` (bag held in hand) |
-| Other images | 4 collection heroes, homepage hero + story image, 4 brew-guide covers |
-| Format | WebP, longest edge 1600 px, quality 80; object names are content-addressed (`<slug>-<kind>-<sha8>.webp`) so CDN caching is immutable |
-| Generation | One-off `scripts/generate-images.ts` outside the app runtime; parallelism 6; idempotent by manifest entry; writes `content/images.manifest.json` |
-| Data model | `product_images` table seeded from the manifest; `collections.hero_image_url`; homepage/guide images as typed content |
-| Fallback | Existing SVG art (`products.image_path`) when a product has no images |
+| Decision     | Choice                                                                                                                                                         |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Look         | Editorial studio photography: bags and gear on cream/linen backdrops, soft daylight, brand palette (espresso, latte, cream, copper); a few lifestyle scenes    |
+| Storage      | GCS bucket `cofresso-prod-assets`, uniform bucket-level access, public object read, served as a CDN-backed backend bucket on the existing LB under `/assets/*` |
+| Per product  | 4 images: `front` (bag on backdrop), `detail` (beans/product close-up), `lifestyle` (brewing scene), `packaging` (bag held in hand)                            |
+| Other images | 4 collection heroes, homepage hero + story image, 4 brew-guide covers                                                                                          |
+| Format       | WebP, longest edge 1600 px, quality 80; object names are content-addressed (`<slug>-<kind>-<sha8>.webp`) so CDN caching is immutable                           |
+| Generation   | One-off `scripts/generate-images.ts` outside the app runtime; parallelism 6; idempotent by manifest entry; writes `content/images.manifest.json`               |
+| Data model   | `product_images` table seeded from the manifest; `collections.hero_image_url`; homepage/guide images as typed content                                          |
+| Fallback     | Existing SVG art (`products.image_path`) when a product has no images                                                                                          |
 
 ## Infrastructure
 
