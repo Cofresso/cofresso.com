@@ -27,7 +27,7 @@ export type PlaceOrderFailure =
   'empty_cart' | 'out_of_stock' | 'payment_declined' | 'invalid_discount' | 'unknown';
 
 export type PlaceOrderResult =
-  | { ok: true; orderId: string; orderNumber: string; lookupToken: string }
+  | { ok: true; orderId: string; orderNumber: string; lookupToken: string; totalCents: number }
   | { ok: false; code: PlaceOrderFailure; message: string; lineId?: string };
 
 class PlaceOrderError extends Error {
@@ -64,7 +64,7 @@ export async function placeOrder(params: {
 
   const existing = await db.query.orders.findFirst({
     where: eq(orders.idempotencyKey, input.idempotencyKey),
-    columns: { id: true, orderNumber: true, lookupToken: true },
+    columns: { id: true, orderNumber: true, lookupToken: true, totalCents: true },
   });
   if (existing)
     return {
@@ -72,6 +72,7 @@ export async function placeOrder(params: {
       orderId: existing.id,
       orderNumber: existing.orderNumber,
       lookupToken: existing.lookupToken,
+      totalCents: existing.totalCents,
     };
 
   try {
@@ -94,7 +95,7 @@ export async function placeOrder(params: {
         // the case where both calls reach the insert.
         const concurrentOrder = await tx.query.orders.findFirst({
           where: eq(orders.idempotencyKey, input.idempotencyKey),
-          columns: { id: true, orderNumber: true, lookupToken: true },
+          columns: { id: true, orderNumber: true, lookupToken: true, totalCents: true },
         });
         if (concurrentOrder) {
           return {
@@ -102,6 +103,7 @@ export async function placeOrder(params: {
             orderId: concurrentOrder.id,
             orderNumber: concurrentOrder.orderNumber,
             lookupToken: concurrentOrder.lookupToken,
+            totalCents: concurrentOrder.totalCents,
           } satisfies PlaceOrderResult;
         }
         throw new PlaceOrderError('empty_cart', 'Your cart is empty.');
@@ -274,7 +276,13 @@ export async function placeOrder(params: {
         totalCents: totals.totalCents,
         items: items.length,
       });
-      return { ok: true, orderId: order.id, orderNumber, lookupToken } satisfies PlaceOrderResult;
+      return {
+        ok: true,
+        orderId: order.id,
+        orderNumber,
+        lookupToken,
+        totalCents: totals.totalCents,
+      } satisfies PlaceOrderResult;
     });
   } catch (err) {
     if (err instanceof PlaceOrderError) {
@@ -287,7 +295,7 @@ export async function placeOrder(params: {
       // card was declined — hand back the order the winning call created.
       const replay = await db.query.orders.findFirst({
         where: eq(orders.idempotencyKey, input.idempotencyKey),
-        columns: { id: true, orderNumber: true, lookupToken: true },
+        columns: { id: true, orderNumber: true, lookupToken: true, totalCents: true },
       });
       if (replay) {
         return {
@@ -295,6 +303,7 @@ export async function placeOrder(params: {
           orderId: replay.id,
           orderNumber: replay.orderNumber,
           lookupToken: replay.lookupToken,
+          totalCents: replay.totalCents,
         };
       }
     }

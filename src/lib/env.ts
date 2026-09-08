@@ -15,6 +15,13 @@ const serverSchema = z
     SITE_URL: z.string().url().default('http://localhost:3000'),
     COFRAME_SITE_KEY: z.preprocess(emptyToUndefined, z.string().optional()),
     COFRAME_SCRIPT_URL: z.preprocess(emptyToUndefined, z.string().url().optional()),
+    COFRAME_PROJECT_ID: z
+      .preprocess(emptyToUndefined, z.string().optional())
+      .default('6a9e31bb82444fc48fd16faf'),
+    COFRAME_API_TOKEN: z.preprocess(emptyToUndefined, z.string().optional()),
+    COFRAME_INGEST_URL: z
+      .preprocess(emptyToUndefined, z.string().url().optional())
+      .default('https://ingest.app.coframe.com'),
     GIT_SHA: z.string().default('dev'),
     ALLOW_DB_RESET: z.preprocess(emptyToUndefined, z.string().optional()),
     // Kill switch for the deliberate UI interruptions (popup, cookie banner, chat bubble,

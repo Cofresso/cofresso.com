@@ -6,6 +6,7 @@ import type { FieldErrors } from '@/lib/action-result';
 import { readCartId } from '@/lib/cart/cookie';
 import { placeOrder, type PlaceOrderFailure } from '@/lib/checkout/place-order';
 import { checkoutSchema } from '@/lib/checkout/schemas';
+import { trackPurchaseConversion } from '@/lib/coframe';
 
 export type CheckoutActionState = {
   error: string;
@@ -29,6 +30,14 @@ export async function placeOrderAction(
 
   const result = await placeOrder({ cartId, input: parsed.data });
   if (!result.ok) return { error: result.message, code: result.code };
+
+  await trackPurchaseConversion({
+    orderNumber: result.orderNumber,
+    orderId: result.orderId,
+    totalCents: result.totalCents,
+    email: parsed.data.email,
+    lookupToken: result.lookupToken,
+  });
 
   // placeOrder empties the cart in the database; refresh the shared layout (header cart badge)
   // so it reflects that on the next render instead of showing the pre-order item count.
