@@ -75,3 +75,17 @@ export const IconMessageCircle = (p: IconProps) => (
     <path d="M8 12h.01M12 12h.01M16 12h.01" />
   </svg>
 );
+export const IconStar = (p: IconProps) => (
+  <svg
+    {...base({
+      width: 16,
+      height: 16,
+      viewBox: '0 0 20 20',
+      fill: 'currentColor',
+      stroke: 'none',
+      ...p,
+    })}
+  >
+    <path d="M10 1.5l2.472 5.01 5.528.803-4 3.899.944 5.508L10 14.98l-4.944 2.74.944-5.508-4-3.899 5.528-.803L10 1.5z" />
+  </svg>
+);
