@@ -75,6 +75,19 @@ resource "google_cloud_run_v2_service" "web" {
         }
       }
 
+      # Coframe Conversion API: server-side purchase and newsletter events (src/lib/coframe).
+      # Production only: preview deploys leave it unset and the client no-ops, so preview
+      # traffic never reports conversions against the production project.
+      env {
+        name = "COFRAME_API_TOKEN"
+        value_source {
+          secret_key_ref {
+            secret  = data.google_secret_manager_secret.coframe_api_token.secret_id
+            version = "latest"
+          }
+        }
+      }
+
       startup_probe {
         tcp_socket {
           port = 8080
@@ -109,6 +122,7 @@ resource "google_cloud_run_v2_service" "web" {
   depends_on = [
     google_project_service.apis,
     google_secret_manager_secret_iam_member.runtime_reads_db_password,
+    google_secret_manager_secret_iam_member.runtime_reads_coframe_api_token,
     google_project_iam_member.runtime_roles,
   ]
 }
