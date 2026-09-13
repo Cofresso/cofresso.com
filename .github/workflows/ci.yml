@@ -164,7 +164,7 @@ jobs:
           service_account: ${{ vars.GCP_PREVIEW_DEPLOYER_SA }}
           token_format: access_token
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v3
 
       - uses: docker/login-action@v3
         with:
@@ -283,7 +283,7 @@ jobs:
           service_account: ${{ vars.GCP_DEPLOYER_SA }}
           token_format: access_token
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v3
 
       - uses: docker/login-action@v3
         with:
